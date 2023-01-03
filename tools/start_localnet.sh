@@ -2,6 +2,7 @@
 #
 # start_localnet.sh
 killall db3 tendermint
+DB3_VERSION="v0.2.4"
 test_dir=`pwd`
 BUILD_MODE='debug'
 if [[ $1 == 'release' ]] ; then
@@ -14,13 +15,13 @@ then
     echo "tendermint exist"
 else
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        wget https://github.com/dbpunk-labs/db3/releases/download/v0.2.3/db3-v0.2.3-linux-x86_64.tar.gz
-        tar -zxf db3-v0.2.3-linux-x86_64.tar.gz
-        mv -f db3-v0.2.3-linux-x86_64 db3
+        wget https://github.com/dbpunk-labs/db3/releases/download/${DB3_VERSION}/db3-${DB3_VERSION}-linux-x86_64.tar.gz
+        tar -zxf db3-${DB3_VERSION}-linux-x86_64.tar.gz
+        mv -f db3-${DB3_VERSION}-linux-x86_64 db3
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        wget https://github.com/dbpunk-labs/db3/releases/download/v0.2.3/db3-v0.2.3-macos-x86_64.tar.gz
-        tar -zxf db3-v0.2.3-macos-x86_64.tar.gz
-        mv -f db3-v0.2.3-macos-x86_64 db3
+        wget https://github.com/dbpunk-labs/db3/releases/download/${DB3_VERSION}/db3-${DB3_VERSION}-macos-x86_64.tar.gz
+        tar -zxf db3-${DB3_VERSION}-macos-x86_64.tar.gz
+        mv -f db3-${DB3_VERSION}-macos-x86_64 db3
     else
         echo "$OSTYPE is not supported, please give us a issue https://github.com/dbpunk-labs/db3/issues/new/choose"
         exit 1
