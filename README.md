@@ -11,7 +11,7 @@ and you can combine the [web3,js](https://github.com/web3/web3.js) and  db3.js t
 
 # Build
 
-```
+```shell
 git submodule update
 # install the dependency
 yarn
@@ -21,4 +21,6 @@ make
 yarn test
 # format the code
 yarn prettier --write src
+# run benchmark
+yarn benny-sdk
 ```
