@@ -4,7 +4,7 @@
 ![npm](https://img.shields.io/npm/dw/db3js?style=flat-square)
 
 db3.js is the [db3 network](https://github.com/dbpunk-labs/db3) javascript API and you can write and query JSON documents against the db3 network with db3.js.
-and you can combine the [web3,js](https://github.com/web3/web3.js) and  db3.js to build a fully decentralized storage-heavy application
+and you can combine the [web3.js](https://github.com/web3/web3.js) and  db3.js to build a fully decentralized storage-heavy application
 
 ![why](./images/whydb3js.png)
 
