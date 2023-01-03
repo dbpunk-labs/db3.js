@@ -1,0 +1,29 @@
+name: CI # Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  db3js_test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup test env
+        run: |
+          cd tools
+          bash start_localnet.sh >tm.log 2>&1 &
+      - uses: actions/setup-node@v3.5.1
+      - uses: CultureHQ/actions-yarn@v1.0.1
+      - name: test db3js
+        run: |
+          yarn install
+          make
+          yarn test
