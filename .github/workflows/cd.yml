@@ -1,0 +1,23 @@
+name: CD
+on:
+    push:
+        tags:
+            - "[v]?[0-9]+.[0-9]+.[0-9]+"
+jobs:
+    npm_publish:
+        name: Publish Package to npmjs
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3.5.1
+              with:
+                  node-version: "16.x"
+            - uses: CultureHQ/actions-yarn@v1.0.1
+            - run: |
+                yarn install
+                make
+                yarn build
+            - uses: JS-DevTools/npm-publish@v1
+              with:
+                  token: ${{ secrets.NPM_TOKEN }}
+                  package: ./package.json
