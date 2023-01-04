@@ -2,9 +2,6 @@
     "name": "db3.js",
     "version": "0.2.5",
     "description": "DB3 Network Javascript API",
-    "main": "./dist/index.js",
-    "module": "./dist/esm/index.js",
-    "type": "module",
     "author": "dbpunk labs",
   	"keywords": [
 		"db",
@@ -20,8 +17,12 @@
 		"realtime"
   	],
   	"license": "Apache-2.0",
+    "main": "./dist/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/index.d.ts",
+    "type": "module",
     "scripts": {
-        "build": "tsup --legacy-output --loader .wasm=file --minify",
+        "build": "tsup --legacy-output --loader .wasm=file --minify --dts",
         "test": "jest",
         "benny-sdk": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_query.ts",
         "benny-demo": "ts-node-esm ./src/benches/reduce.ts"
