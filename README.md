@@ -56,6 +56,7 @@ request.onsuccess = function () {
   };
 };
 ```
+the example from https://github.com/alexeagleson/template-indexeddb
 
 # Build
 
