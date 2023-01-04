@@ -15,6 +15,7 @@
  */
 
 // @ts-nocheck
+// TODO: fix typescript errors
 import { DB3 } from './db3'
 import { KVPair, MutationAction } from '../pkg/db3_mutation'
 import { SmartBuffer, SmartBufferOptions } from 'smart-buffer'

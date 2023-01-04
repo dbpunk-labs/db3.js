@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+// @ts-nocheck
+// TODO: fix typescript errors
 import { describe, expect, test } from '@jest/globals'
 import { DB3 } from './db3'
 import {
@@ -131,6 +132,7 @@ describe('test db3js api', () => {
             const response = await db3_instance.closeQuerySession(_sign)
             expect(response).toBeDefined()
         } catch (error) {
+            console.error(error)
             throw error
         }
     })
@@ -158,6 +160,7 @@ describe('test db3js api', () => {
             )
             expect(value).toBe('value123')
         } catch (error) {
+            console.error(error)
             throw error
         }
     })
