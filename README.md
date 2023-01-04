@@ -15,29 +15,45 @@ The goal of db3.js is compatible with [the indexeddb api](https://www.w3.org/TR/
 ## Using db3.js like using the indexeddb API
 
 ```javascript
-const request = db3.open("library");
-let db;
-request.onsuccess = function() {
-  db = request.result;
-};
-// put some documents
-const tx = db.transaction("books", "readwrite");
-const store = tx.objectStore("books");
-store.put({title: "Quarry Memories", author: "Fred", isbn: 123456});
-store.put({title: "Water Buffaloes", author: "Fred", isbn: 234567});
-store.put({title: "Bedrock Nights", author: "Barney", isbn: 345678});
-// use index to query documents
-const index = store.index("by_title");
-const request = index.get("Bedrock Nights");
-request.onsuccess = function() {
-  const matching = request.result;
-  if (matching !== undefined) {
-    // A match was found.
-    report(matching.isbn, matching.title, matching.author);
-  } else {
-    // No match was found.
-    report(null);
-  }
+request.onsuccess = function () {
+  console.log("Database opened successfully");
+
+  const db = request.result;
+
+  // 1
+  const transaction = db.transaction("cars", "readwrite");
+  
+  //2
+  const store = transaction.objectStore("cars");
+  const colourIndex = store.index("cars_colour");
+  const makeModelIndex = store.index("colour_and_make");
+
+  //3
+  store.put({ id: 1, colour: "Red", make: "Toyota" });
+  store.put({ id: 2, colour: "Red", make: "Kia" });
+  store.put({ id: 3, colour: "Blue", make: "Honda" });
+  store.put({ id: 4, colour: "Silver", make: "Subaru" });
+
+  //4
+  const idQuery = store.get(4);
+  const colourQuery = colourIndex.getAll(["Red"]);
+  const colourMakeQuery = makeModelIndex.get(["Blue", "Honda"]);
+
+  // 5
+  idQuery.onsuccess = function () {
+    console.log('idQuery', idQuery.result);
+  };
+  colourQuery.onsuccess = function () {
+    console.log('colourQuery', colourQuery.result);
+  };
+  colourMakeQuery.onsuccess = function () {
+    console.log('colourMakeQuery', colourMakeQuery.result);
+  };
+
+  // 6
+  transaction.oncomplete = function () {
+    db.close();
+  };
 };
 ```
 
