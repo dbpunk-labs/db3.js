@@ -17,28 +17,22 @@ The goal of db3.js is compatible with [the indexeddb api](https://www.w3.org/TR/
 ```javascript
 request.onsuccess = function () {
   console.log("Database opened successfully");
-
   const db = request.result;
-
   // 1
   const transaction = db.transaction("cars", "readwrite");
-  
   //2
   const store = transaction.objectStore("cars");
   const colourIndex = store.index("cars_colour");
   const makeModelIndex = store.index("colour_and_make");
-
   //3
   store.put({ id: 1, colour: "Red", make: "Toyota" });
   store.put({ id: 2, colour: "Red", make: "Kia" });
   store.put({ id: 3, colour: "Blue", make: "Honda" });
   store.put({ id: 4, colour: "Silver", make: "Subaru" });
-
   //4
   const idQuery = store.get(4);
   const colourQuery = colourIndex.getAll(["Red"]);
   const colourMakeQuery = makeModelIndex.get(["Blue", "Honda"]);
-
   // 5
   idQuery.onsuccess = function () {
     console.log('idQuery', idQuery.result);
@@ -49,7 +43,6 @@ request.onsuccess = function () {
   colourMakeQuery.onsuccess = function () {
     console.log('colourMakeQuery', colourMakeQuery.result);
   };
-
   // 6
   transaction.oncomplete = function () {
     db.close();
@@ -59,6 +52,14 @@ request.onsuccess = function () {
 the example from https://github.com/alexeagleson/template-indexeddb
 
 # Build
+
+## Run Localnet
+
+```
+cd tools && bash start_localnet.sh
+```
+
+## Run Testcase
 
 ```shell
 git submodule update
