@@ -12,6 +12,9 @@ and you can combine the [web3.js](https://github.com/web3/web3.js) and db3.js to
 
 The goal of db3.js is compatible with [the indexeddb api](https://www.w3.org/TR/IndexedDB/) and you can use db3.js like using indexeddb, even you can use all libraries based on indexeddb e.g. [rxdb](https://github.com/pubkey/rxdb). 
 
+## Show Your Support
+Please ⭐️ this repository if this project helped you!
+
 ## Using db3.js like using the indexeddb API
 
 ```javascript
