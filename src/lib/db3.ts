@@ -22,6 +22,7 @@ import {
     KVPair,
     Mutation,
     MutationAction,
+    DatabaseRequest
 } from '../pkg/db3_mutation'
 import { Erc20Token, Price } from '../pkg/db3_base'
 import { ChainId, ChainRole } from '../pkg/db3_base'
@@ -33,11 +34,11 @@ import {
     BatchGetKey,
     GetKeyRequest,
     BroadcastRequest,
-    GetNamespaceRequest,
+    ShowDatabaseRequest,
     OpenSessionRequest,
     GetAccountRequest,
 } from '../pkg/db3_node'
-import { QueryPrice, Namespace } from '../pkg/db3_namespace'
+import { QueryPrice, Database } from '../pkg/db3_database'
 import {
     CloseSessionPayload,
     QuerySessionInfo,
@@ -56,7 +57,7 @@ export interface KvMutation {
     data: Record<string, any>
 }
 
-export interface NsSimpleDesc {
+export interface DbSimpleDesc {
     name: string
     desc: string
     erc20Token: string
@@ -108,8 +109,8 @@ export class DB3 {
         this.client = new StorageNodeClient(transport)
     }
 
-    async createSimpleNs(
-        desc: NsSimpleDesc,
+    async createSimpleDb(
+        desc: DbSimpleDesc,
         sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>,
         nonce?: number
     ) {
@@ -118,41 +119,44 @@ export class DB3 {
             units: [desc.erc20Token],
             scalar: ['1'],
         }
-
         const priceProto: Price = {
             amount: desc.price,
             unit: desc.erc20Token,
             token: token,
         }
-
         const queryPrice: QueryPrice = {
             price: priceProto,
             queryCount: desc.queryCount,
         }
-
-        const namespaceProto: Namespace = {
+        const dbProto: Database = {
             name: desc.name,
             price: queryPrice,
             ts: Date.now(),
             description: desc.desc,
         }
-
-        return await this.createNs(namespaceProto, sign, nonce)
+        return await this.createDb(dbProto, sign, nonce)
     }
 
-    async createNs(
-        ns: Namespace,
+    async createDb(
+        db: Database,
         sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>,
         nonce?: number
     ) {
-        const mbuffer = Namespace.toBinary(ns)
+        const databaseRequest:DatabaseRequest = {
+            body: {
+                oneofKind: "database",
+                database: db
+            }
+        }
+        const mbuffer = DatabaseRequest.toBinary(databaseRequest)
         const [signature, public_key] = await sign(mbuffer)
         const writeRequest: WriteRequest = {
             payload: mbuffer,
             signature: signature,
             publicKey: public_key,
-            payloadType: PayloadType.NamespacePayload,
+            payloadType: PayloadType.DatabasePayload
         }
+
         const broadcastRequest: BroadcastRequest = {
             body: WriteRequest.toBinary(writeRequest),
         }
@@ -160,14 +164,15 @@ export class DB3 {
         return uint8ToBase64(response.hash)
     }
 
-    async getNsList(
+    async getDatabases(
         sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
     ) {
         const token = await this.keepSession(sign)
-        const request: GetNamespaceRequest = {
+        const request: ShowDatabaseRequest = {
             sessionToken: token,
+            names: []
         }
-        const { response } = await this.client.getNamespace(request)
+        const { response } = await this.client.showDatabase(request)
         const count = this.querySessionInfo!.queryCount + 1
         this.querySessionInfo!.queryCount = count
         return response
