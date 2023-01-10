@@ -86,14 +86,14 @@ describe('test db3js api', () => {
         }
     })
 
-    test('namespace smoke test', async () => {
+    test('database smoke test', async () => {
         try {
             const db3 = new DB3('http://127.0.0.1:26659')
             const _sign = await getSign()
-            const result = await db3.createSimpleNs(
+            const result = await db3.createSimpleDb(
                 {
-                    name: 'test_ns',
-                    desc: 'desc_ns',
+                    name: 'test_db',
+                    desc: 'desc_db',
                     erc20Token: 'usdt',
                     price: 1,
                     queryCount: 100,
@@ -101,8 +101,8 @@ describe('test db3js api', () => {
                 _sign
             )
             await new Promise((r) => setTimeout(r, 2000))
-            const nsList = await db3.getNsList(_sign)
-            expect(nsList.nsList[0].name).toBe('test_ns')
+            const response = await db3.getDatabases(_sign)
+            expect(response.dbList[0].name).toBe('test_db')
         } catch (error) {
             console.log('namespace smoke test error', error)
             expect(1).toBe(0)
