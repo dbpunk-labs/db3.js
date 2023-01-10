@@ -25,6 +25,7 @@
         "build": "tsup --legacy-output --loader .wasm=file --minify --dts",
         "test": "jest",
         "benny-sdk": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_query.ts",
+        "benny-mutation": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_mutation.ts",
         "benny-demo": "ts-node-esm ./src/benches/reduce.ts"
     },
     "dependencies": {
