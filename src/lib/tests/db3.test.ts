@@ -16,7 +16,7 @@
 // @ts-nocheck
 // TODO: fix typescript errors
 import { describe, expect, test } from '@jest/globals'
-import { DB3 } from './db3'
+import { DB3 } from '../db3'
 import {
     DocMetaManager,
     DocStore,
@@ -25,8 +25,8 @@ import {
     DocKeyType,
     genPrimaryKey,
     object2Buffer,
-} from './doc_store'
-import { sign, getATestStaticKeypair, getAddress } from './keys'
+} from '../doc_store'
+import { sign, getATestStaticKeypair, getAddress } from '../keys'
 import { TextEncoder, TextDecoder } from 'util'
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder

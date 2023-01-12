@@ -22,7 +22,7 @@ import {
     KVPair,
     Mutation,
     MutationAction,
-    DatabaseRequest
+    DatabaseRequest,
 } from '../pkg/db3_mutation'
 import { Erc20Token, Price } from '../pkg/db3_base'
 import { ChainId, ChainRole } from '../pkg/db3_base'
@@ -76,7 +76,8 @@ export interface QuerySession {
 }
 
 export interface DB3_Options {
-    mode: 'DEV' | 'PROD'
+    sign(target: Uint8Array): Promise<[Uint8Array, Uint8Array]>
+    nonce(): number
 }
 
 function encodeUint8Array(text: string) {
@@ -96,7 +97,7 @@ export class DB3 {
     private client: StorageNodeClient
     public sessionToken?: string
     private querySessionInfo?: QuerySessionInfo
-    constructor(node: string, options?: DB3_Options) {
+    constructor(node: string, options: DB3_Options) {
         const goptions: GrpcWebOptions = {
             baseUrl: node,
             // simple example for how to add auth headers to each request
@@ -107,13 +108,11 @@ export class DB3 {
         }
         const transport = new GrpcWebFetchTransport(goptions)
         this.client = new StorageNodeClient(transport)
+        this.sign = options?.sign
+        this.nonce = options?.nonce
     }
 
-    async createSimpleDb(
-        desc: DbSimpleDesc,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>,
-        nonce?: number
-    ) {
+    async createSimpleDb(desc: DbSimpleDesc) {
         const token: Erc20Token = {
             symbal: desc.erc20Token,
             units: [desc.erc20Token],
@@ -134,27 +133,23 @@ export class DB3 {
             ts: Date.now(),
             description: desc.desc,
         }
-        return await this.createDb(dbProto, sign, nonce)
+        return await this.createDb(dbProto)
     }
 
-    async createDb(
-        db: Database,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>,
-        nonce?: number
-    ) {
-        const databaseRequest:DatabaseRequest = {
+    async createDb(db: Database) {
+        const databaseRequest: DatabaseRequest = {
             body: {
-                oneofKind: "database",
-                database: db
-            }
+                oneofKind: 'database',
+                database: db,
+            },
         }
         const mbuffer = DatabaseRequest.toBinary(databaseRequest)
-        const [signature, public_key] = await sign(mbuffer)
+        const [signature, public_key] = await this.sign(mbuffer)
         const writeRequest: WriteRequest = {
             payload: mbuffer,
             signature: signature,
             publicKey: public_key,
-            payloadType: PayloadType.DatabasePayload
+            payloadType: PayloadType.DatabasePayload,
         }
 
         const broadcastRequest: BroadcastRequest = {
@@ -164,13 +159,11 @@ export class DB3 {
         return uint8ToBase64(response.hash)
     }
 
-    async getDatabases(
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
-        const token = await this.keepSession(sign)
+    async getDatabases() {
+        const token = await this.keepSession(this.sign)
         const request: ShowDatabaseRequest = {
             sessionToken: token,
-            names: []
+            names: [],
         }
         const { response } = await this.client.showDatabase(request)
         const count = this.querySessionInfo!.queryCount + 1

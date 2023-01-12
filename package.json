@@ -22,7 +22,8 @@
     "types": "./dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "tsup --legacy-output --loader .wasm=file --minify --dts",
+        "build": "tsup --legacy-output  --minify --dts",
+        "build:test": "tsup src/wpt_test.ts --legacy-output  --minify  --format iife --target es5",
         "test": "jest",
         "benny-sdk": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_query.ts",
         "benny-demo": "ts-node-esm ./src/benches/reduce.ts"
