@@ -2,6 +2,8 @@
 
 [![npm](https://img.shields.io/npm/v/db3.js?style=flat-square)](https://www.npmjs.com/package/db3.js)
 ![npm](https://img.shields.io/npm/dw/db3.js?style=flat-square)
+[![GitPOAP Badge](https://public-api.gitpoap.io/v1/repo/dbpunk-labs/db3.js/badge)](https://www.gitpoap.io/gh/gitpoap/gitpoap-docs)
+
 
 db3.js is the [db3 network](https://github.com/dbpunk-labs/db3) javascript API and you can write and query JSON documents against the db3 network with db3.js.
 and you can combine the [web3.js](https://github.com/web3/web3.js) and db3.js to build a fully decentralized storage-heavy application
