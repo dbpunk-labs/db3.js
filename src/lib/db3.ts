@@ -108,7 +108,14 @@ export class DB3 {
         }
         const transport = new GrpcWebFetchTransport(goptions)
         this.client = new StorageNodeClient(transport)
-        this.sign = options?.sign
+        if (window.db3Js) {
+            this.sign = async function (data: Uint8Array) {
+                const _sing = await options.sign()
+                return await _sing(data)
+            }
+        } else {
+            this.sign = options.sign
+        }
         this.nonce = options?.nonce
     }
 
@@ -144,6 +151,7 @@ export class DB3 {
             },
         }
         const mbuffer = DatabaseRequest.toBinary(databaseRequest)
+
         const [signature, public_key] = await this.sign(mbuffer)
         const writeRequest: WriteRequest = {
             payload: mbuffer,
@@ -171,12 +179,7 @@ export class DB3 {
         return response
     }
 
-    async submitRawMutation(
-        ns: string,
-        kv_pairs: KVPair[],
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>,
-        nonce?: number
-    ) {
+    async submitRawMutation(ns: string, kv_pairs: KVPair[], nonce?: number) {
         const mutation: Mutation = {
             ns: encodeUint8Array(ns),
             kvPairs: kv_pairs,
@@ -187,7 +190,7 @@ export class DB3 {
             gas: '100',
         }
         const mbuffer = Mutation.toBinary(mutation)
-        const [signature, public_key] = await sign(mbuffer)
+        const [signature, public_key] = await this.sign(mbuffer)
         const writeRequest: WriteRequest = {
             payload: mbuffer,
             signature: signature,
@@ -232,9 +235,7 @@ export class DB3 {
         return this.sessionToken
     }
 
-    async openQuerySession(
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
+    async openQuerySession() {
         if (this.querySessionInfo) {
             return {}
         }
@@ -253,7 +254,7 @@ export class DB3 {
             startTime: Math.floor(Date.now() / 1000),
         }
         const payloadU8 = OpenSessionPayload.toBinary(payload)
-        const [signature, public_key] = await sign(payloadU8)
+        const [signature, public_key] = await this.sign(payloadU8)
         const sessionRequest: OpenSessionRequest = {
             payload: payloadU8,
             signature: signature,
@@ -303,9 +304,7 @@ export class DB3 {
         return response
     }
 
-    async closeQuerySession(
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
+    async closeQuerySession() {
         if (!this.sessionToken) {
             throw new Error('SessionToken is not defined')
         }
@@ -315,7 +314,7 @@ export class DB3 {
         }
 
         const payloadU8 = CloseSessionPayload.toBinary(payload)
-        const [signature, public_key] = await sign(payloadU8)
+        const [signature, public_key] = await this.sign(payloadU8)
         const closeQuerySessionRequest: CloseSessionRequest = {
             payload: payloadU8,
             signature: signature,

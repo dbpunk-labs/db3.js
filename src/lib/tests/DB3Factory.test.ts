@@ -17,12 +17,11 @@ if (!globalThis.fetch) {
 describe('test indexedDB3 api', () => {
     async function getSign() {
         const [sk, public_key] = await getATestStaticKeypair()
-        async function _sign(
+        return async function (
             data: Uint8Array
         ): Promise<[Uint8Array, Uint8Array]> {
             return [await sign(data, sk), public_key]
         }
-        return _sign
     }
     function nonce() {
         return Date.now()
@@ -31,7 +30,6 @@ describe('test indexedDB3 api', () => {
     test('indexedDB3 open', async () => {
         try {
             const sign = await getSign()
-
             const indexedDB3 = new DB3Factory({
                 node: 'http://127.0.0.1:26659',
                 sign,
@@ -73,5 +71,28 @@ describe('test indexedDB3 api', () => {
         })
         const type = await promise
         expect(type).toBe('success')
+    })
+
+    test('indexedDB3 open in wpt_test', async () => {
+        try {
+            window.db3Js = {}
+            const indexedDB3 = new DB3Factory({
+                node: 'http://127.0.0.1:26659',
+                sign: getSign,
+                nonce,
+            })
+            const desc = {
+                desc: 'desc_db',
+                erc20Token: 'usdt',
+                price: 1,
+                queryCount: 100,
+            }
+            indexedDB3.open('mydatabase', desc)
+            await new Promise((r) => setTimeout(r, 2000))
+            const databases = await indexedDB3.databases()
+            expect(databases[0].name).toBe('mydatabase')
+        } catch (error) {
+            console.log('doc meta smoke test error', error)
+        }
     })
 })

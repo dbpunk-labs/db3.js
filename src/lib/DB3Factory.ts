@@ -29,6 +29,7 @@ export class DB3Factory implements IDBFactory {
                 request.dispatchEvent(new Event('success'))
             })
             .catch((error) => {
+                console.error(error)
                 request.dispatchEvent(new Event('error'))
             })
 
