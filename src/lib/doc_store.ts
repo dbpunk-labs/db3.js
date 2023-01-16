@@ -130,10 +130,7 @@ export class DocMetaManager {
         this.doc_store = new DocStore(db3)
     }
 
-    async get_all_doc_metas(
-        ns: string,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
+    async get_all_doc_metas(ns: string) {
         const static_doc_index = {
             keys: [
                 {
@@ -148,14 +145,10 @@ export class DocMetaManager {
             ns: ns,
             docName: '_meta_',
         }
-        return await this.doc_store.queryAllDocs(ns, static_doc_index, sign)
+        return await this.doc_store.queryAllDocs(ns, static_doc_index)
     }
 
-    async create_doc_meta(
-        doc_index: DocIndex,
-        desc: string,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
+    async create_doc_meta(doc_index: DocIndex, desc: string) {
         const static_doc_index = {
             keys: [
                 {
@@ -177,11 +170,7 @@ export class DocMetaManager {
             desc: desc,
         }
         //TODO check if the doc meta exists
-        return await this.doc_store.insertDocs(
-            static_doc_index,
-            [doc_meta],
-            sign
-        )
+        return await this.doc_store.insertDocs(static_doc_index, [doc_meta])
     }
 }
 
@@ -191,12 +180,7 @@ export class DocStore {
         this.db3 = db3
     }
 
-    async insertDocs(
-        index: DocIndex,
-        docs: Object[],
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>,
-        nonce?: number
-    ) {
+    async insertDocs(index: DocIndex, docs: Object[], nonce?: number) {
         const kvPairs: KVPair[] = []
         docs.forEach((doc: Object) => {
             const key = genPrimaryKey(index, doc) as Uint8Array
@@ -207,20 +191,16 @@ export class DocStore {
             }
             kvPairs.push(kvPair)
         })
-        return await this.db3.submitRawMutation(index.ns, kvPairs, sign, nonce)
+        return await this.db3.submitRawMutation(index.ns, kvPairs, nonce)
     }
 
-    async getDocs(
-        index: DocIndex,
-        queries: Object[],
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
+    async getDocs(index: DocIndex, queries: Object[]) {
         const keys: Uint8Array[] = []
         queries.forEach((doc: Object) => {
             const key = genPrimaryKey(index, doc) as Uint8Array
             keys.push(key)
         })
-        await this.db3.keepSession(sign)
+        await this.db3.keepSession()
         const response = await this.db3.getKey({
             ns: index.ns,
             keyList: keys,
@@ -232,12 +212,8 @@ export class DocStore {
         return docs
     }
 
-    async queryAllDocs(
-        ns: string,
-        index: DocIndex,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
-        await this.db3.keepSession(sign)
+    async queryAllDocs(ns: string, index: DocIndex) {
+        await this.db3.keepSession()
         const docs: Record<string, any>[] = []
         const res = await this.db3.getRange(
             ns,
@@ -254,10 +230,9 @@ export class DocStore {
         ns: string,
         index: DocIndex,
         startKey: Record<string, any>,
-        endKey: Record<string, any>,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
+        endKey: Record<string, any>
     ) {
-        await this.db3.keepSession(sign)
+        await this.db3.keepSession()
         const docs: Record<string, any>[] = []
         const res = await this.db3.getRange(
             ns,
@@ -270,14 +245,9 @@ export class DocStore {
         return docs
     }
 
-    async deleteDoc(
-        ns: string,
-        index: DocIndex,
-        doc: Record<string, any>,
-        sign: (target: Uint8Array) => Promise<[Uint8Array, Uint8Array]>
-    ) {
+    async deleteDoc(ns: string, index: DocIndex, doc: Record<string, any>) {
         const key = genPrimaryKey(index, doc)
-        const res = await this.db3.deleteKey(ns, key, sign)
+        const res = await this.db3.deleteKey(ns, key)
         return res
     }
 }
