@@ -17,10 +17,14 @@
 
 import nacl from 'tweetnacl'
 import type { Keypair } from './keypair'
-import { SignatureScheme } from './publickey'
+import { SignatureScheme, SIGNATURE_SCHEME_TO_FLAG } from './publickey'
+import { Ed25519PublicKey } from './ed25519_publickey'
 
 export const DEFAULT_ED25519_DERIVATION_PATH = "m/44'/784'/0'/0'/0'"
 
+const ED25519_SIGNATURE_LEN = 64
+const ED25519_PUBLIC_LEN = 64
+const DB3_ED25519_SIGNATURE_LEN = ED25519_SIGNATURE_LEN + ED25519_PUBLIC_LEN + 1
 /**
  * Ed25519 Keypair data
  */
@@ -73,14 +77,25 @@ export class Ed25519Keypair implements Keypair {
         }
         return new Ed25519Keypair(nacl.sign.keyPair.fromSeed(seed))
     }
+
     /**
      * Return the signature for the provided data using Ed25519.
      */
-    signData(
-        data: Uint8Array,
-        _useRecoverable: boolean = false
-    ): Uint8Array {
-       nacl.sign.detached(data.getData(), this.keypair.secretKey)
+    signData(data: Uint8Array): Uint8Array {
+        const signature = nacl.sign.detached(data, this.keypair.secretKey)
+        const buf = new Uint8Array(DB3_ED25519_SIGNATURE_LEN)
+        buf[0] = SIGNATURE_SCHEME_TO_FLAG['ED25519']
+        for (let i = 0; i < signature.length; i++) {
+            buf[i + 1] = signature[i]
+        }
+        for (let i = 0; i < this.keypair.publicKey.length; i++) {
+            buf[i + 1 + ED25519_SIGNATURE_LEN] = this.keypair.publicKey[i]
+        }
+        return buf
+    }
+
+    getPublicKey(): Ed25519PublicKey {
+        return new Ed25519PublicKey(this.keypair.publicKey)
     }
 
     export(): ExportedKeypair {
