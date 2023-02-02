@@ -73,7 +73,7 @@ export class Ed25519PublicKey {
     }
 
     /**
-     * Return the Sui address associated with this Ed25519 public key
+     * Return the db3 address associated with this Ed25519 public key
      */
     toAddress(): string {
         let tmp = new Uint8Array(PUBLIC_KEY_SIZE + 1)
