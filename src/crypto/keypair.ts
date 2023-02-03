@@ -17,6 +17,11 @@
 
 import { PublicKey, SignatureScheme } from './publickey'
 
+export type ExportedKeypair = {
+    schema: SignatureScheme
+    privateKey: string
+}
+
 /**
  * A keypair used for signing transactions.
  */

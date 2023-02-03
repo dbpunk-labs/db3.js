@@ -1,6 +1,3 @@
 [submodule "thirdparty/db3"]
 	path = thirdparty/db3
 	url = https://github.com/dbpunk-labs/db3.git
-[submodule "thirdparty/wpt"]
-	path = thirdparty/wpt
-	url = https://github.com/dbpunk-labs/wpt.git

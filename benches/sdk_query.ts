@@ -15,8 +15,8 @@
  */
 
 // @ts-ignore
-import { DB3 } from '../lib/db3'
-import { sign, getATestStaticKeypair, getAddress } from '../lib/keys'
+import { DB3 } from '../src/lib/db3'
+import { sign, getATestStaticKeypair, getAddress } from '../src/lib/keys'
 import b from 'benny'
 import { TextDecoder } from 'util'
 
