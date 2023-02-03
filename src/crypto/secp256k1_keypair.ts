@@ -31,8 +31,8 @@ import { toB64 } from './crypto_utils'
 import { HDKey } from '@scure/bip32'
 
 export const DEFAULT_SECP256K1_DERIVATION_PATH = "m/54'/784'/0'/0/0"
-const SECP256K1_SIGNATURE_LEN = 64
-const SECP256K1_PUBLIC_LEN = 64
+const SECP256K1_SIGNATURE_LEN = 65
+const SECP256K1_PUBLIC_LEN = 33
 const DB3_SECP256K1_SIGNATURE_LEN =
     SECP256K1_SIGNATURE_LEN + SECP256K1_PUBLIC_LEN + 1
 
@@ -141,19 +141,15 @@ export class Secp256k1Keypair implements Keypair {
      */
     signData(data: Uint8Array): Uint8Array {
         const msgHash = sha256(data)
-        const sig = secp.signSync(msgHash, this.keypair.secretKey, {
+        const [sig, rec_id] = secp.signSync(msgHash, this.keypair.secretKey, {
             canonical: true,
-            recovered: false,
+            recovered: true,
         })
-        const signature = Signature.fromDER(sig).toCompactRawBytes()
-        const buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
+        var buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
         buf[0] = SIGNATURE_SCHEME_TO_FLAG['SECP256K1']
-        for (let i = 0; i < signature.length; i++) {
-            buf[i + 1] = signature[i]
-        }
-        for (let i = 0; i < this.keypair.publicKey.length; i++) {
-            buf[i + 1 + SECP256K1_SIGNATURE_LEN] = this.keypair.publicKey[i]
-        }
+        buf.set(Signature.fromDER(sig).toCompactRawBytes(), 1)
+        buf.set([rec_id], 65)
+        buf.set(this.keypair.publicKey, 66)
         return buf
     }
 
