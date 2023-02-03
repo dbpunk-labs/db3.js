@@ -20,11 +20,17 @@ import type { ExportedKeypair, Keypair } from './keypair'
 import { PublicKey, SignatureScheme } from './publickey'
 import { hmac } from '@noble/hashes/hmac'
 import { sha256 } from '@noble/hashes/sha256'
-import { Secp256k1PublicKey } from './secp256k1-publickey'
+import { Secp256k1PublicKey } from './secp256k1_publickey'
 import { Signature } from '@noble/secp256k1'
 import { isValidBIP32Path, mnemonicToSeed } from './mnemonics'
+import { isValidHardenedPath, toB64 } from './crypto_utils'
+import { HDKey } from '@scure/bip32'
 
 export const DEFAULT_SECP256K1_DERIVATION_PATH = "m/54'/784'/0'/0/0"
+const SECP256K1_SIGNATURE_LEN = 64
+const SECP256K1_PUBLIC_LEN = 64
+const DB3_SECP256K1_SIGNATURE_LEN =
+    SECP256K1_SIGNATURE_LEN + SECP256K1_PUBLIC_LEN + 1
 
 secp.utils.hmacSha256Sync = (key: Uint8Array, ...msgs: Uint8Array[]) => {
     const h = hmac.create(sha256, key)
@@ -129,35 +135,22 @@ export class Secp256k1Keypair implements Keypair {
     /**
      * Return the signature for the provided data.
      */
-    signData(
-        data: Base64DataBuffer,
-        useRecoverable: boolean
-    ): Base64DataBuffer {
-        const msgHash = sha256(data.getData())
-        // Starting from sui 0.25.0, sui accepts 64-byte nonrecoverable signature instead of 65-byte recoverable signature for Secp256k1.
-        // TODO(joyqvq): Remove recoverable signature support after 0.25.0 is released.
-        if (useRecoverable) {
-            const [sig, rec_id] = secp.signSync(
-                msgHash,
-                this.keypair.secretKey,
-                {
-                    canonical: true,
-                    recovered: true,
-                }
-            )
-            var recoverable_sig = new Uint8Array(65)
-            recoverable_sig.set(Signature.fromDER(sig).toCompactRawBytes())
-            recoverable_sig.set([rec_id], 64)
-            return new Base64DataBuffer(recoverable_sig)
-        } else {
-            const sig = secp.signSync(msgHash, this.keypair.secretKey, {
-                canonical: true,
-                recovered: false,
-            })
-            return new Base64DataBuffer(
-                Signature.fromDER(sig).toCompactRawBytes()
-            )
+    signData(data: Uint8Array): Uint8Array {
+        const msgHash = sha256(data)
+        const sig = secp.signSync(msgHash, this.keypair.secretKey, {
+            canonical: true,
+            recovered: false,
+        })
+        const signature = Signature.fromDER(sig).toCompactRawBytes()
+        const buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
+        buf[0] = SIGNATURE_SCHEME_TO_FLAG['SECP256K1']
+        for (let i = 0; i < signature.length; i++) {
+            buf[i + 1] = signature[i]
         }
+        for (let i = 0; i < this.keypair.publicKey.length; i++) {
+            buf[i + 1 + SECP256K1_SIGNATURE_LEN] = this.keypair.publicKey[i]
+        }
+        return buf
     }
 
     /**
@@ -167,7 +160,11 @@ export class Secp256k1Keypair implements Keypair {
      * If path is none, it will default to m/54'/784'/0'/0/0, otherwise the path must
      * be compliant to BIP-32 in form m/54'/784'/{account_index}'/{change_index}/{address_index}.
      */
-    static deriveKeypair(path: string, mnemonics: string): Secp256k1Keypair {
+    static deriveKeypair(mnemonics: string, path?: string): Secp256k1Keypair {
+        if (path == null) {
+            path = DEFAULT_SECP256K1_DERIVATION_PATH
+        }
+
         if (!isValidBIP32Path(path)) {
             throw new Error('Invalid derivation path')
         }

@@ -16,7 +16,7 @@
 //
 
 import sha3 from 'js-sha3'
-import { fromB64, toB64 } from './util'
+import { fromB64, toB64 } from './crypto_utils'
 import {
     bytesEqual,
     PublicKeyInitData,
