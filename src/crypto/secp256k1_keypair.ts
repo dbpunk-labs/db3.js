@@ -105,7 +105,7 @@ export class Secp256k1Keypair implements Keypair {
         const publicKey: Uint8Array = secp.getPublicKey(secretKey, true)
         if (!options || !options.skipValidation) {
             const encoder = new TextEncoder()
-            const signData = encoder.encode('sui validation')
+            const signData = encoder.encode('db3 validation')
             const msgHash = sha256(signData)
             const signature = secp.signSync(msgHash, secretKey)
             if (!secp.verify(signature, msgHash, publicKey, { strict: true })) {

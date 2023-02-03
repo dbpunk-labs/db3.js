@@ -15,12 +15,12 @@
 // limitations under the License.
 //
 
-
-import { describe, expect, test } from '@jest/globals'
 import { TextEncoder, TextDecoder } from 'util'
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder
 
+
+import { describe, expect, test } from '@jest/globals'
 import { Ed25519Keypair } from '../src/crypto/ed25519_keypair'
 import { Ed25519PublicKey } from '../src/crypto/ed25519_publickey'
 import { Secp256k1Keypair } from '../src/crypto/secp256k1_keypair'
