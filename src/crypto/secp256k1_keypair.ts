@@ -27,7 +27,7 @@ import { sha256 } from '@noble/hashes/sha256'
 import { Secp256k1PublicKey } from './secp256k1_publickey'
 import { Signature } from '@noble/secp256k1'
 import { isValidBIP32Path, mnemonicToSeed } from './mnemonics'
-import { isValidHardenedPath, toB64 } from './crypto_utils'
+import { toB64 } from './crypto_utils'
 import { HDKey } from '@scure/bip32'
 
 export const DEFAULT_SECP256K1_DERIVATION_PATH = "m/54'/784'/0'/0/0"

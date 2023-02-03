@@ -24,26 +24,19 @@ import { toHEX } from '../src/crypto/crypto_utils'
 
 describe('test db3.js crypto module', () => {
     test('ed25519_keypair smoke test', async () => {
-        const seed = new Uint8Array(32)
-        for (let i = 0; i < 32; i++) {
-            seed[i] = 0
-        }
-        const keypair = Ed25519Keypair.fromSeed(seed)
+        const mnemonic =
+            'prefer name genius napkin pig tree twelve blame meat market market soda'
+        const keypair = Ed25519Keypair.deriveKeypair(mnemonic)
         const address = keypair.getPublicKey().toAddress()
-        expect(address).toBe('0x8a4662abf9f8b7aa947b174f29a7a8f259e111e5')
+        expect(address).toBe('0x5132ed60e5b69eed3086c5dd6665f758edc4f007')
         const msg = new Uint8Array(1)
         msg[0] = 0
         const signature = keypair.signData(msg)
         expect(toHEX(signature)).toBe(
-            '001b9da904f12708363c88d4b96b33b474b2a5a863e290be2be5d4cacef8a5cbac1c0132c3e20e477d7affd1491be6577e8b83af012773beaf51c6df3f4af95b0e3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da290000000000000000000000000000000000000000000000000000000000000000'
+            '00c6c00a38278132de297f01d3c26c7b9a27b9f4ea8ba7ea17443807f5ea7a5a3e34b00712f785058d67a6516d58f7ba16bf769f4851d1cc16093bd118f3a8770a56ce74db3780810a815813388a7a10b7157d95a5c807f244622e299e3aa0e3080000000000000000000000000000000000000000000000000000000000000000'
         )
     })
     test('secp259k1_keypair smoke test', async () => {
-        const seed = new Uint8Array(32)
-        for (let i = 0; i < 32; i++) {
-            seed[i] = 0
-        }
-
         const mnemonic =
             'prefer name genius napkin pig tree twelve blame meat market market soda'
         const keypair = Secp256k1Keypair.deriveKeypair(mnemonic)

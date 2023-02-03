@@ -3,4 +3,4 @@
 # format.sh
 
 
-yarn prettier --write src
+yarn prettier --write src tests

@@ -19,12 +19,8 @@ import nacl from 'tweetnacl'
 import type { Keypair } from './keypair'
 import { SignatureScheme, SIGNATURE_SCHEME_TO_FLAG } from './publickey'
 import { Ed25519PublicKey } from './ed25519_publickey'
-import {
-    isValidHardenedPath,
-    derivePath,
-    getPublicKey,
-    toB64,
-} from './crypto_utils'
+import { mnemonicToSeedHex, isValidHardenedPath } from './mnemonics'
+import { derivePath, getPublicKey, toB64 } from './crypto_utils'
 
 export const DEFAULT_ED25519_DERIVATION_PATH = "m/44'/784'/0'/0'/0'"
 
