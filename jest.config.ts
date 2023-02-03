@@ -4,5 +4,6 @@ export default {
     transform: {
         '\\.[jt]sx?$': 'babel-jest',
     },
-    testPathIgnorePatterns: ['thirdparty'],
+    testPathIgnorePatterns: ["/node_modules/", "/thirdparty/", "/src/"],
+    testMatch: ["tests/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"]
 }

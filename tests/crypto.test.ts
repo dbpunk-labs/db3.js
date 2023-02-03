@@ -16,9 +16,9 @@
 //
 
 import { describe, expect, test } from '@jest/globals'
-import { Ed25519Keypair } from '../ed25519_keypair'
-import { Ed25519PublicKey } from '../ed25519_publickey'
-import {toHEX} from '../util'
+import { Ed25519Keypair } from '../src/crypto/ed25519_keypair'
+import { Ed25519PublicKey } from '../src/crypto/ed25519_publickey'
+import { toHEX } from '../src/crypto/util'
 
 describe('test db3.js crypto module', () => {
     test('ed25519_keypair smoke test', async () => {
@@ -32,6 +32,8 @@ describe('test db3.js crypto module', () => {
         const msg = new Uint8Array(1)
         msg[0] = 0
         const signature = keypair.signData(msg)
-        expect(toHEX(signature)).toBe('001b9da904f12708363c88d4b96b33b474b2a5a863e290be2be5d4cacef8a5cbac1c0132c3e20e477d7affd1491be6577e8b83af012773beaf51c6df3f4af95b0e3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da290000000000000000000000000000000000000000000000000000000000000000')
+        expect(toHEX(signature)).toBe(
+            '001b9da904f12708363c88d4b96b33b474b2a5a863e290be2be5d4cacef8a5cbac1c0132c3e20e477d7affd1491be6577e8b83af012773beaf51c6df3f4af95b0e3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da290000000000000000000000000000000000000000000000000000000000000000'
+        )
     })
 })
