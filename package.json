@@ -27,6 +27,7 @@
         "build:wpt": "microbundle --entry src/index.ts --external none -f umd -o thirdparty/wpt/indexedDB/resources/indexedDB3.js ",
         "test": "jest",
         "benny-sdk": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_query.ts",
+        "benny-mutation": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_mutation.ts",
         "benny-demo": "ts-node-esm ./src/benches/reduce.ts"
     },
     "exports": {
