@@ -17,7 +17,11 @@
 
 import * as secp from '@noble/secp256k1'
 import type { ExportedKeypair, Keypair } from './keypair'
-import {SIGNATURE_SCHEME_TO_FLAG,  PublicKey, SignatureScheme } from './publickey'
+import {
+    SIGNATURE_SCHEME_TO_FLAG,
+    PublicKey,
+    SignatureScheme,
+} from './publickey'
 import { hmac } from '@noble/hashes/hmac'
 import { sha256 } from '@noble/hashes/sha256'
 import { Secp256k1PublicKey } from './secp256k1_publickey'
