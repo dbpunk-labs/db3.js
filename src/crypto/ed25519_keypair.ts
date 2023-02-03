@@ -25,7 +25,7 @@ import { derivePath, getPublicKey, toB64 } from './crypto_utils'
 export const DEFAULT_ED25519_DERIVATION_PATH = "m/44'/784'/0'/0'/0'"
 
 const ED25519_SIGNATURE_LEN = 64
-const ED25519_PUBLIC_LEN = 64
+const ED25519_PUBLIC_LEN = 32
 const DB3_ED25519_SIGNATURE_LEN = ED25519_SIGNATURE_LEN + ED25519_PUBLIC_LEN + 1
 /**
  * Ed25519 Keypair data
@@ -85,14 +85,10 @@ export class Ed25519Keypair implements Keypair {
      */
     signData(data: Uint8Array): Uint8Array {
         const signature = nacl.sign.detached(data, this.keypair.secretKey)
-        const buf = new Uint8Array(DB3_ED25519_SIGNATURE_LEN)
+        var buf = new Uint8Array(DB3_ED25519_SIGNATURE_LEN)
         buf[0] = SIGNATURE_SCHEME_TO_FLAG['ED25519']
-        for (let i = 0; i < signature.length; i++) {
-            buf[i + 1] = signature[i]
-        }
-        for (let i = 0; i < this.keypair.publicKey.length; i++) {
-            buf[i + 1 + ED25519_SIGNATURE_LEN] = this.keypair.publicKey[i]
-        }
+        buf.set(signature, 1)
+        buf.set(this.keypair.publicKey, 1 + ED25519_SIGNATURE_LEN)
         return buf
     }
 

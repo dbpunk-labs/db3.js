@@ -33,7 +33,7 @@ describe('test db3.js crypto module', () => {
         msg[0] = 0
         const signature = keypair.signData(msg)
         expect(toB64(signature)).toBe(
-            'AGAxggujR0I6p1CFqT4iUlfRs++AgprT4gREHM71+V8qkRktNJRx4WOjudvKGiQUioJ6AU3WC/n1aJjKpa/NXA5oWy1vmHhN12MkmvIckvWIyhvoDECpjFW/fJG3TlrB4gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+            'AGAxggujR0I6p1CFqT4iUlfRs++AgprT4gREHM71+V8qkRktNJRx4WOjudvKGiQUioJ6AU3WC/n1aJjKpa/NXA5oWy1vmHhN12MkmvIckvWIyhvoDECpjFW/fJG3TlrB4g=='
         )
     })
     test('secp259k1_keypair smoke test', async () => {
