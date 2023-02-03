@@ -48,12 +48,12 @@ describe('test db3.js crypto module', () => {
             'prefer name genius napkin pig tree twelve blame meat market market soda'
         const keypair = Secp256k1Keypair.deriveKeypair(mnemonic)
         const address = keypair.getPublicKey().toAddress()
-        expect(address).toBe('0x8a4662abf9f8b7aa947b174f29a7a8f259e111e5')
+        expect(address).toBe('0x957dfa89b32d6bf428a839374296286ab416dd9c')
         const msg = new Uint8Array(1)
         msg[0] = 0
         const signature = keypair.signData(msg)
         expect(toHEX(signature)).toBe(
-            '001b9da904f12708363c88d4b96b33b474b2a5a863e290be2be5d4cacef8a5cbac1c0132c3e20e477d7affd1491be6577e8b83af012773beaf51c6df3f4af95b0e3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da290000000000000000000000000000000000000000000000000000000000000000'
+            '007a6c10d30963413376f3881938aa87fb141753f6335aab8bcc4f8124cc557be83f629c3a3ecadeecc3748ea4f7b61d7d443b037acd820bce8cf264161747acaa03e89a6c81c6ae08670eea4da30801591bbff3d51d52872381d0a5c522aab9d57500000000000000000000000000000000000000000000000000000000000000'
         )
     })
 })
