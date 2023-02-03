@@ -15,11 +15,6 @@
 // limitations under the License.
 //
 
-import { TextEncoder, TextDecoder } from 'util'
-global.TextEncoder = TextEncoder
-global.TextDecoder = TextDecoder
-
-
 import { describe, expect, test } from '@jest/globals'
 import { Ed25519Keypair } from '../src/crypto/ed25519_keypair'
 import { Ed25519PublicKey } from '../src/crypto/ed25519_publickey'
@@ -50,7 +45,7 @@ describe('test db3.js crypto module', () => {
         }
 
         const mnemonic =
-        'prefer name genius napkin pig tree twelve blame meat market market soda'
+            'prefer name genius napkin pig tree twelve blame meat market market soda'
         const keypair = Secp256k1Keypair.deriveKeypair(mnemonic)
         const address = keypair.getPublicKey().toAddress()
         expect(address).toBe('0x8a4662abf9f8b7aa947b174f29a7a8f259e111e5')
@@ -61,6 +56,4 @@ describe('test db3.js crypto module', () => {
             '001b9da904f12708363c88d4b96b33b474b2a5a863e290be2be5d4cacef8a5cbac1c0132c3e20e477d7affd1491be6577e8b83af012773beaf51c6df3f4af95b0e3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da290000000000000000000000000000000000000000000000000000000000000000'
         )
     })
-
 })
-
