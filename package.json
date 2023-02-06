@@ -35,13 +35,14 @@
         "default": "./dist/index.modern.js"
     },
     "dependencies": {
+        "@noble/hashes": "^1.1.5",
+        "@noble/secp256k1": "^1.7.0",
         "@protobuf-ts/grpcweb-transport": "^2.8.2",
         "@protobuf-ts/runtime": "^2.8.2",
         "@protobuf-ts/runtime-rpc": "^2.8.2",
-        "@noble/hashes": "^1.1.5",
-        "@noble/secp256k1": "^1.7.0",
         "@scure/bip32": "^1.1.1",
         "@scure/bip39": "^1.1.0",
+        "int64-buffer": "^1.0.1",
         "js-sha3": "^0.8.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

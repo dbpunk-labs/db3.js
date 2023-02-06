@@ -54,41 +54,45 @@ async function run_1000_get_key(ns: string, keyList: string[]) {
         throw error
     }
 }
-function benchmark_data(suffix:string, size: number) : Record<string, string> {
-    let kvs : Record<string, string> = {};
+function benchmark_data(suffix: string, size: number): Record<string, string> {
+    let kvs: Record<string, string> = {}
     for (let i = 0; i < size; i++) {
-        kvs["bm_key_" + i + suffix] = "bm_value_" + i + suffix;
+        kvs['bm_key_' + i + suffix] = 'bm_value_' + i + suffix
     }
-    return kvs;
+    return kvs
 }
 
-async function send_submit_mutation(suffix:string, qps: number) {
-    console.log("send_submit_mutation...")
+async function send_submit_mutation(suffix: string, qps: number) {
+    console.log('send_submit_mutation...')
     const db3_instance = new DB3('http://127.0.0.1:26659')
     const _sign = await getSign()
-    const tc = new Date().getMilliseconds();
+    const tc = new Date().getMilliseconds()
     for (let i = 0; i < qps; i++) {
         await db3_instance.submitMutaition(
             {
                 ns: 'my_twitter',
                 gasLimit: 10,
-                data: benchmark_data( suffix + tc + "_mutation_", 1),
+                data: benchmark_data(suffix + tc + '_mutation_', 1),
             },
             _sign
         )
     }
-    console.log("send_submit_mutation...end")
+    console.log('send_submit_mutation...end')
 }
 
 b.suite(
     'DB3 JS SDK Benchmark',
-    b.add(`submit mutation 100 requests per session/keys size/1`, async () => {
-        console.log('submit mutation start')
-        return async () => {
-            console.log('submit mutation')
-            await send_submit_mutation("group1_", 100);
-        }
-    }, options),
+    b.add(
+        `submit mutation 100 requests per session/keys size/1`,
+        async () => {
+            console.log('submit mutation start')
+            return async () => {
+                console.log('submit mutation')
+                await send_submit_mutation('group1_', 100)
+            }
+        },
+        options
+    ),
     b.cycle(),
     b.complete(),
     b.configure({
