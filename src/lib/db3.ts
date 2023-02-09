@@ -26,9 +26,9 @@ import {
     DatabaseAction,
     CollectionMutation,
     DocumentMutation,
-} from '../pkg/db3_mutation'
-import { BroadcastMeta } from '../pkg/db3_base'
-import { ChainId, ChainRole } from '../pkg/db3_base'
+} from '../proto/db3_mutation'
+import { BroadcastMeta } from '../proto/db3_base'
+import { ChainId, ChainRole } from '../proto/db3_base'
 import {
     GetRangeRequest,
     RangeKey,
@@ -41,18 +41,18 @@ import {
     OpenSessionRequest,
     GetAccountRequest,
     ListDocumentsRequest,
-} from '../pkg/db3_node'
-import { Database, Index } from '../pkg/db3_database'
+} from '../proto/db3_node'
+import { Database, Index } from '../proto/db3_database'
 import {
     CloseSessionPayload,
     QuerySessionInfo,
     OpenSessionPayload,
-} from '../pkg/db3_session'
+} from '../proto/db3_session'
 import {
     GrpcWebFetchTransport,
     GrpcWebOptions,
 } from '@protobuf-ts/grpcweb-transport'
-import { StorageNodeClient } from '../pkg/db3_node.client'
+import { StorageNodeClient } from '../proto/db3_node.client'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import sha3 from 'js-sha3'
 import { DbId } from '../crypto/id'
