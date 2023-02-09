@@ -27,6 +27,7 @@ import { BroadcastMeta, ChainId, ChainRole } from '../proto/db3_base'
 import { StorageProvider } from '../provider/storage_provider'
 import { Wallet } from '../wallet/wallet'
 import { DbId } from '../crypto/id'
+import { fromHEX } from '../crypto/crypto_utils'
 
 //
 //
@@ -43,6 +44,10 @@ export class DB3Client {
         this.accountAddress = wallet.getAddress()
     }
 
+    /**
+     * create a database and return the address of it
+     *
+     */
     async createDatabase(): Promise<[string, string]> {
         const meta: BroadcastMeta = {
             nonce: this.provider.getNonce().toString(),
@@ -65,11 +70,78 @@ export class DB3Client {
         return [dbId.getHexAddr(), txId.getB64()]
     }
 
+    /**
+     * get a database information
+     *
+     */
     async getDatabase(addr: string) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDatabase(addr, token)
         this.querySessionInfo!.queryCount += 1
         return response
+    }
+
+    /**
+     * create a collection
+     *
+     */
+    async createCollection(
+        databaseAddress: string,
+        name: string,
+        index: Index[]
+    ) {
+        const meta: BroadcastMeta = {
+            nonce: this.provider.getNonce().toString(),
+            chainId: ChainId.MainNet,
+            chainRole: ChainRole.StorageShardChain,
+        }
+        const collection: CollectionMutation = {
+            index,
+            collectionName: name,
+        }
+        const dm: DatabaseMutation = {
+            meta,
+            collectionMutations: [collection],
+            documentMutations: [],
+            dbAddress: fromHEX(databaseAddress),
+            action: DatabaseAction.AddCollection,
+        }
+        const payload = DatabaseMutation.toBinary(dm)
+        const txId = await this.provider.sendMutation(
+            payload,
+            PayloadType.DatabasePayload
+        )
+        return txId.getB64()
+    }
+
+    async createDocument(
+        databaseAddress: string,
+        collectionName: string,
+        document: Record<string, any>
+    ) {
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            document: [BSON.serialize(document)],
+        }
+
+        const meta: BroadcastMeta = {
+            nonce: this.provider.getNonce().toString(),
+            chainId: ChainId.MainNet,
+            chainRole: ChainRole.StorageShardChain,
+        }
+        const dm: DatabaseMutation = {
+            meta,
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbAddress: fromHEX(databaseAddress),
+            action: DatabaseAction.AddDocument,
+        }
+        const payload = DatabaseMutation.toBinary(dm)
+        const txId = await this.provider.sendMutation(
+            payload,
+            PayloadType.DatabasePayload
+        )
+        return txId.getB64()
     }
 
     async keepSessionAlive() {
