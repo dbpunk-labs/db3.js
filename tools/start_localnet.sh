@@ -36,7 +36,7 @@ then
     rm -rf db
 fi
 ./bin/tendermint init
-./bin/db3 node >db3.log 2>&1  &
+./bin/db3 start >db3.log 2>&1  &
 sleep 1
 ./bin/tendermint unsafe_reset_all && ./bin/tendermint start
 sleep 1
