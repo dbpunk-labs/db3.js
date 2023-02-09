@@ -19,16 +19,6 @@ export type WalletType = 'DB3_SECP259K1' | 'DB3_ED25519' | 'MetaMask'
 
 export interface Wallet {
     /**
-     * Init the wallet
-     **/
-    init(walletType: WalletType): boolean
-
-    /**
-     * recover wallet from local browser
-     **/
-    recover(): boolean
-
-    /**
      * Sign the message
      */
     sign(message: Uint8Array): Uint8Array
@@ -36,11 +26,5 @@ export interface Wallet {
     /**
      * return the db3 address
      */
-    toAddress(): string
-
-    /**
-     *
-     * return the evm address if the wallettype is DB3_ED25519 or Metamask
-     */
-    toEVMAddress(): string
+    getAddress(): string
 }

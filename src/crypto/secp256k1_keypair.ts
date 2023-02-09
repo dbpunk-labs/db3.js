@@ -102,20 +102,8 @@ export class Secp256k1Keypair implements Keypair {
      * @param options: skip secret key validation
      */
 
-    static fromSecretKey(
-        secretKey: Uint8Array,
-        options?: { skipValidation?: boolean }
-    ): Secp256k1Keypair {
+    static fromSecretKey(secretKey: Uint8Array): Secp256k1Keypair {
         const publicKey: Uint8Array = secp.getPublicKey(secretKey, true)
-        if (!options || !options.skipValidation) {
-            const encoder = new TextEncoder()
-            const signData = encoder.encode('db3 validation')
-            const msgHash = sha256(signData)
-            const signature = secp.signSync(msgHash, secretKey)
-            if (!secp.verify(signature, msgHash, publicKey, { strict: true })) {
-                throw new Error('Provided secretKey is invalid')
-            }
-        }
         return new Secp256k1Keypair({ publicKey, secretKey })
     }
 
