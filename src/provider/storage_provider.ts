@@ -132,4 +132,9 @@ export class StorageProvider {
         const { response } = await this.client.getAccount(getAccountRequest)
         return response
     }
+
+    async getNonce(): number {
+        //TODO get nonce from remote with account address
+        return Date.now()
+    }
 }
