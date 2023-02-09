@@ -44,7 +44,6 @@ describe('test db3js api', () => {
                 sign,
                 nonce,
             })
-
             const [dbID, tid] = await db3_instance.createDB()
             dbAddress = dbID
             await new Promise((r) => setTimeout(r, 2000))

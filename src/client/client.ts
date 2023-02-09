@@ -26,6 +26,7 @@ import {
 import { BroadcastMeta, ChainId, ChainRole } from '../proto/db3_base'
 import { StorageProvider } from '../provider/storage_provider'
 import { Wallet } from '../wallet/wallet'
+import { DbId } from '../crypto/id'
 
 //
 //
@@ -44,7 +45,7 @@ export class DB3Client {
 
     async createDatabase(): Promise<[string, string]> {
         const meta: BroadcastMeta = {
-            nonce: this.provider.getNonce(),
+            nonce: this.provider.getNonce().toString(),
             chainId: ChainId.MainNet,
             chainRole: ChainRole.StorageShardChain,
         }
@@ -62,5 +63,30 @@ export class DB3Client {
         )
         const dbId = new DbId(this.accountAddress, +meta.nonce)
         return [dbId.getHexAddr(), txId.getB64()]
+    }
+
+    async getDatabase(addr: string) {
+        const token = await this.keepSessionAlive()
+        const response = await this.provider.getDatabase(addr, token)
+        this.querySessionInfo!.queryCount += 1
+        return response
+    }
+
+    async keepSessionAlive() {
+        if (!this.querySessionInfo) {
+            const response = await this.provider.openSession()
+            this.sessionToken = response.sessionToken
+            this.querySessionInfo = response.querySessionInfo
+            return this.sessionToken
+        }
+        // TODO
+        if (this.querySessionInfo!.queryCount > 1000) {
+            await this.provider.closeSession()
+            const response = await this.provider.openSession()
+            this.sessionToken = response.sessionToken
+            this.querySessionInfo = response.querySessionInfo
+            return this.sessionToken
+        }
+        return this.sessionToken
     }
 }

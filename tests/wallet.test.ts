@@ -19,30 +19,6 @@ import { describe, expect, test } from '@jest/globals'
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
 import { toB64, fromB64 } from '../src/crypto/crypto_utils'
 
-class LocalStorageMock {
-    constructor() {
-        this.store = {}
-    }
-
-    clear() {
-        this.store = {}
-    }
-
-    getItem(key) {
-        return this.store[key] || null
-    }
-
-    setItem(key, value) {
-        this.store[key] = String(value)
-    }
-
-    removeItem(key) {
-        delete this.store[key]
-    }
-}
-
-global.localStorage = new LocalStorageMock()
-
 describe('test db3.js wallet module', () => {
     test('ed25519 wallet smoke test', async () => {
         const mnemonic =

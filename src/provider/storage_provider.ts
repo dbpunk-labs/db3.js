@@ -133,7 +133,16 @@ export class StorageProvider {
         return response
     }
 
-    async getNonce(): number {
+    async getDatabase(address: string, token: string) {
+        const request: ShowDatabaseRequest = {
+            sessionToken: token,
+            address,
+        }
+        const { response } = await this.client.showDatabase(request)
+        return response
+    }
+
+    getNonce(): number {
         //TODO get nonce from remote with account address
         return Date.now()
     }
