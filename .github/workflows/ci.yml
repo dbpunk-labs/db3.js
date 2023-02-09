@@ -22,7 +22,7 @@ jobs:
           bash start_localnet.sh >tm.log 2>&1 &
       - uses: actions/setup-node@v3.5.1
       - uses: CultureHQ/actions-yarn@v1.0.1
-      - name: test db3js
+      - name: test db3.js
         run: |
           yarn install
           make

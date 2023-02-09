@@ -32,11 +32,7 @@ import {
     OpenSessionPayload,
 } from '../proto/db3_session'
 import { TxId } from '../crypto/id'
-
-export interface StorageProviderOption {
-    sign(target: Uint8Array): Promise<[Uint8Array, Uint8Array]>
-    nonce(): number
-}
+import { Wallet } from '../wallet/wallet'
 
 //
 // the db3 storage node provider implementation which provides low level methods to exchange with db3 network
@@ -45,7 +41,7 @@ export class StorageProvider {
     /**
      * new a storage provider with db3 storage grpc url
      */
-    constructor(url: string, options: StorageProviderOption) {
+    constructor(url: string, wallet: Wallet) {
         const goptions: GrpcWebOptions = {
             baseUrl: url,
             // simple example for how to add auth headers to each request
@@ -56,14 +52,14 @@ export class StorageProvider {
         }
         const transport = new GrpcWebFetchTransport(goptions)
         this.client = new StorageNodeClient(transport)
-        this.options = options
+        this.wallet = wallet
     }
 
     /**
      * send mutation to db3 network
      */
     async sendMutation(mutation: Uint8Array, payloadType: PayloadType) {
-        const signature = await this.options.sign(mutation)
+        const signature = await this.wallet.sign(mutation)
         const writeRequest: WriteRequest = {
             payload: mutation,
             signature: signature,
@@ -95,7 +91,7 @@ export class StorageProvider {
             startTime: Math.floor(Date.now() / 1000),
         }
         const payloadBinary = OpenSessionPayload.toBinary(payload)
-        const signature = await this.options.sign(payloadBinary)
+        const signature = await this.wallet.sign(payloadBinary)
         const sessionRequest: OpenSessionRequest = {
             payload: payloadBinary,
             signature: signature,
@@ -114,7 +110,7 @@ export class StorageProvider {
             sessionToken: token,
         }
         const payloadU8 = CloseSessionPayload.toBinary(payload)
-        const signature = await this.options.sign(payloadU8)
+        const signature = await this.wallet.sign(payloadU8)
         const closeQuerySessionRequest: CloseSessionRequest = {
             payload: payloadU8,
             signature: signature,

@@ -134,7 +134,7 @@ export class Secp256k1Keypair implements Keypair {
             recovered: true,
         })
         var buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
-        buf[0] = SIGNATURE_SCHEME_TO_FLAG['SECP256K1']
+        buf[0] = SIGNATURE_SCHEME_TO_FLAG['Secp256k1']
         buf.set(Signature.fromDER(sig).toCompactRawBytes(), 1)
         buf.set([rec_id], 65)
         buf.set(this.keypair.publicKey, 66)

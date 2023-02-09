@@ -72,7 +72,7 @@ describe('test db3.js wallet module', () => {
         msg[0] = 0
         const signature = wallet.sign(msg)
         expect(toB64(signature)).toBe(
-            'AH5QFEhl8OQHom8DmzkWJeuPs62q3z7XhAcIUM+MwYnEMoOCA8tB4K4JcEZIqu4vHYu6H4/XHc6Wmn0L0m6TaCsBA+NxdDVYKrM9LjFdIem8ThlQCh/EyM3HOhU2WJF3SxMf'
+            'AX5QFEhl8OQHom8DmzkWJeuPs62q3z7XhAcIUM+MwYnEMoOCA8tB4K4JcEZIqu4vHYu6H4/XHc6Wmn0L0m6TaCsBA+NxdDVYKrM9LjFdIem8ThlQCh/EyM3HOhU2WJF3SxMf'
         )
         const address = wallet.getAddress()
         expect(address).toBe('0xed17b3f435c03ff69c2cdc6d394932e68375f20f')

@@ -28,26 +28,41 @@ import {
     StorageProvider,
     StorageProviderOptions,
 } from '../src/provider/storage_provider'
+import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
+import { toB64, fromB64 } from '../src/crypto/crypto_utils'
+class LocalStorageMock {
+    constructor() {
+        this.store = {}
+    }
 
-describe('test db3.js crypto module', () => {
+    clear() {
+        this.store = {}
+    }
+
+    getItem(key) {
+        return this.store[key] || null
+    }
+
+    setItem(key, value) {
+        this.store[key] = String(value)
+    }
+
+    removeItem(key) {
+        delete this.store[key]
+    }
+}
+
+global.localStorage = new LocalStorageMock()
+
+describe('test db3.js provider module', () => {
     const mnemonic =
         'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-    const keypair = Secp256k1Keypair.deriveKeypair(mnemonic)
-    async function getSign() {
-        return async function (data: Uint8Array): Promise<Uint8Array> {
-            return await keypair.signData(data)
-        }
-    }
+    const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
     function nonce() {
         return Date.now().toString()
     }
-
-    test('provider send mutation test', async () => {
-        const sign = await getSign()
-        const provider = new StorageProvider('http://127.0.0.1:26659', {
-            sign,
-            nonce,
-        })
+    test('provider send mutation test secp256k1', async () => {
+        const provider = new StorageProvider('http://127.0.0.1:26659', wallet)
         const meta: BroadcastMeta = {
             nonce: '9527',
             chainId: ChainId.MainNet,
@@ -61,12 +76,13 @@ describe('test db3.js crypto module', () => {
             action: DatabaseAction.CreateDB,
         }
         const payload = DatabaseMutation.toBinary(dm)
+        const signature = wallet.sign(payload)
         const txId = await provider.sendMutation(
             payload,
             PayloadType.DatabasePayload
         )
         expect(txId.getB64()).toBe(
-            'C+Pl/Rpuu8uG2ddA6X6IYjLZ096yFFeODMtwJK+sYak='
+            'zHkR2KQa9y6n31PjezDTrfi+McVMGQKE9ocMFMsXIJE='
         )
     })
 })
