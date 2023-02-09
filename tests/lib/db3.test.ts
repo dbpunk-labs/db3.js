@@ -34,7 +34,7 @@ describe('test db3js api', () => {
     }
 
     let accountAddress = keypair.getPublicKey().toAddress()
-    let db_address
+    let dbAddress
 
     test('can create database', async () => {
         try {
@@ -45,10 +45,11 @@ describe('test db3js api', () => {
                 nonce,
             })
 
-            const [db_address, tid] = await db3_instance.createDB()
+            const [dbID, tid] = await db3_instance.createDB()
+            dbAddress = dbID
             await new Promise((r) => setTimeout(r, 2000))
-            const db = await db3_instance.getDB(db_address)
-            console.log(db_address, db)
+            const { db } = await db3_instance.getDB(dbID)
+            expect(dbID).toEqual(`0x${toHEX(db!.address)}`)
         } catch (error) {
             console.error('doc meta smoke test error', error)
             expect(1).toBe(0)
@@ -63,20 +64,42 @@ describe('test db3js api', () => {
                 sign,
                 nonce,
             })
+            await db3_instance.createCollection(dbAddress, 'cities', [
+                {
+                    name: 'idx1',
+                    id: 1,
+                    fields: [
+                        {
+                            fieldPath: 'state',
+                            valueMode: { oneofKind: 'order', order: 1 },
+                        },
+                    ],
+                },
+            ])
 
-            const result = await db3_instance.createCollection(
-                'cities',
-                db_address
-            )
-            const result1 = await db3_instance.createCollection(
-                'cities',
-                db_address
-            )
-            console.log(toHEX(result), toHEX(result1))
             await new Promise((r) => setTimeout(r, 2000))
+            const collections = await db3_instance.getCollection(dbAddress)
+            console.log(collections)
+            expect(collections && collections['cities']).toBeDefined()
         } catch (error) {
             console.error('doc meta smoke test error', error)
             expect(1).toBe(0)
         }
+    })
+
+    test('can create doc', async () => {
+        const sign = await getSign()
+        const db3_instance = new DB3('http://127.0.0.1:26659', {
+            accountAddress,
+            sign,
+            nonce,
+        })
+        const hash = await db3_instance.createDoc(dbAddress, 'cities', {
+            name: 'la',
+            state: 'ca',
+        })
+        await new Promise((r) => setTimeout(r, 2000))
+        const documents = await db3_instance.getDoc(dbAddress, 'cities')
+        expect(documents.length > 0).toBe(true)
     })
 })

@@ -20,7 +20,8 @@ import { Ed25519Keypair } from '../src/crypto/ed25519_keypair'
 import { Ed25519PublicKey } from '../src/crypto/ed25519_publickey'
 import { Secp256k1Keypair } from '../src/crypto/secp256k1_keypair'
 import { Secp256k1PublicKey } from '../src/crypto/secp256k1_publickey'
-import { toB64 } from '../src/crypto/crypto_utils'
+import { toB64, fromB64 } from '../src/crypto/crypto_utils'
+import { TxId, DbId } from '../src/crypto/id'
 
 describe('test db3.js crypto module', () => {
     test('ed25519_keypair smoke test', async () => {
@@ -48,5 +49,20 @@ describe('test db3.js crypto module', () => {
         expect(toB64(signature)).toBe(
             'AH5QFEhl8OQHom8DmzkWJeuPs62q3z7XhAcIUM+MwYnEMoOCA8tB4K4JcEZIqu4vHYu6H4/XHc6Wmn0L0m6TaCsBA+NxdDVYKrM9LjFdIem8ThlQCh/EyM3HOhU2WJF3SxMf'
         )
+    })
+
+    test('tx id smoke  test', async () => {
+        const txIdStr = '3V7r7VRg+9zUXeGNmqRR0YdVXWtBSl4sk+Z50h9BrOc='
+        const hash = fromB64(txIdStr)
+        const txId = new TxId(hash)
+        expect(txId.getB64()).toBe(txIdStr)
+    })
+
+    test('db id smoke test', async () => {
+        const sender = '0xed17b3f435c03ff69c2cdc6d394932e68375f20f'
+        const nonce = 10
+        const dbId = new DbId(sender, nonce)
+        const target = '0xd74360cca976522a8b66c7cbd4f674fef9eeef97'
+        expect(target).toBe(dbId.getHexAddr())
     })
 })

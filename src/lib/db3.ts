@@ -25,6 +25,7 @@ import {
     DatabaseMutation,
     DatabaseAction,
     CollectionMutation,
+    DocumentMutation,
 } from '../pkg/db3_mutation'
 import { BroadcastMeta } from '../pkg/db3_base'
 import { ChainId, ChainRole } from '../pkg/db3_base'
@@ -39,8 +40,9 @@ import {
     ShowDatabaseRequest,
     OpenSessionRequest,
     GetAccountRequest,
+    ListDocumentsRequest,
 } from '../pkg/db3_node'
-import { Database } from '../pkg/db3_database'
+import { Database, Index } from '../pkg/db3_database'
 import {
     CloseSessionPayload,
     QuerySessionInfo,
@@ -51,8 +53,9 @@ import {
     GrpcWebOptions,
 } from '@protobuf-ts/grpcweb-transport'
 import { StorageNodeClient } from '../pkg/db3_node.client'
-import { toHEX } from '../crypto/crypto_utils'
+import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import sha3 from 'js-sha3'
+import { DbId } from '../crypto/id'
 
 export interface KvMutation {
     ns: string
@@ -81,27 +84,6 @@ export interface DB3_Options {
     accountAddress: string
     sign(target: Uint8Array): Promise<[Uint8Array, Uint8Array]>
     nonce(): string
-}
-
-function encodeUint8Array(text: string) {
-    return new TextEncoder().encode(text)
-}
-
-function uint8ToBase64(arr: Uint8Array) {
-    return btoa(
-        Array(arr.length)
-            .fill('')
-            .map((_, i) => String.fromCharCode(arr[i]))
-            .join('')
-    )
-}
-const DB3_ADDRESS_LENGTH = 20
-
-function getDBID(accountAddress: string, nonce: string) {
-    let hasher = sha3.sha3_256.update(nonce).update(accountAddress)
-    const g_arr = hasher.arrayBuffer()
-    const u8 = new Uint8Array(g_arr)
-    return toHEX(u8.slice(0, DB3_ADDRESS_LENGTH))
 }
 export class DB3 {
     private client: StorageNodeClient
@@ -210,6 +192,7 @@ export class DB3 {
         const dm: DatabaseMutation = {
             meta,
             collectionMutations: [],
+            documentMutations: [],
             dbAddress: new Uint8Array(),
             action: DatabaseAction.CreateDB,
         }
@@ -224,9 +207,9 @@ export class DB3 {
             body: WriteRequest.toBinary(writeRequest),
         }
         const { response } = await this.client.broadcast(broadcastRequest)
-        const dbId = getDBID(this.accountAddress, meta.nonce)
+        const dbId = new DbId(this.accountAddress, +meta.nonce)
 
-        return [`0x${dbId}`, response.hash.toString()]
+        return [dbId.getHexAddr(), response.hash.toString()]
     }
 
     async getDB(address: string) {
@@ -236,38 +219,93 @@ export class DB3 {
             address,
         }
         const { response } = await this.client.showDatabase(request)
-        const count = this.querySessionInfo!.queryCount + 1
-        this.querySessionInfo!.queryCount = count
+        this.querySessionInfo!.queryCount += 1
         return response
     }
 
-    async createCollection(name: string, db_address: string) {
+    async createCollection(db_address: string, name: string, index: Index[]) {
         const meta: BroadcastMeta = {
             nonce: this.nonce(),
             chainId: ChainId.MainNet,
             chainRole: ChainRole.StorageShardChain,
         }
         const collection: CollectionMutation = {
-            index: [],
-            collectionId: name,
+            index,
+            collectionName: name,
         }
         const dm: DatabaseMutation = {
             meta,
             collectionMutations: [collection],
-            dbAddress: encodeUint8Array(db_address),
-            action: DatabaseAction.CreateDB,
+            documentMutations: [],
+            dbAddress: fromHEX(db_address),
+            action: DatabaseAction.AddCollection,
         }
         const payload = DatabaseMutation.toBinary(dm)
         const [signature] = await this.sign(payload)
         const writeRequest: WriteRequest = {
             payload,
-            signature: signature,
-            payloadType: PayloadType.MutationPayload,
+            signature,
+            payloadType: PayloadType.DatabasePayload,
         }
         const broadcastRequest: BroadcastRequest = {
-            body: BSON.serialize(writeRequest),
+            body: WriteRequest.toBinary(writeRequest),
         }
         const { response } = await this.client.broadcast(broadcastRequest)
         return response.hash
+    }
+
+    async getCollection(dbAddress: string) {
+        const { db } = await this.getDB(dbAddress)
+        return db?.collections
+    }
+
+    async createDoc(
+        dbAddress: string,
+        collectionName: string,
+        document: Record<string, any>
+    ) {
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            document: [BSON.serialize(document)],
+        }
+        const meta: BroadcastMeta = {
+            nonce: this.nonce(),
+            chainId: ChainId.MainNet,
+            chainRole: ChainRole.StorageShardChain,
+        }
+        const dm: DatabaseMutation = {
+            meta,
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbAddress: fromHEX(dbAddress),
+            action: DatabaseAction.AddDocument,
+        }
+        const payload = DatabaseMutation.toBinary(dm)
+        const [signature] = await this.sign(payload)
+        const writeRequest: WriteRequest = {
+            payload,
+            signature,
+            payloadType: PayloadType.DatabasePayload,
+        }
+        const broadcastRequest: BroadcastRequest = {
+            body: WriteRequest.toBinary(writeRequest),
+        }
+        const { response } = await this.client.broadcast(broadcastRequest)
+        return response.hash
+    }
+
+    async getDoc(dbAddress: string, collectionName: string) {
+        const token = await this.keepSession()
+        const request: ListDocumentsRequest = {
+            sessionToken: token!,
+            address: dbAddress,
+            collectionName,
+        }
+        const { response } = await this.client.listDocuments(request)
+        this.querySessionInfo!.queryCount += 1
+        return response.documents.map((item) => ({
+            ...item,
+            doc: BSON.deserialize(item.doc),
+        }))
     }
 }
