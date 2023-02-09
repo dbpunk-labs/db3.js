@@ -2,7 +2,7 @@
 #
 # start_localnet.sh
 killall db3 tendermint
-DB3_VERSION="v0.2.5"
+DB3_VERSION="v0.2.7"
 test_dir=`pwd`
 BUILD_MODE='debug'
 if [[ $1 == 'release' ]] ; then
