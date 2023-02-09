@@ -59,7 +59,6 @@ describe('test db3js api', () => {
                 sign,
                 nonce,
             })
-
             const doc_meta_mgr = new DocMetaManager(db3_instance)
             const my_transaction_meta = {
                 keys: [

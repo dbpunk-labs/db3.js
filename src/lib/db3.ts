@@ -197,9 +197,11 @@ export class DB3 {
             publicKey: public_key,
             payloadType: PayloadType.MutationPayload,
         }
+
         const broadcastRequest: BroadcastRequest = {
             body: WriteRequest.toBinary(writeRequest),
         }
+
         const { response } = await this.client.broadcast(broadcastRequest)
         const id = uint8ToBase64(response.hash)
         return id

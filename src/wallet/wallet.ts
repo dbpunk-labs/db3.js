@@ -40,7 +40,7 @@ export interface Wallet {
 
     /**
      *
-     * return the evm address
+     * return the evm address if the wallettype is DB3_ED25519 or Metamask
      */
     toEVMAddress(): string
 }
