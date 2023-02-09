@@ -55,13 +55,42 @@ class LocalStorageMock {
 global.localStorage = new LocalStorageMock()
 
 describe('test db3.js provider module', () => {
-    const mnemonic =
-        'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-    const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
     function nonce() {
         return Date.now().toString()
     }
+    test('provider send mutation test ed26619', async () => {
+        const mnemonic =
+            'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_ED25519')
+        const provider = new StorageProvider('http://127.0.0.1:26659', wallet)
+        const meta: BroadcastMeta = {
+            nonce: '9527',
+            chainId: ChainId.MainNet,
+            chainRole: ChainRole.StorageShardChain,
+        }
+        const dm: DatabaseMutation = {
+            meta,
+            collectionMutations: [],
+            documentMutations: [],
+            dbAddress: new Uint8Array(),
+            action: DatabaseAction.CreateDB,
+        }
+        const payload = DatabaseMutation.toBinary(dm)
+        const signature = wallet.sign(payload)
+        const txId = await provider.sendMutation(
+            payload,
+            PayloadType.DatabasePayload
+        )
+        expect(txId.getB64()).toBe(
+            'MiuDkHefVUg0AyHQtuq76QwBcraNwNoqbl1QL3Wj78U='
+        )
+        localStorage.clear()
+    })
+
     test('provider send mutation test secp256k1', async () => {
+        const mnemonic =
+            'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
         const provider = new StorageProvider('http://127.0.0.1:26659', wallet)
         const meta: BroadcastMeta = {
             nonce: '9527',
@@ -84,5 +113,6 @@ describe('test db3.js provider module', () => {
         expect(txId.getB64()).toBe(
             'zHkR2KQa9y6n31PjezDTrfi+McVMGQKE9ocMFMsXIJE='
         )
+        localStorage.clear()
     })
 })
