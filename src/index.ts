@@ -14,5 +14,3 @@
  * limitations under the License.
  */
 
-export * from './lib/keys'
-export * from './lib/DB3Factory'
