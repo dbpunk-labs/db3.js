@@ -28,7 +28,31 @@ describe('test db3.js client module', () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
         await new Promise((r) => setTimeout(r, 2000))
-        const { db } = await client.getDatabase(dbId)
+        const db = await client.getDatabase(dbId)
         expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
+        const indexList = [
+            {
+                name: 'idx1',
+                id: 1,
+                fields: [
+                    {
+                        fieldPath: 'name',
+                        valueMode: { oneofKind: 'order', order: 1 },
+                    },
+                ],
+            },
+        ]
+        await client.createCollection(dbId, 'books', indexList)
+        await new Promise((r) => setTimeout(r, 2000))
+        const collections = await client.listCollection(dbId)
+        expect(collections && collections['books']).toBeDefined()
+        await client.createDocument(dbId, 'books', {
+            name: 'book1',
+            author: 'db3 developers',
+        })
+        await new Promise((r) => setTimeout(r, 2000))
+        const books = await client.listDocuments(dbId, 'books')
+        expect(books.length).toBe(1)
+        expect(books[0]['doc']['name']).toBe('book1')
     })
 })

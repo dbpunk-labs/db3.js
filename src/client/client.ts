@@ -27,7 +27,7 @@ import { BroadcastMeta, ChainId, ChainRole } from '../proto/db3_base'
 import { StorageProvider } from '../provider/storage_provider'
 import { Wallet } from '../wallet/wallet'
 import { DbId } from '../crypto/id'
-import { fromHEX } from '../crypto/crypto_utils'
+import { toB64, fromHEX, toHEX } from '../crypto/crypto_utils'
 
 //
 //
@@ -78,7 +78,12 @@ export class DB3Client {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDatabase(addr, token)
         this.querySessionInfo!.queryCount += 1
-        return response
+        return response?.db
+    }
+
+    async listCollection(databaseAddress: string) {
+        const db = await this.getDatabase(databaseAddress)
+        return db?.collections
     }
 
     /**
@@ -133,6 +138,7 @@ export class DB3Client {
             chainId: ChainId.MainNet,
             chainRole: ChainRole.StorageShardChain,
         }
+
         const dm: DatabaseMutation = {
             meta,
             collectionMutations: [],
@@ -140,6 +146,7 @@ export class DB3Client {
             dbAddress: fromHEX(databaseAddress),
             action: DatabaseAction.AddDocument,
         }
+
         const payload = DatabaseMutation.toBinary(dm)
         const txId = await this.provider.sendMutation(
             payload,
@@ -157,8 +164,9 @@ export class DB3Client {
         )
         this.querySessionInfo!.queryCount += 1
         return response.documents.map((item) => ({
-            ...item,
+            id: toB64(item.id),
             doc: BSON.deserialize(item.doc),
+            owner: '0x' + toHEX(item.owner),
         }))
     }
 
