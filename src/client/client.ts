@@ -114,6 +114,10 @@ export class DB3Client {
         return txId.getB64()
     }
 
+    /**
+     * create a document
+     *
+     */
     async createDocument(
         databaseAddress: string,
         collectionName: string,
@@ -142,6 +146,20 @@ export class DB3Client {
             PayloadType.DatabasePayload
         )
         return txId.getB64()
+    }
+
+    async listDocuments(dbAddress: string, collectionName: string) {
+        const token = await this.keepSessionAlive()
+        const response = await this.provider.listDocuments(
+            token,
+            dbAddress,
+            collectionName
+        )
+        this.querySessionInfo!.queryCount += 1
+        return response.documents.map((item) => ({
+            ...item,
+            doc: BSON.deserialize(item.doc),
+        }))
     }
 
     async keepSessionAlive() {

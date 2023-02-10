@@ -25,6 +25,7 @@ import {
     OpenSessionRequest,
     BroadcastRequest,
     GetAccountRequest,
+    ListDocumentsRequest,
 } from '../proto/db3_node'
 import {
     CloseSessionPayload,
@@ -33,6 +34,7 @@ import {
 } from '../proto/db3_session'
 import { TxId } from '../crypto/id'
 import { Wallet } from '../wallet/wallet'
+import { fromHEX } from '../crypto/crypto_utils'
 
 //
 // the db3 storage node provider implementation which provides low level methods to exchange with db3 network
@@ -145,5 +147,15 @@ export class StorageProvider {
     getNonce(): number {
         //TODO get nonce from remote with account address
         return Date.now()
+    }
+
+    async listDocuments(token: string, addr: string, collectionName: string) {
+        const request: ListDocumentsRequest = {
+            sessionToken: token,
+            address: addr,
+            collectionName,
+        }
+        const { response } = await this.client.listDocuments(request)
+        return response
     }
 }
