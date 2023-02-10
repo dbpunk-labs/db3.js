@@ -57,7 +57,22 @@ export class Ed25519Keypair implements Keypair {
     static generate(): Ed25519Keypair {
         return new Ed25519Keypair(nacl.sign.keyPair())
     }
-
+    static fromSecretKey(secretKey: Uint8Array): Ed25519Keypair {
+        const secretKeyLength = secretKey.length
+        if (secretKeyLength !== 64) {
+            // Many users actually wanted to invoke fromSeed(seed: Uint8Array), especially when reading from keystore.
+            if (secretKeyLength === 32) {
+                throw new Error(
+                    'Wrong secretKey size. Expected 64 bytes, got 32. Similar function exists: fromSeed(seed: Uint8Array)'
+                )
+            }
+            throw new Error(
+                `Wrong secretKey size. Expected 64 bytes, got ${secretKeyLength}.`
+            )
+        }
+        const keypair = nacl.sign.keyPair.fromSecretKey(secretKey)
+        return new Ed25519Keypair(keypair)
+    }
     /**
      * Get the key scheme of the keypair ED25519
      */

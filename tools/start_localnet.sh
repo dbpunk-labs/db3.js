@@ -2,7 +2,7 @@
 #
 # start_localnet.sh
 killall db3 tendermint
-DB3_VERSION="v0.2.5"
+DB3_VERSION="v0.2.7"
 test_dir=`pwd`
 BUILD_MODE='debug'
 if [[ $1 == 'release' ]] ; then
@@ -36,7 +36,7 @@ then
     rm -rf db
 fi
 ./bin/tendermint init
-./bin/db3 node >db3.log 2>&1  &
+./bin/db3 start >db3.log 2>&1  &
 sleep 1
 ./bin/tendermint unsafe_reset_all && ./bin/tendermint start
 sleep 1

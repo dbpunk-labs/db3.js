@@ -1,5 +1,5 @@
 //
-// crypto.test.ts
+// wallet.test.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,53 +16,48 @@
 //
 
 import { describe, expect, test } from '@jest/globals'
-import { Ed25519Keypair } from '../src/crypto/ed25519_keypair'
-import { Ed25519PublicKey } from '../src/crypto/ed25519_publickey'
-import { Secp256k1Keypair } from '../src/crypto/secp256k1_keypair'
-import { Secp256k1PublicKey } from '../src/crypto/secp256k1_publickey'
+import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
 import { toB64, fromB64 } from '../src/crypto/crypto_utils'
-import { TxId, DbId } from '../src/crypto/id'
 
-describe('test db3.js crypto module', () => {
-    test('ed25519_keypair smoke test', async () => {
+describe('test db3.js wallet module', () => {
+    test('ed25519 wallet smoke test', async () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-        const keypair = Ed25519Keypair.deriveKeypair(mnemonic)
-        const address = keypair.getPublicKey().toAddress()
-        expect(address).toBe('0x1a4623343cd42be47d67314fce0ad042f3c82685')
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_ED25519')
         const msg = new Uint8Array(1)
         msg[0] = 0
-        const signature = keypair.signData(msg)
+        const signature = wallet.sign(msg)
         expect(toB64(signature)).toBe(
             'AGAxggujR0I6p1CFqT4iUlfRs++AgprT4gREHM71+V8qkRktNJRx4WOjudvKGiQUioJ6AU3WC/n1aJjKpa/NXA5oWy1vmHhN12MkmvIckvWIyhvoDECpjFW/fJG3TlrB4g=='
         )
+        const address = wallet.getAddress()
+        expect(address).toBe('0x1a4623343cd42be47d67314fce0ad042f3c82685')
+        const hasKey = DB3BrowserWallet.hasKey()
+        expect(hasKey).toBe(true)
+        const recoverWallet = DB3BrowserWallet.recover()
+        expect(recoverWallet.getAddress()).toBe(
+            '0x1a4623343cd42be47d67314fce0ad042f3c82685'
+        )
+        localStorage.clear()
     })
-    test('secp259k1_keypair smoke test', async () => {
+    test('secp256k1 wallet smoke test', async () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-        const keypair = Secp256k1Keypair.deriveKeypair(mnemonic)
-        const address = keypair.getPublicKey().toAddress()
-        expect(address).toBe('0xed17b3f435c03ff69c2cdc6d394932e68375f20f')
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
         const msg = new Uint8Array(1)
         msg[0] = 0
-        const signature = keypair.signData(msg)
+        const signature = wallet.sign(msg)
         expect(toB64(signature)).toBe(
             'AX5QFEhl8OQHom8DmzkWJeuPs62q3z7XhAcIUM+MwYnEMoOCA8tB4K4JcEZIqu4vHYu6H4/XHc6Wmn0L0m6TaCsBA+NxdDVYKrM9LjFdIem8ThlQCh/EyM3HOhU2WJF3SxMf'
         )
-    })
-
-    test('tx id smoke  test', async () => {
-        const txIdStr = '3V7r7VRg+9zUXeGNmqRR0YdVXWtBSl4sk+Z50h9BrOc='
-        const hash = fromB64(txIdStr)
-        const txId = new TxId(hash)
-        expect(txId.getB64()).toBe(txIdStr)
-    })
-
-    test('db id smoke test', async () => {
-        const sender = '0xed17b3f435c03ff69c2cdc6d394932e68375f20f'
-        const nonce = 10
-        const dbId = new DbId(sender, nonce)
-        const target = '0xd74360cca976522a8b66c7cbd4f674fef9eeef97'
-        expect(target).toBe(dbId.getHexAddr())
+        const address = wallet.getAddress()
+        expect(address).toBe('0xed17b3f435c03ff69c2cdc6d394932e68375f20f')
+        const hasKey = DB3BrowserWallet.hasKey()
+        expect(hasKey).toBe(true)
+        const recoverWallet = DB3BrowserWallet.recover()
+        expect(recoverWallet.getAddress()).toBe(
+            '0xed17b3f435c03ff69c2cdc6d394932e68375f20f'
+        )
+        localStorage.clear()
     })
 })

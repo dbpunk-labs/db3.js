@@ -3,4 +3,4 @@
 # format.sh
 
 
-yarn prettier --write src tests
+yarn prettier --write src tests ./jest.setup.ts ./jest.config.ts
