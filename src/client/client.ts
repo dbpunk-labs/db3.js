@@ -167,6 +167,7 @@ export class DB3Client {
             id: toB64(item.id),
             doc: BSON.deserialize(item.doc),
             owner: '0x' + toHEX(item.owner),
+            tx: toB64(item.txId),
         }))
     }
 
