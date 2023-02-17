@@ -29,7 +29,38 @@ const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
 // build db3 client
 const client = new DB3Client('http://127.0.0.1:26659', wallet)
 ```
+### Create a database
 
+```typescript
+const [dbId, txId] = await client.createDatabase()
+const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
+```
+
+### Create a collection
+
+```typescript
+const indexList: Index[] = [
+            {
+                name: 'idx1',
+                id: 1,
+                fields: [
+                    {
+                        fieldPath: 'BJ',
+                        valueMode: {
+                            oneofKind: 'order',
+                            order: Index_IndexField_Order.ASCENDING,
+                        },
+                    },
+                ],
+            },
+        ]
+const collectionRef = await collection(db, 'cities', indexList)
+const result = await addDoc(collectionRef, {
+    name: 'beijing',
+    address: 'north',
+})
+const docs = await getDocs(collectionRef)
+```
 
 ## Show Your Support
 Please ⭐️ this repository if this project helped you!
