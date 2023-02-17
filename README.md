@@ -39,13 +39,14 @@ const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
 ### Create a collection
 
 ```typescript
+// add a index to collection
 const indexList: Index[] = [
             {
                 name: 'idx1',
                 id: 1,
                 fields: [
                     {
-                        fieldPath: 'BJ',
+                        fieldPath: 'name',
                         valueMode: {
                             oneofKind: 'order',
                             order: Index_IndexField_Order.ASCENDING,
@@ -53,12 +54,15 @@ const indexList: Index[] = [
                     },
                 ],
             },
-        ]
+]
+// create a collecion
 const collectionRef = await collection(db, 'cities', indexList)
+// add a doc to collection
 const result = await addDoc(collectionRef, {
     name: 'beijing',
     address: 'north',
 })
+// get all docs from collection
 const docs = await getDocs(collectionRef)
 ```
 
