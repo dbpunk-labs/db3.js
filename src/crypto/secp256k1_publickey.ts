@@ -19,6 +19,7 @@ import sha3 from 'js-sha3'
 import { fromB64, toB64 } from './crypto_utils'
 import {
     bytesEqual,
+    PublicKey,
     PublicKeyInitData,
     SIGNATURE_SCHEME_TO_FLAG,
 } from './publickey'

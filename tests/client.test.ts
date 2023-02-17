@@ -19,6 +19,7 @@ import { describe, expect, test } from '@jest/globals'
 import { toHEX } from '../src/crypto/crypto_utils'
 import { DB3Client } from '../src/client/client'
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
+import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
 
 describe('test db3.js client module', () => {
     test('create database smoke test', async () => {
@@ -30,14 +31,17 @@ describe('test db3.js client module', () => {
         await new Promise((r) => setTimeout(r, 2000))
         const db = await client.getDatabase(dbId)
         expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
-        const indexList = [
+        const indexList: Index[] = [
             {
                 name: 'idx1',
                 id: 1,
                 fields: [
                     {
                         fieldPath: 'name',
-                        valueMode: { oneofKind: 'order', order: 1 },
+                        valueMode: {
+                            oneofKind: 'order',
+                            order: Index_IndexField_Order.ASCENDING,
+                        },
                     },
                 ],
             },
@@ -54,5 +58,8 @@ describe('test db3.js client module', () => {
         const books = await client.listDocuments(dbId, 'books')
         expect(books.length).toBe(1)
         expect(books[0]['doc']['name']).toBe('book1')
+        const bookId = books[0].id
+        const result = await client.deleteDocument(dbId, 'books', [bookId])
+        expect(result).toBeDefined()
     })
 })
