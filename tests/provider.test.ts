@@ -59,7 +59,7 @@ describe('test db3.js provider module', () => {
             PayloadType.DatabasePayload
         )
         expect(txId.getB64()).toBe(
-            'MiuDkHefVUg0AyHQtuq76QwBcraNwNoqbl1QL3Wj78U='
+            "HzyHbZjgfdCcZUW8KERvjQAsjyDTGjt7TLTlhU4wwWE="
         )
         localStorage.clear()
     })
@@ -88,7 +88,7 @@ describe('test db3.js provider module', () => {
             PayloadType.DatabasePayload
         )
         expect(txId.getB64()).toBe(
-            'zHkR2KQa9y6n31PjezDTrfi+McVMGQKE9ocMFMsXIJE='
+            "uWECy6GSliva8MJv1F6yg0Qu9nZPjxFPMgIsmejjWiE="
         )
         localStorage.clear()
     })
