@@ -19,26 +19,17 @@ yarn add db3.js
 
 ## Use db3.js in action
 
+### Build db3 client
+
 ```typescript
-/*
-|----------------------------|
-| use db3js open a database  |
-|----------------------------|
-*/
-
-// build sign function
-const sign = await getSign()
-
-// build database factory
-const dbFactory = new DB3Factory({
-    node: 'http://127.0.0.1:26659',
-    sign,
-    nonce
-})
-
-// open database with an address
-const db = dbFactory.open("0x5ca8d43c15fb366d80e221d11a34894eb0975da6")
+// the key seed
+const mnemonic ='...'
+// create a wallet
+const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
+// build db3 client
+const client = new DB3Client('http://127.0.0.1:26659', wallet)
 ```
+
 
 ## Show Your Support
 Please ⭐️ this repository if this project helped you!
