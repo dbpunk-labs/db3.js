@@ -22,6 +22,7 @@ import { fromB64 } from '../crypto/crypto_utils'
 
 const WALLET_KEY = '_db3_wallet_key_'
 export class DB3BrowserWallet implements Wallet {
+    keypair: Ed25519Keypair | Secp256k1Keypair
     constructor(keypair: Ed25519Keypair | Secp256k1Keypair) {
         this.keypair = keypair
     }
@@ -35,7 +36,7 @@ export class DB3BrowserWallet implements Wallet {
     }
 
     static hasKey(): boolean {
-        const key = JSON.parse(localStorage.getItem(WALLET_KEY) ?? {})
+        const key = JSON.parse(localStorage.getItem(WALLET_KEY) ?? '{}')
         if (!key.hasOwnProperty('schema')) {
             return false
         }
@@ -43,7 +44,7 @@ export class DB3BrowserWallet implements Wallet {
     }
 
     static recover(): DB3BrowserWallet {
-        const key = JSON.parse(localStorage.getItem(WALLET_KEY) ?? {})
+        const key = JSON.parse(localStorage.getItem(WALLET_KEY) ?? '{}')
         if (!key.hasOwnProperty('schema')) {
             throw new Error('no key in browser')
         }

@@ -16,7 +16,7 @@
 //
 
 import nacl from 'tweetnacl'
-import type { Keypair } from './keypair'
+import type { ExportedKeypair, Keypair } from './keypair'
 import { SignatureScheme, SIGNATURE_SCHEME_TO_FLAG } from './publickey'
 import { Ed25519PublicKey } from './ed25519_publickey'
 import { mnemonicToSeedHex, isValidHardenedPath } from './mnemonics'
@@ -36,13 +36,14 @@ export interface Ed25519KeypairData {
 }
 
 export class Ed25519Keypair implements Keypair {
+    keypair: Ed25519KeypairData | nacl.SignKeyPair
     /**
      * Create a new Ed25519 keypair instance.
      * Generate random keypair if no {@link Ed25519Keypair} is provided.
      *
      * @param keypair Ed25519 keypair
      */
-    constructor(keypair?: Ed25519KeypairData) {
+    constructor(keypair: Ed25519KeypairData) {
         if (keypair) {
             this.keypair = keypair
         } else {

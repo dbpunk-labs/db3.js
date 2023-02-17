@@ -14,18 +14,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
+// @ts-nocheck
 import {
     GrpcWebFetchTransport,
     GrpcWebOptions,
 } from '@protobuf-ts/grpcweb-transport'
 import { StorageNodeClient } from '../proto/db3_node.client'
-import { WriteRequest, Mutation, PayloadType } from '../proto/db3_mutation'
+import { WriteRequest, PayloadType } from '../proto/db3_mutation'
 import {
     OpenSessionRequest,
     BroadcastRequest,
     GetAccountRequest,
     ListDocumentsRequest,
+    CloseSessionRequest,
+    ShowDatabaseRequest,
 } from '../proto/db3_node'
 import {
     CloseSessionPayload,
@@ -40,6 +42,8 @@ import { fromHEX } from '../crypto/crypto_utils'
 // the db3 storage node provider implementation which provides low level methods to exchange with db3 network
 //
 export class StorageProvider {
+    readonly client: StorageNodeClient
+    readonly wallet: Wallet
     /**
      * new a storage provider with db3 storage grpc url
      */
@@ -74,11 +78,12 @@ export class StorageProvider {
         return new TxId(response.hash)
     }
 
+    // @ts-nocheck
     /**
      * build a session with storage node for querying data
      */
     async openSession() {
-        let header = ''
+        let header
         if (typeof window === 'undefined') {
             header =
                 new Date().getTime() +
@@ -127,9 +132,9 @@ export class StorageProvider {
      * get the account information with db3 address
      *
      */
-    async getAccount(addr: string) {
+    async getAccount(addr: Uint8Array) {
         const getAccountRequest: GetAccountRequest = {
-            addr: address,
+            addr,
         }
         const { response } = await this.client.getAccount(getAccountRequest)
         return response

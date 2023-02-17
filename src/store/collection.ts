@@ -1,25 +1,32 @@
+import { Index } from '../proto/db3_database'
 import { DB3Store } from './database'
 import { DocumentData, DocumentReference } from './document'
 import { Query } from './query'
 
-export class CollectionReference<T = DocumentData> extends Query<T> {
+export class CollectionReference {
     readonly type = 'collection'
-    get name(): string {
-        return ''
-    }
-    get address(): string {
-        return ''
+    readonly db: DB3Store
+    readonly name: string
+    constructor(db: DB3Store, name: string) {
+        this.db = db
+        this.name = name
     }
 }
 
-export function collection(
+export async function collection(
     db: DB3Store,
-    address: string
-): CollectionReference<DocumentData>
+    name: string,
+    index: Index[]
+): Promise<CollectionReference>
 
-export function collection(
+export async function collection(
     db: DB3Store,
-    address: string
-): CollectionReference<DocumentData> {
-    return new CollectionReference(db)
+    name: string,
+    index: Index[]
+): Promise<CollectionReference> {
+    const collections = await db.getCollections()
+    if (!collections || !collections[name]) {
+        await db.client.createCollection(db.address, name, index)
+    }
+    return new CollectionReference(db, name)
 }

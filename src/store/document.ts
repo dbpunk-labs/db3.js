@@ -1,22 +1,6 @@
 import { CollectionReference } from './collection'
 import { DB3Store } from './database'
-import { Query } from './query'
 
-export type Primitive = string | number | boolean | undefined | null
-
-export type WithFieldValue<T> =
-    | T
-    | (T extends Primitive
-          ? T
-          : T extends {}
-          ? { [K in keyof T]: WithFieldValue<T[K]> }
-          : never)
-
-export type UpdateData<T> = T extends Primitive
-    ? T
-    : T extends {}
-    ? { [K in keyof T]?: UpdateData<T[K]> }
-    : Partial<T>
 export interface DocumentData {
     [field: string]: any
 }
@@ -54,43 +38,31 @@ export class DocumentReference<T = DocumentData> {
     }
 }
 
-export function doc<T>(
-    reference: CollectionReference<T>,
-    path?: string,
-    ...pathSegments: string[]
-): DocumentReference<T>
-
-export function doc<T>(
-    parent: DB3Store | CollectionReference<T> | DocumentReference<unknown>,
-    path?: string
-): DocumentReference {
-    return {}
+export async function addDoc(
+    reference: CollectionReference,
+    data: any
+): Promise<any> {
+    const db = reference.db
+    const result = await db.client.createDocument(
+        db.address,
+        reference.name,
+        data
+    )
+    return result
 }
 
-export function addDoc<T>(
-    reference: CollectionReference<T>,
-    data: WithFieldValue<T>
-): Promise<DocumentReference<T>> {
-    return {}
+export async function getDocs(reference: CollectionReference) {
+    const db = reference.db
+    const docs = await db.client.listDocuments(db.address, reference.name)
+    return docs
 }
 
-export function updateDoc<T>(
-    reference: DocumentReference<T>,
-    data: UpdateData<T>
-): Promise<void> {}
-
-export function setDoc<T>(
-    reference: DocumentReference<T>,
-    data: PartialWithFieldValue<T>,
-    options?: SetOptions
-): Promise<void> {}
-
-export function getDoc<T>(
-    reference: DocumentReference<T>
-): Promise<DocumentData<T>> {}
-
-export function getDocs<T>(query: Query<T>): Promise<QuerySnapshot<T>> {}
-
-export function deleteDoc(
-    reference: DocumentReference<unknown>
-): Promise<void> {}
+export async function deleteDoc(reference: CollectionReference, ids: string[]) {
+    const db = reference.db
+    const result = await db.client.deleteDocument(
+        db.address,
+        reference.name,
+        ids
+    )
+    return result
+}

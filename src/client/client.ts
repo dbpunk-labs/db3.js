@@ -28,6 +28,8 @@ import { StorageProvider } from '../provider/storage_provider'
 import { Wallet } from '../wallet/wallet'
 import { DbId } from '../crypto/id'
 import { toB64, fromHEX, toHEX } from '../crypto/crypto_utils'
+import { Database, Index } from '../proto/db3_database'
+import { QuerySessionInfo } from '../proto/db3_session'
 
 //
 //
@@ -35,6 +37,11 @@ import { toB64, fromHEX, toHEX } from '../crypto/crypto_utils'
 //
 //
 export class DB3Client {
+    readonly provider: StorageProvider
+    readonly accountAddress: string
+    querySessionInfo: QuerySessionInfo | undefined
+    sessionToken: string | undefined
+
     /**
      * new a db3 client with db3 node url and wallet
      *
@@ -74,11 +81,11 @@ export class DB3Client {
      * get a database information
      *
      */
-    async getDatabase(addr: string) {
+    async getDatabase(addr: string): Promise<Database | undefined> {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDatabase(addr, token)
         this.querySessionInfo!.queryCount += 1
-        return response?.db
+        return response.db
     }
 
     async listCollection(databaseAddress: string) {
@@ -130,7 +137,8 @@ export class DB3Client {
     ) {
         const documentMutation: DocumentMutation = {
             collectionName,
-            document: [BSON.serialize(document)],
+            documents: [BSON.serialize(document)],
+            ids: [],
         }
 
         const meta: BroadcastMeta = {
@@ -171,20 +179,54 @@ export class DB3Client {
         }))
     }
 
+    async deleteDocument(
+        databaseAddress: string,
+        collectionName: string,
+        ids: string[]
+    ) {
+        const meta: BroadcastMeta = {
+            nonce: this.provider.getNonce().toString(),
+            chainId: ChainId.MainNet,
+            chainRole: ChainRole.StorageShardChain,
+        }
+
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            documents: [],
+            ids,
+        }
+
+        const dm: DatabaseMutation = {
+            meta,
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbAddress: fromHEX(databaseAddress),
+            action: DatabaseAction.DeleteDocument,
+        }
+        const payload = DatabaseMutation.toBinary(dm)
+        return this.provider.sendMutation(payload, PayloadType.DatabasePayload)
+    }
+
     async keepSessionAlive() {
-        if (!this.querySessionInfo) {
+        if (!this.querySessionInfo || !this.sessionToken) {
             const response = await this.provider.openSession()
             this.sessionToken = response.sessionToken
             this.querySessionInfo = response.querySessionInfo
             return this.sessionToken
         }
         // TODO
-        if (this.querySessionInfo!.queryCount > 1000) {
-            await this.provider.closeSession()
+        if (this.querySessionInfo.queryCount > 1000) {
+            await this.provider.closeSession(
+                this.sessionToken,
+                this.querySessionInfo
+            )
             const response = await this.provider.openSession()
             this.sessionToken = response.sessionToken
             this.querySessionInfo = response.querySessionInfo
             return this.sessionToken
+        }
+        if (!this.sessionToken) {
+            throw new Error('sessioToken is not found')
         }
         return this.sessionToken
     }

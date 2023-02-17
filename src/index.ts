@@ -13,3 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
+export { DB3Client } from './client/client'
+export { initializeDB3 } from './store/app'
+export { collection } from './store/collection'
+export { addDoc, getDocs, deleteDoc } from './store/document'

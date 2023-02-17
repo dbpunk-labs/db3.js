@@ -23,8 +23,7 @@
     "types": "./dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "microbundle --entry src/index.ts --external none",
-        "build:wpt": "microbundle --entry src/index.ts --external none -f umd -o thirdparty/wpt/indexedDB/resources/indexedDB3.js ",
+        "build": "microbundle --entry src/index.ts --external none -f modern,esm",
         "test": "jest",
         "benny-sdk": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_query.ts",
         "benny-mutation": "ts-node-esm --experimental-specifier-resolution=node ./src/benches/sdk_mutation.ts",
