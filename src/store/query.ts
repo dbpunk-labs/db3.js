@@ -1,10 +1,9 @@
 import { DB3Store } from './database'
-import type { DocumentData } from './document'
+import type { DocumentData, DocumentReference } from './document'
 
 export class Query<T = DocumentData> {
     /** The type of this Firestore reference. */
     readonly type: 'query' | 'collection'
-
     /**
      * The `Firestore` instance for the Firestore database (useful for performing
      * transactions, etc.).
@@ -21,6 +20,7 @@ export class Query<T = DocumentData> {
          */
     ) {
         this.db = db3store
+        this.type = 'query'
     }
 }
 
@@ -61,15 +61,12 @@ export abstract class QueryConstraint extends AppliableConstraint {
     abstract _apply<T>(query: Query<T>): Query<T>
 }
 
-export function query<T>(
-    query: Query<T>,
-    ...queryConstraints: QueryConstraint[]
-): Query<T>
-
-export function query<T>(
-    query: Query<T>,
-    queryConstraint: QueryConstraint
-): Query<T> {}
+//export function query<T>(
+//    query: Query<T>,
+//    ...queryConstraints: QueryConstraint[]
+//): Query<T> {
+//
+//}
 
 export class QueryResult<T = DocumentData> {
     readonly docs: Array<DocumentReference<T>>
