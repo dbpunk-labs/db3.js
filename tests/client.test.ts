@@ -19,7 +19,11 @@ import { describe, expect, test } from '@jest/globals'
 import { toHEX } from '../src/crypto/crypto_utils'
 import { DB3Client } from '../src/client/client'
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
-import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
+import {
+    Index,
+    Index_IndexField_Order,
+    StructuredQuery,
+} from '../src/proto/db3_database'
 
 describe('test db3.js client module', () => {
     test('create database smoke test', async () => {
@@ -55,7 +59,10 @@ describe('test db3.js client module', () => {
             author: 'db3 developers',
         })
         await new Promise((r) => setTimeout(r, 2000))
-        const books = await client.listDocuments(dbId, 'books')
+        const query: StructuredQuery = {
+            collectionName: 'books',
+        }
+        const books = await client.runQuery(dbId, query)
         expect(books.length).toBe(1)
         expect(books[0]['doc']['name']).toBe('book1')
         const bookId = books[0].id

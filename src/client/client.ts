@@ -167,11 +167,11 @@ export class DB3Client {
 
     async getDocument(id: string) {
         const token = await this.keepSessionAlive()
-        const response = await this.provider.getDocument(id)
+        const response = await this.provider.getDocument(token, id)
         return {
             id: toB64(response.document.id),
             doc: BSON.deserialize(response.document.doc),
-            owner: '0x' + toHex(response.document.owner),
+            owner: '0x' + toHEX(response.document.owner),
             tx: toB64(response.document.txId),
         }
     }
@@ -225,19 +225,22 @@ export class DB3Client {
         collectionName: string,
         document: Record<string, any>,
         id: string,
-        masks?: string[]
+        masks: string[]
     ) {
         const meta: BroadcastMeta = {
             nonce: this.provider.getNonce().toString(),
             chainId: ChainId.MainNet,
             chainRole: ChainRole.StorageShardChain,
         }
+        const documentMask: DocumentMask = {
+            fields: masks,
+        }
         //TODO add mask
         const documentMutation: DocumentMutation = {
             collectionName,
             documents: [BSON.serialize(document)],
             ids: [id],
-            masks: [{ fields: masks }],
+            masks: [documentMask],
         }
         const dm: DatabaseMutation = {
             meta,

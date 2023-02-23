@@ -40,7 +40,7 @@
         "@protobuf-ts/runtime-rpc": "^2.8.2",
         "@scure/bip32": "^1.1.1",
         "@scure/bip39": "^1.1.1",
-        "bson": "^5.0.0",
+        "bson": "^5.0.1",
         "int64-buffer": "^1.0.1",
         "js-sha3": "^0.8.0",
         "loglevel": "^1.8.1",
