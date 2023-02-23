@@ -1,28 +1,45 @@
+//
+// collection.ts
+// Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// @ts-nocheck
+
 import { Index } from '../proto/db3_database'
 import { DB3Store } from './database'
 import { DocumentData, DocumentReference } from './document'
 import { Query } from './query'
 
-export class CollectionReference {
+export class CollectionReference<T = DocumentData> extends Query<T> {
     readonly type = 'collection'
     readonly db: DB3Store
     readonly name: string
     constructor(db: DB3Store, name: string) {
-        this.db = db
+        super(db)
         this.name = name
     }
 }
-
 export async function collection(
     db: DB3Store,
     name: string,
-    index: Index[]
+    index?: Index[]
 ): Promise<CollectionReference>
 
 export async function collection(
     db: DB3Store,
     name: string,
-    index: Index[]
+    index?: Index[]
 ): Promise<CollectionReference> {
     const collections = await db.getCollections()
     if (!collections || !collections[name]) {

@@ -14,7 +14,6 @@ export class DB3Store {
             const collections = await this.client.listCollection(this.address)
             this._collections = collections
         }
-
         return this._collections
     }
 }

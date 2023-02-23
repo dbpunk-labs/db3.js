@@ -22,14 +22,16 @@ import {
     DatabaseAction,
     CollectionMutation,
     DocumentMutation,
+    DocumentMask,
 } from '../proto/db3_mutation'
 import { BroadcastMeta, ChainId, ChainRole } from '../proto/db3_base'
 import { StorageProvider } from '../provider/storage_provider'
 import { Wallet } from '../wallet/wallet'
 import { DbId } from '../crypto/id'
 import { toB64, fromHEX, toHEX } from '../crypto/crypto_utils'
-import { Database, Index } from '../proto/db3_database'
+import { Database, Index, StructuredQuery } from '../proto/db3_database'
 import { QuerySessionInfo } from '../proto/db3_session'
+import * as log from 'loglevel'
 
 //
 //
@@ -139,6 +141,7 @@ export class DB3Client {
             collectionName,
             documents: [BSON.serialize(document)],
             ids: [],
+            masks: [],
         }
 
         const meta: BroadcastMeta = {
@@ -149,12 +152,11 @@ export class DB3Client {
 
         const dm: DatabaseMutation = {
             meta,
+            action: DatabaseAction.AddDocument,
+            dbAddress: fromHEX(databaseAddress),
             collectionMutations: [],
             documentMutations: [documentMutation],
-            dbAddress: fromHEX(databaseAddress),
-            action: DatabaseAction.AddDocument,
         }
-
         const payload = DatabaseMutation.toBinary(dm)
         const txId = await this.provider.sendMutation(
             payload,
@@ -163,14 +165,20 @@ export class DB3Client {
         return txId.getB64()
     }
 
-    async listDocuments(dbAddress: string, collectionName: string) {
+    async getDocument(id: string) {
         const token = await this.keepSessionAlive()
-        const response = await this.provider.listDocuments(
-            token,
-            dbAddress,
-            collectionName
-        )
-        this.querySessionInfo!.queryCount += 1
+        const response = await this.provider.getDocument(id)
+        return {
+            id: toB64(response.document.id),
+            doc: BSON.deserialize(response.document.doc),
+            owner: '0x' + toHex(response.document.owner),
+            tx: toB64(response.document.txId),
+        }
+    }
+
+    async runQuery(dbAddress: string, query: StructuredQuery) {
+        const token = await this.keepSessionAlive()
+        const response = await this.provider.runQuery(token, dbAddress, query)
         return response.documents.map((item) => ({
             id: toB64(item.id),
             doc: BSON.deserialize(item.doc),
@@ -194,8 +202,8 @@ export class DB3Client {
             collectionName,
             documents: [],
             ids,
+            masks: [],
         }
-
         const dm: DatabaseMutation = {
             meta,
             collectionMutations: [],
@@ -207,15 +215,55 @@ export class DB3Client {
         return this.provider.sendMutation(payload, PayloadType.DatabasePayload)
     }
 
+    //
+    //
+    // update document with a mask
+    //
+    //
+    async updateDocument(
+        databaseAddress: string,
+        collectionName: string,
+        document: Record<string, any>,
+        id: string,
+        masks?: string[]
+    ) {
+        const meta: BroadcastMeta = {
+            nonce: this.provider.getNonce().toString(),
+            chainId: ChainId.MainNet,
+            chainRole: ChainRole.StorageShardChain,
+        }
+        //TODO add mask
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            documents: [BSON.serialize(document)],
+            ids: [id],
+            masks: [{ fields: masks }],
+        }
+        const dm: DatabaseMutation = {
+            meta,
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbAddress: fromHEX(databaseAddress),
+            action: DatabaseAction.UpdateDocument,
+        }
+        const payload = DatabaseMutation.toBinary(dm)
+        return this.provider.sendMutation(payload, PayloadType.DatabasePayload)
+    }
+
     async keepSessionAlive() {
         if (!this.querySessionInfo || !this.sessionToken) {
             const response = await this.provider.openSession()
             this.sessionToken = response.sessionToken
             this.querySessionInfo = response.querySessionInfo
+            log.info('create a new session token ', response.sessionToken)
             return this.sessionToken
         }
         // TODO
         if (this.querySessionInfo.queryCount > 1000) {
+            log.info(
+                'submit query session with count ',
+                this.querySessionInfo.queryCount
+            )
             await this.provider.closeSession(
                 this.sessionToken,
                 this.querySessionInfo
@@ -223,9 +271,11 @@ export class DB3Client {
             const response = await this.provider.openSession()
             this.sessionToken = response.sessionToken
             this.querySessionInfo = response.querySessionInfo
+            log.info('create a new session token ', response.sessionToken)
             return this.sessionToken
         }
         if (!this.sessionToken) {
+            log.warn('no session token')
             throw new Error('sessioToken is not found')
         }
         return this.sessionToken

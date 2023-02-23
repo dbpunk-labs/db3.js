@@ -25,15 +25,17 @@ import {
     OpenSessionRequest,
     BroadcastRequest,
     GetAccountRequest,
-    ListDocumentsRequest,
+    RunQueryRequest,
     CloseSessionRequest,
     ShowDatabaseRequest,
+    GetDocumentRequest,
 } from '../proto/db3_node'
 import {
     CloseSessionPayload,
     QuerySessionInfo,
     OpenSessionPayload,
 } from '../proto/db3_session'
+import { StructuredQuery } from '../proto/db3_database'
 import { TxId } from '../crypto/id'
 import { Wallet } from '../wallet/wallet'
 import { fromHEX } from '../crypto/crypto_utils'
@@ -154,13 +156,22 @@ export class StorageProvider {
         return Date.now()
     }
 
-    async listDocuments(token: string, addr: string, collectionName: string) {
-        const request: ListDocumentsRequest = {
+    async runQuery(token: string, addr: string, query: StructuredQuery) {
+        const request: RunQueryRequest = {
             sessionToken: token,
             address: addr,
-            collectionName,
+            query,
         }
-        const { response } = await this.client.listDocuments(request)
+        const { response } = await this.client.runQuery(request)
+        return response
+    }
+
+    async getDocument(token: string, id: string) {
+        const request: GetDocumentRequest = {
+            sessionToken: token,
+            id,
+        }
+        const { response } = await this.client.getDoument(request)
         return response
     }
 }

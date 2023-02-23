@@ -1,15 +1,15 @@
 import { DB3Store } from './database'
-import { DocumentData } from './document'
+import type { DocumentData } from './document'
 
 export class Query<T = DocumentData> {
     /** The type of this Firestore reference. */
-    readonly type: 'query' | 'collection' = 'query'
+    readonly type: 'query' | 'collection'
 
     /**
      * The `Firestore` instance for the Firestore database (useful for performing
      * transactions, etc.).
      */
-    readonly db3store: DB3Store
+    readonly db: DB3Store
 
     // This is the lite version of the Query class in the main SDK.
 
@@ -20,7 +20,7 @@ export class Query<T = DocumentData> {
          * If provided, the `FirestoreDataConverter` associated with this instance.
          */
     ) {
-        this.db3store = db3store
+        this.db = db3store
     }
 }
 
@@ -70,3 +70,18 @@ export function query<T>(
     query: Query<T>,
     queryConstraint: QueryConstraint
 ): Query<T> {}
+
+export class QueryResult<T = DocumentData> {
+    readonly docs: Array<DocumentReference<T>>
+    readonly db: DB3Store
+    constructor(db3store: DB3Store, docs: Array<DocumentReference<T>>) {
+        this.db = db3store
+        this.docs = docs
+    }
+    get empty(): boolean {
+        return this.docs.length == 0
+    }
+    get size(): number {
+        return this.docs.length
+    }
+}
