@@ -47,20 +47,22 @@ export async function addDoc(
 //    const db = reference.db
 //}
 
-export async function getDocs<DocumentReference>(
+export async function getDocs<T = DocumentData>(
     query: Query
-): Promise<QueryResult<DocumentData>> {
+): Promise<QueryResult<T>> {
     const db = query.db
     if (query.type == 'collection') {
         const colref = query as CollectionReference
         const squery: StructuredQuery = {
             collectionName: colref.name,
         }
-        const docs = await db.client.runQuery(db.address, squery)
-        const new_docs = docs.map((item) => new DocumentReference(colref, item))
-        return new QueryResult(db, new_docs)
+        const docs = await db.client.runQuery<T>(db.address, squery)
+        const new_docs = docs.map(
+            (item) => new DocumentReference<T>(colref, item)
+        )
+        return new QueryResult<T>(db, new_docs)
     } else {
-        return new QueryResult(db, [])
+        return new QueryResult<T>(db, [])
     }
 }
 

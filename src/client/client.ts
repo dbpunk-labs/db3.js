@@ -176,15 +176,18 @@ export class DB3Client {
         }
     }
 
-    async runQuery(dbAddress: string, query: StructuredQuery) {
+    async runQuery<T>(dbAddress: string, query: StructuredQuery) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.runQuery(token, dbAddress, query)
-        return response.documents.map((item) => ({
-            id: toB64(item.id),
-            doc: BSON.deserialize(item.doc),
-            owner: '0x' + toHEX(item.owner),
-            tx: toB64(item.txId),
-        }))
+        return response.documents.map(
+            (item) =>
+                ({
+                    id: toB64(item.id),
+                    doc: BSON.deserialize(item.doc),
+                    owner: '0x' + toHEX(item.owner),
+                    tx: toB64(item.txId),
+                } as T)
+        )
     }
 
     async deleteDocument(
