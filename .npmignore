@@ -1,0 +1,13 @@
+*.idea
+test
+dist
+docs
+coverage
+scripts
+.gitignore
+.editorconfig
+.npmignore
+.DS_Store
+thirdparty
+src
+tools
