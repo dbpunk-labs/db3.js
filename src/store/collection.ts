@@ -18,7 +18,8 @@
 
 import { Index } from '../proto/db3_database'
 import { DB3Store } from './database'
-import { DocumentData, DocumentReference } from './document'
+import { DocumentReference } from './document'
+import type { DocumentData } from '../client/client'
 import { Query } from './query'
 
 export class CollectionReference<T = DocumentData> extends Query<T> {

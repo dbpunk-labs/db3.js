@@ -34,6 +34,10 @@ import { QuerySessionInfo } from '../proto/db3_session'
 import * as log from 'loglevel'
 import { BSON } from 'bson'
 
+export interface DocumentData {
+    [field: string]: any
+}
+
 export interface DocumentEntry<T> {
     id: string
     owner: string
@@ -143,7 +147,7 @@ export class DB3Client {
     async createDocument(
         databaseAddress: string,
         collectionName: string,
-        document: Record<string, any>
+        document: DocumentData
     ) {
         const documentMutation: DocumentMutation = {
             collectionName,
@@ -184,10 +188,7 @@ export class DB3Client {
         }
     }
 
-    async runQuery<T>(
-        dbAddress: string,
-        query: StructuredQuery
-    ): Array<DocumentEntry<T>> {
+    async runQuery<T>(dbAddress: string, query: StructuredQuery) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.runQuery(token, dbAddress, query)
         return response.documents.map(

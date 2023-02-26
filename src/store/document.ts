@@ -2,11 +2,7 @@ import { CollectionReference, collection } from './collection'
 import { DB3Store } from './database'
 import { Query, QueryResult } from './query'
 import { StructuredQuery } from '../proto/db3_database'
-import { DocumentEntry } from '../client/client'
-
-export interface DocumentData {
-    [field: string]: any
-}
+import { DocumentEntry, DocumentData } from '../client/client'
 
 export class DocumentReference<T = DocumentData> {
     /** The type of this Firestore reference. */
@@ -29,13 +25,13 @@ export class DocumentReference<T = DocumentData> {
 // add a document with collection reference
 //
 export function addDoc<T = DocumentData>(
-    reference: CollectionReference,
+    reference: CollectionReference<T>,
     data: T
 ): Promise<any> {
     return new Promise((resolve, reject) => {
         const db = reference.db
         db.client
-            .createDocument(db.address, reference.name, data)
+            .createDocument(db.address, reference.name, data as DocumentData)
             .then((result) => {
                 resolve(result)
             })
