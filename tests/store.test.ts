@@ -24,6 +24,7 @@ import {
     getDocs,
     deleteDoc,
     updateDoc,
+    DocumentData,
 } from '../src/index'
 import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
 
@@ -50,19 +51,20 @@ describe('test db3.js store module', () => {
                 ],
             },
         ]
+
         const collectionRef = await collection(db, 'cities', indexList)
         await new Promise((r) => setTimeout(r, 2000))
         // create doc
         const result = await addDoc(collectionRef, {
             name: 'beijing',
             address: 'north',
-        })
+        } as DocumentData)
 
         await new Promise((r) => setTimeout(r, 2000))
         const docs = await getDocs(collectionRef)
         expect(docs.size).toBe(1)
-        expect(docs.docs[0].doc.doc['name']).toBe('beijing')
-        expect(docs.docs[0].doc.owner).toBe(wallet.getAddress())
+        expect(docs.docs[0].entry.doc['name']).toBe('beijing')
+        expect(docs.docs[0].entry.owner).toBe(wallet.getAddress())
 
         // update
         await updateDoc(docs.docs[0], {
@@ -72,10 +74,10 @@ describe('test db3.js store module', () => {
         await new Promise((r) => setTimeout(r, 2000))
         const docs3 = await getDocs(collectionRef)
         expect(docs3.size).toBe(1)
-        expect(docs.docs[0].id).toBe(docs3.docs[0].id)
-        expect(docs3.docs[0].doc.doc['name']).toBe('shanghai')
-        expect(docs3.docs[0].doc.doc['new_field']).toBe('new_field')
-        expect(docs3.docs[0].doc.owner).toBe(wallet.getAddress())
+        expect(docs.docs[0].entry.id).toBe(docs3.docs[0].entry.id)
+        expect(docs3.docs[0].entry.doc['name']).toBe('shanghai')
+        expect(docs3.docs[0].entry.doc['new_field']).toBe('new_field')
+        expect(docs3.docs[0].entry.owner).toBe(wallet.getAddress())
         // delete
         await deleteDoc(docs.docs[0])
         await new Promise((r) => setTimeout(r, 2000))

@@ -1,5 +1,6 @@
 import { DB3Store } from './database'
-import type { DocumentData, DocumentReference } from './document'
+import type { DocumentReference } from './document'
+import type { DocumentData } from '../client/client'
 
 export class Query<T = DocumentData> {
     /** The type of this Firestore reference. */

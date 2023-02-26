@@ -18,7 +18,8 @@
 
 import { Index } from '../proto/db3_database'
 import { DB3Store } from './database'
-import { DocumentData, DocumentReference } from './document'
+import { DocumentReference } from './document'
+import type { DocumentData } from '../client/client'
 import { Query } from './query'
 
 export class CollectionReference<T = DocumentData> extends Query<T> {
@@ -28,22 +29,31 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
     constructor(db: DB3Store, name: string) {
         super(db)
         this.name = name
+        this.db = db
     }
 }
-export async function collection(
+export function collection(
     db: DB3Store,
     name: string,
     index?: Index[]
 ): Promise<CollectionReference>
 
-export async function collection(
+export function collection(
     db: DB3Store,
     name: string,
     index?: Index[]
 ): Promise<CollectionReference> {
-    const collections = await db.getCollections()
-    if (!collections || !collections[name]) {
-        await db.client.createCollection(db.address, name, index)
-    }
-    return new CollectionReference(db, name)
+    return new Promise((resolve, reject) => {
+        db.getCollections().then((collections) => {
+            if (!collections || !collections[name]) {
+                db.client
+                    .createCollection(db.address, name, index)
+                    .then((txid) => {
+                        resolve(new CollectionReference(db, name))
+                    })
+            } else {
+                resolve(new CollectionReference(db, name))
+            }
+        })
+    })
 }

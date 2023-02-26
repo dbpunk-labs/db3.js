@@ -1,3 +1,4 @@
+//@ts-nocheck
 //
 // client.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
@@ -15,7 +16,6 @@
 // limitations under the License.
 //
 
-import { BSON } from 'bson'
 import {
     PayloadType,
     DatabaseMutation,
@@ -32,6 +32,18 @@ import { toB64, fromHEX, toHEX } from '../crypto/crypto_utils'
 import { Database, Index, StructuredQuery } from '../proto/db3_database'
 import { QuerySessionInfo } from '../proto/db3_session'
 import * as log from 'loglevel'
+import { BSON } from 'bson'
+
+export interface DocumentData {
+    [field: string]: any
+}
+
+export interface DocumentEntry<T> {
+    id: string
+    owner: string
+    tx: string
+    doc: T
+}
 
 //
 //
@@ -135,7 +147,7 @@ export class DB3Client {
     async createDocument(
         databaseAddress: string,
         collectionName: string,
-        document: Record<string, any>
+        document: DocumentData
     ) {
         const documentMutation: DocumentMutation = {
             collectionName,
@@ -182,11 +194,11 @@ export class DB3Client {
         return response.documents.map(
             (item) =>
                 ({
+                    doc: BSON.deserialize(item.doc) as T,
                     id: toB64(item.id),
-                    doc: BSON.deserialize(item.doc),
                     owner: '0x' + toHEX(item.owner),
                     tx: toB64(item.txId),
-                } as T)
+                } as DocumentEntry<T>)
         )
     }
 

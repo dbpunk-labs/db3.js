@@ -1,0 +1,13 @@
+95,99c95,96
+< const nodejsRandomBytes = await (async () => {
+<     try {
+<         return (await import('crypto')).randomBytes;
+<     }
+<     catch {
+---
+> 
+> const nodejsRandomBytes =  (() => {
+101d97
+<     }
+102a99
+> 
