@@ -64,7 +64,7 @@ describe('test db3.js client module', () => {
         }
         const books = await client.runQuery(dbId, query)
         expect(books.length).toBe(1)
-        expect(books[0]['doc']['name']).toBe('book1')
+        expect(books[0].doc['name']).toBe('book1')
         const bookId = books[0].id
         const result = await client.deleteDocument(dbId, 'books', [bookId])
         expect(result).toBeDefined()

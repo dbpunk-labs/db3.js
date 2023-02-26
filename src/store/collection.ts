@@ -28,6 +28,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
     constructor(db: DB3Store, name: string) {
         super(db)
         this.name = name
+        this.db = db
     }
 }
 export function collection(
