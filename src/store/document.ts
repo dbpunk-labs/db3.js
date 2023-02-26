@@ -27,17 +27,18 @@ export class DocumentReference<T = DocumentData> {
 //
 // add a document with collection reference
 //
-export async function addDoc(
+export function addDoc(
     reference: CollectionReference,
     data: any
 ): Promise<any> {
-    const db = reference.db
-    const result = await db.client.createDocument(
-        db.address,
-        reference.name,
-        data
-    )
-    return result
+    return new Promise((resolve, reject) => {
+        const db = reference.db
+        db.client
+            .createDocument(db.address, reference.name, data)
+            .then((result) => {
+                resolve(result)
+            })
+    })
 }
 
 //export async function doc<T>(
@@ -47,36 +48,43 @@ export async function addDoc(
 //    const db = reference.db
 //}
 
-export async function getDocs<T = DocumentData>(
+export function getDocs<T = DocumentData>(
     query: Query
 ): Promise<QueryResult<T>> {
-    const db = query.db
-    if (query.type == 'collection') {
-        const colref = query as CollectionReference
-        const squery: StructuredQuery = {
-            collectionName: colref.name,
+    return new Promise((resolve, reject) => {
+        const db = query.db
+        if (query.type == 'collection') {
+            const colref = query as CollectionReference
+            const squery: StructuredQuery = {
+                collectionName: colref.name,
+            }
+            db.client.runQuery<T>(db.address, squery).then((docs) => {
+                const new_docs = docs.map(
+                    (item) => new DocumentReference<T>(colref, item)
+                )
+                resolve(new QueryResult<T>(db, new_docs))
+            })
+        } else {
+            resolve(new QueryResult<T>(db, []))
         }
-        const docs = await db.client.runQuery<T>(db.address, squery)
-        const new_docs = docs.map(
-            (item) => new DocumentReference<T>(colref, item)
-        )
-        return new QueryResult<T>(db, new_docs)
-    } else {
-        return new QueryResult<T>(db, [])
-    }
+    })
 }
 
-export async function deleteDoc(
+export function deleteDoc(
     reference: DocumentReference<unknown>
 ): Promise<void> {
     const db = reference.collection.db
     const doc = reference.doc as DocumentData
-    await db.client.deleteDocument(db.address, reference.collection.name, [
-        doc['id'],
-    ])
+    return new Promise((resolve, reject) => {
+        db.client
+            .deleteDocument(db.address, reference.collection.name, [doc['id']])
+            .then(() => {
+                resolve()
+            })
+    })
 }
 
-export async function updateDoc(
+export function updateDoc(
     reference: DocumentReference<unknown>,
     data: any
 ): Promise<void> {
@@ -86,11 +94,17 @@ export async function updateDoc(
     for (const key in data) {
         doc[key] = data[key]
     }
-    await db.client.updateDocument(
-        db.address,
-        reference.collection.name,
-        doc,
-        doc['id'],
-        masks
-    )
+    return new Promise((resolve, reject) => {
+        db.client
+            .updateDocument(
+                db.address,
+                reference.collection.name,
+                doc,
+                doc['id'],
+                masks
+            )
+            .then(() => {
+                resolve()
+            })
+    })
 }

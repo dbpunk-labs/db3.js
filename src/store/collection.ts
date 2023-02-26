@@ -30,20 +30,28 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
         this.name = name
     }
 }
-export async function collection(
+export function collection(
     db: DB3Store,
     name: string,
     index?: Index[]
 ): Promise<CollectionReference>
 
-export async function collection(
+export function collection(
     db: DB3Store,
     name: string,
     index?: Index[]
 ): Promise<CollectionReference> {
-    const collections = await db.getCollections()
-    if (!collections || !collections[name]) {
-        await db.client.createCollection(db.address, name, index)
-    }
-    return new CollectionReference(db, name)
+    return new Promise((resolve, reject) => {
+        db.getCollections().then((collections) => {
+            if (!collections || !collections[name]) {
+                db.client
+                    .createCollection(db.address, name, index)
+                    .then((txid) => {
+                        resolve(new CollectionReference(db, name))
+                    })
+            } else {
+                resolve(new CollectionReference(db, name))
+            }
+        })
+    })
 }

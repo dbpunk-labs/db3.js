@@ -1,13 +1,13 @@
 *.idea
-test
-dist
+tests
 docs
 coverage
 scripts
+examples
+images
 .gitignore
 .editorconfig
 .npmignore
 .DS_Store
 thirdparty
-src
 tools
