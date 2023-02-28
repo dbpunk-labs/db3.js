@@ -26,4 +26,4 @@ export {
     updateDoc,
     DocumentReference,
 } from './store/document'
-export { where, query } from './store/query'
+export { limit, where, query } from './store/query'

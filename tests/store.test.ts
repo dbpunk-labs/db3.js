@@ -27,6 +27,7 @@ import {
     DocumentData,
     where,
     query,
+    limit,
 } from '../src/index'
 import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
 
@@ -89,6 +90,43 @@ describe('test db3.js store module', () => {
         await new Promise((r) => setTimeout(r, 2000))
         const docs2 = await getDocs<Todo>(collectionRef)
         expect(docs2.size).toBe(0)
+    })
+    test('test document query limit', async () => {
+        const client = new DB3Client('http://127.0.0.1:26659', wallet)
+        const [dbId, txId] = await client.createDatabase()
+        const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
+        const indexList: Index[] = [
+            {
+                name: 'idx1',
+                id: 1,
+                fields: [
+                    {
+                        fieldPath: 'owner',
+                        valueMode: {
+                            oneofKind: 'order',
+                            order: Index_IndexField_Order.ASCENDING,
+                        },
+                    },
+                ],
+            },
+        ]
+        const collectionRef = await collection<Todo>(db, 'todos', indexList)
+        await new Promise((r) => setTimeout(r, 2000))
+        // create doc
+        const result = await addDoc<Todo>(collectionRef, {
+            text: 'text1',
+            owner: wallet.getAddress(),
+        } as Todo)
+
+        await new Promise((r) => setTimeout(r, 2000))
+        // create doc
+        const result1 = await addDoc<Todo>(collectionRef, {
+            text: 'text2',
+            owner: wallet.getAddress(),
+        } as Todo)
+        await new Promise((r) => setTimeout(r, 2000))
+        const docs = await getDocs<Todo>(query<Todo>(collectionRef, limit(1)))
+        expect(docs.size).toBe(1)
     })
 
     test('test document query', async () => {

@@ -252,3 +252,14 @@ export class QueryLimitConstraint extends QueryConstraint {
         }
     }
 }
+
+/**
+ * Creates a {@link QueryLimitConstraint} that only returns the first matching
+ * documents.
+ *
+ * @param limit - The maximum number of items to return.
+ * @returns The created {@link QueryLimitConstraint}.
+ */
+export function limit(limit: number): QueryLimitConstraint {
+    return QueryLimitConstraint._create('limit', limit)
+}
