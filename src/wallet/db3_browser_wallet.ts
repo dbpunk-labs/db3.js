@@ -64,7 +64,7 @@ export class DB3BrowserWallet implements Wallet {
         if (walletType == 'DB3_ED25519') {
             const keypair = Ed25519Keypair.generate()
 
-            const wallet =  new DB3BrowserWallet(keypair)
+            const wallet = new DB3BrowserWallet(keypair)
             localStorage.setItem(WALLET_KEY, JSON.stringify(keypair.export()))
             localStorage.setItem(WALLET_ADDRESS, wallet.getAddress())
             return wallet

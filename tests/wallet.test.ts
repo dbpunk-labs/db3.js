@@ -40,6 +40,7 @@ describe('test db3.js wallet module', () => {
         )
         localStorage.clear()
     })
+
     test('secp256k1 wallet smoke test', async () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
@@ -58,6 +59,17 @@ describe('test db3.js wallet module', () => {
         expect(recoverWallet.getAddress()).toBe(
             '0xed17b3f435c03ff69c2cdc6d394932e68375f20f'
         )
+        localStorage.clear()
+    })
+    test('wallet generate', async () => {
+        const wallet = DB3BrowserWallet.generate('DB3_SECP259K1')
+        const msg = new Uint8Array(1)
+        msg[0] = 0
+        const signature = wallet.sign(msg)
+        expect(signature).toBeDefined()
+        const wallet2 = DB3BrowserWallet.generate('DB3_ED25519')
+        const signature2 = wallet.sign(msg)
+        expect(signature2).toBeDefined()
         localStorage.clear()
     })
 })

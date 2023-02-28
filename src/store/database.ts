@@ -26,6 +26,8 @@ export class DB3Store {
     constructor(address: string, client: DB3Client) {
         this.address = address
         this.client = client
+        this._database = undefined
+        this._collections = undefined
     }
 
     async getCollections() {

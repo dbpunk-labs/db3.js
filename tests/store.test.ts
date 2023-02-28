@@ -30,6 +30,7 @@ import {
     limit,
 } from '../src/index'
 import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
+import { toHEX } from '../src/crypto/crypto_utils'
 
 interface Todo {
     text: string
@@ -39,6 +40,7 @@ describe('test db3.js store module', () => {
     const mnemonic =
         'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
     const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
+
     test('test document curd', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
@@ -60,6 +62,8 @@ describe('test db3.js store module', () => {
         ]
         const collectionRef = await collection<Todo>(db, 'todos', indexList)
         await new Promise((r) => setTimeout(r, 2000))
+        const database = await db.getDatabase()
+        expect('0x' + toHEX(database.address)).toBe(dbId)
         // create doc
         const result = await addDoc<Todo>(collectionRef, {
             text: 'beijing',
@@ -91,6 +95,7 @@ describe('test db3.js store module', () => {
         const docs2 = await getDocs<Todo>(collectionRef)
         expect(docs2.size).toBe(0)
     })
+
     test('test document query limit', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
