@@ -40,7 +40,6 @@ function Footer(props: IFooter) {
                     </li>
                 ))}
             </ul>
-
         </footer>
     )
 }

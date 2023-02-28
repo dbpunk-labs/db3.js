@@ -42,7 +42,7 @@ describe('test db3.js store module', () => {
     test('test document curd', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
-        const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
+        const { db } = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
         const indexList: Index[] = [
             {
                 name: 'idx1',
@@ -94,7 +94,7 @@ describe('test db3.js store module', () => {
     test('test document query limit', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
-        const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
+        const { db } = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
         const indexList: Index[] = [
             {
                 name: 'idx1',
@@ -132,7 +132,7 @@ describe('test db3.js store module', () => {
     test('test document query', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
-        const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
+        const { db } = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
         const indexList: Index[] = [
             {
                 name: 'idx1',

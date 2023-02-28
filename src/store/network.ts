@@ -1,5 +1,5 @@
 //
-// todo_list.tsx
+// network.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,14 @@
 // limitations under the License.
 //
 
-import React, { useState } from 'react'
-import TodoItem from './todo_item'
-import { useReducerAsync } from 'use-reducer-async'
-import { useTodoContext } from './context'
-import { runFilter } from './reducer'
+import { DB3Client } from '../client/client'
+export class DB3Network {
+    readonly client: DB3Client
+    constructor(client: DB3Client) {
+        this.client = client
+    }
 
-const TodoList = () => {
-    const { state, dispatch } = useTodoContext()
-    return (
-        <ul className="todo-list">
-            {runFilter(state.visibility, state.todoList).map((todo) => (
-                <TodoItem key={todo.entry.id} todo={todo} />
-            ))}
-        </ul>
-    )
+    async getState() {
+        return await this.client.getState()
+    }
 }
-export default TodoList

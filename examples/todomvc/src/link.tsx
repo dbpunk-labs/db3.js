@@ -32,6 +32,7 @@ function Link(props: ILink) {
             collection: state.collection,
             type: TodoActionkind.QUERY,
             visibility: filter,
+            userAddress: state.userAddress,
         })
     }
     return (

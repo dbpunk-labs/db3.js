@@ -95,7 +95,7 @@ export class DB3Client {
      * get a database information
      *
      */
-    async getDatabase(addr: string): Promise<Database | undefined> {
+    async getDatabase(addr: string) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDatabase(addr, token)
         this.querySessionInfo!.queryCount += 1
@@ -138,6 +138,14 @@ export class DB3Client {
             PayloadType.DatabasePayload
         )
         return txId.getB64()
+    }
+
+    async getState() {
+        return await this.provider.getState()
+    }
+    async getAccount(address: string) {
+        const binaryAddr = fromHEX(address)
+        return await this.provider.getAccount(binaryAddr)
     }
 
     /**

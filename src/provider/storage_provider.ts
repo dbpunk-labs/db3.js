@@ -29,6 +29,7 @@ import {
     CloseSessionRequest,
     ShowDatabaseRequest,
     GetDocumentRequest,
+    ShowNetworkStatusRequest,
 } from '../proto/db3_node'
 import {
     CloseSessionPayload,
@@ -139,6 +140,12 @@ export class StorageProvider {
             addr,
         }
         const { response } = await this.client.getAccount(getAccountRequest)
+        return response
+    }
+
+    async getState() {
+        const request: ShowNetworkStatusRequest = {}
+        const { response } = await this.client.showNetworkStatus(request)
         return response
     }
 

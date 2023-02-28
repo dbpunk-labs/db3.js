@@ -1,5 +1,5 @@
 //
-// database.ts
+// account.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,33 +16,35 @@
 //
 
 import { DB3Client } from '../client/client'
-import { Collection, Database } from '../proto/db3_database'
 
-export class DB3Store {
+export class DB3Account {
     readonly address: string
     readonly client: DB3Client
-    _database: Database | undefined
-    _collections: Record<string, Collection> | undefined
     constructor(address: string, client: DB3Client) {
         this.address = address
         this.client = client
     }
 
-    async getCollections() {
-        if (!this._database) {
-            const database = await this.client.getDatabase(this.address)
-            this._collections = database?.collections
-            this._database = database
-        }
-        return this._collections
+    async getAccount() {
+        await this.client.getAccount(this.address)
     }
+}
 
-    async getDatabase() {
-        if (!this._database) {
-            const database = await this.client.getDatabase(this.address)
-            this._database = database
-            this._collections = database?.collections
-        }
-        return this._database
+export function bytesToReadableNum(bytes_size: number): string {
+    const STORAGE_LABELS: string[] = [' ', 'K', 'M', 'G', 'T', 'P', 'E']
+    const max_shift = 7
+    var shift = 0
+    var local_bytes_size = bytes_size
+    var value = bytes_size
+    local_bytes_size >>= 10
+    while (local_bytes_size > 0 && shift < max_shift) {
+        value /= 1024.0
+        shift += 1
+        local_bytes_size >>= 10
     }
+    return value.toFixed(2) + STORAGE_LABELS[shift]
+}
+
+export function unitsToReadableNum(units: number): string {
+    return (units / 1000_000_000.0).toFixed(6)
 }

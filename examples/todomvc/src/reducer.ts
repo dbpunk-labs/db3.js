@@ -1,4 +1,4 @@
-// @ts-nocheck
+//no-tscheck
 import { Reducer } from 'react'
 import type { AsyncActionHandlers } from 'use-reducer-async'
 import {
@@ -9,6 +9,8 @@ import {
     getDocs,
     DB3Store,
     collection,
+    query,
+    where,
 } from 'db3.js'
 
 export interface Todo {
@@ -33,10 +35,6 @@ export enum TodoActionkind {
     DELETE = 'DELETE',
 }
 
-type RefreshAction = {
-    type: 'REFRESH' | 'LOADING' | 'UNLOADING'
-}
-
 export type AsyncAction = {
     collection: string
     type: string
@@ -44,81 +42,60 @@ export type AsyncAction = {
     old_payload?: DocumentReference<Todo>
     db: DB3Store
     visibility: string
+    resultSet?: Array<DocumentReference<Todo>>
+    userAddress: string
 }
 
 export const asyncActionHandlers: AsyncActionHandlers<
-    Reducer<Todo, RefreshAction>,
+    Reducer<Todo, AsyncAction>,
     AsyncAction
 > = {
     [TodoActionkind.INSERT]:
         ({ dispatch }) =>
         async (action) => {
-            dispatch({
-                type: 'LOADING',
-            })
-            const col = await collection(action.db, action.collection)
-            await addDoc(col, action.payload)
-            await new Promise((r) => setTimeout(r, 1100))
+            const col = await collection<Todo>(action.db, action.collection)
+            await addDoc<Todo>(col, action.payload!)
+            await new Promise((r) => setTimeout(r, 1000))
             return dispatch({
-                db: action.db,
-                collection: action.collection,
+                ...action,
                 type: TodoActionkind.QUERY,
-                visibility: action.visibility,
             })
         },
 
     [TodoActionkind.UPDATE]:
         ({ dispatch }) =>
         async (action) => {
-            dispatch({
-                type: 'LOADING',
-            })
-            console.log(action.old_payload)
-            console.log(action.payload)
-            await updateDoc(action.old_payload!, action.payload)
-            await new Promise((r) => setTimeout(r, 1100))
+            await updateDoc<Todo>(action.old_payload!, action.payload)
+            await new Promise((r) => setTimeout(r, 1000))
             return dispatch({
-                db: action.db,
-                collection: action.collection,
+                ...action,
                 type: TodoActionkind.QUERY,
-                visibility: action.visibility,
             })
         },
 
     [TodoActionkind.DELETE]:
         ({ dispatch }) =>
         async (action) => {
-            dispatch({
-                type: 'LOADING',
-            })
-            await deleteDoc(action.old_payload!)
-            await new Promise((r) => setTimeout(r, 1100))
+            await deleteDoc<Todo>(action.old_payload!)
+            await new Promise((r) => setTimeout(r, 1000))
             return dispatch({
-                db: action.db,
-                collection: action.collection,
+                ...action,
                 type: TodoActionkind.QUERY,
-                visibility: action.visibility,
             })
         },
 
     [TodoActionkind.QUERY]:
         ({ dispatch }) =>
         async (action) => {
-            dispatch({
-                type: 'LOADING',
-            })
-            const col = await collection(action.db, action.collection)
+            const col = await collection<Todo>(action.db, action.collection)
             // get all docs
-            const result = await getDocs(col)
-            dispatch({
-                type: 'UNLOADING',
-            })
+            const result = await getDocs<Todo>(
+                query<Todo>(col, where('owner', '==', action.userAddress))
+            )
             return dispatch({
-                collection: action.collection,
-                db: action.db,
+                ...action,
                 type: 'REFRESH',
-                payload: result.docs,
-                visibility: action.visibility,
+                resultSet: result.docs,
             })
         },
 }
@@ -139,13 +116,13 @@ export function runFilter(
     }
 }
 
-export function reducer(state: TodoState, action: RefreshAction) {
-    const { type, payload } = action
+export function reducer(state: TodoState, action: AsyncAction) {
+    const { type, resultSet } = action
     switch (type) {
         case 'REFRESH':
             return {
                 ...state,
-                todoList: payload,
+                todoList: resultSet,
                 visibility: action.visibility,
             }
         case 'LOADING':

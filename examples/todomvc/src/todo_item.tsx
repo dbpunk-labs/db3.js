@@ -45,6 +45,7 @@ function TodoItem(props: ITodoItem) {
             db: todo.collection.db,
             collection: todo.collection.name,
             visibility: state.visibility,
+            userAddress: state.userAddress,
         })
     }
 
@@ -56,6 +57,7 @@ function TodoItem(props: ITodoItem) {
             db: todo.collection.db,
             collection: todo.collection.name,
             visibility: state.visibility,
+            userAddress: state.userAddress,
         })
     }
 
@@ -68,6 +70,7 @@ function TodoItem(props: ITodoItem) {
                 db: todo.collection.db,
                 collection: todo.collection.name,
                 visibility: state.visibility,
+                userAddress: state.userAddress,
             })
         } else {
             dispatch({
@@ -80,6 +83,7 @@ function TodoItem(props: ITodoItem) {
                 db: todo.collection.db,
                 collection: todo.collection.name,
                 visibility: state.visibility,
+                userAddress: state.userAddress,
             })
         }
         setEditing(false)
