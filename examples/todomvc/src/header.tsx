@@ -33,6 +33,7 @@ function Header() {
             db: state.db,
             collection: state.collection,
             visibility: state.visibility,
+            userAddress: state.userAddress,
         })
     }
     return (

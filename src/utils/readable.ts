@@ -1,5 +1,5 @@
 //
-// todo_list.tsx
+// readable.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,21 @@
 // limitations under the License.
 //
 
-import React, { useState } from 'react'
-import TodoItem from './todo_item'
-import { useReducerAsync } from 'use-reducer-async'
-import { useTodoContext } from './context'
-import { runFilter } from './reducer'
-
-const TodoList = () => {
-    const { state, dispatch } = useTodoContext()
-    return (
-        <ul className="todo-list">
-            {runFilter(state.visibility, state.todoList).map((todo) => (
-                <TodoItem key={todo.entry.id} todo={todo} />
-            ))}
-        </ul>
-    )
+export function bytesToReadableNum(bytes_size: number): string {
+    const STORAGE_LABELS: string[] = [' ', 'K', 'M', 'G', 'T', 'P', 'E']
+    const max_shift = 7
+    var shift = 0
+    var local_bytes_size = bytes_size
+    var value = bytes_size
+    local_bytes_size >>= 10
+    while (local_bytes_size > 0 && shift < max_shift) {
+        value /= 1024.0
+        shift += 1
+        local_bytes_size >>= 10
+    }
+    return value.toFixed(2) + STORAGE_LABELS[shift]
 }
-export default TodoList
+
+export function unitsToReadableNum(units: number): string {
+    return ((units as f64) / 1000_000_000.0).toFixed(6)
+}

@@ -26,3 +26,9 @@ export {
     updateDoc,
     DocumentReference,
 } from './store/document'
+export { limit, where, query } from './store/query'
+export {
+    DB3Account,
+    bytesToReadableNum,
+    unitsToReadableNum,
+} from './store/account'

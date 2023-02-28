@@ -32,27 +32,27 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
         this.db = db
     }
 }
-export function collection(
+export function collection<T = DocumentData>(
     db: DB3Store,
     name: string,
     index?: Index[]
-): Promise<CollectionReference>
+): Promise<CollectionReference<T>>
 
-export function collection(
+export function collection<T = DocumentData>(
     db: DB3Store,
     name: string,
     index?: Index[]
-): Promise<CollectionReference> {
+): Promise<CollectionReference<T>> {
     return new Promise((resolve, reject) => {
-        db.getCollections().then((collections) => {
-            if (!collections || !collections[name]) {
+        db.getCollections(name).then((collection) => {
+            if (!collection) {
                 db.client
                     .createCollection(db.address, name, index)
                     .then((txid) => {
-                        resolve(new CollectionReference(db, name))
+                        resolve(new CollectionReference<T>(db, name))
                     })
             } else {
-                resolve(new CollectionReference(db, name))
+                resolve(new CollectionReference<T>(db, name))
             }
         })
     })

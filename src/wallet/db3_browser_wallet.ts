@@ -21,6 +21,7 @@ import { Secp256k1Keypair } from '../crypto/secp256k1_keypair'
 import { fromB64 } from '../crypto/crypto_utils'
 
 const WALLET_KEY = '_db3_wallet_key_'
+const WALLET_ADDRESS = '_db3_wallet_ADDR_'
 export class DB3BrowserWallet implements Wallet {
     keypair: Ed25519Keypair | Secp256k1Keypair
     constructor(keypair: Ed25519Keypair | Secp256k1Keypair) {
@@ -57,6 +58,25 @@ export class DB3BrowserWallet implements Wallet {
             return new DB3BrowserWallet(Ed25519Keypair.fromSecretKey(data))
         }
         throw new Error('no key in browser')
+    }
+
+    static generate(walletType: WalletType): DB3BrowserWallet {
+        if (walletType == 'DB3_ED25519') {
+            const keypair = Ed25519Keypair.generate()
+
+            const wallet = new DB3BrowserWallet(keypair)
+            localStorage.setItem(WALLET_KEY, JSON.stringify(keypair.export()))
+            localStorage.setItem(WALLET_ADDRESS, wallet.getAddress())
+            return wallet
+        }
+        if (walletType == 'DB3_SECP259K1') {
+            const keypair = Secp256k1Keypair.generate()
+            const wallet = new DB3BrowserWallet(keypair)
+            localStorage.setItem(WALLET_KEY, JSON.stringify(keypair.export()))
+            localStorage.setItem(WALLET_ADDRESS, wallet.getAddress())
+            return wallet
+        }
+        throw new Error('wallet type is not supported')
     }
 
     static createNew(

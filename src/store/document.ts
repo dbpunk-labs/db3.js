@@ -62,7 +62,23 @@ export function getDocs<T = DocumentData>(
                 resolve(new QueryResult<T>(db, new_docs))
             })
         } else {
-            resolve(new QueryResult<T>(db, []))
+            const internalQuery = query._query
+            const colref = internalQuery.collection
+            const squery: StructuredQuery = {
+                collectionName: internalQuery.collection.name,
+            }
+            if (internalQuery.filters.length > 0) {
+                squery.where = internalQuery.filters[0]
+            }
+            if (internalQuery.limit != null) {
+                squery.limit = internalQuery.limit
+            }
+            db.client.runQuery<T>(db.address, squery).then((docs) => {
+                const new_docs = docs.map(
+                    (item) => new DocumentReference<T>(colref, item)
+                )
+                resolve(new QueryResult<T>(db, new_docs))
+            })
         }
     })
 }

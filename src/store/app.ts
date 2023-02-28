@@ -19,12 +19,28 @@
 import { DB3Client } from '../client/client'
 import { Wallet } from '../wallet/wallet'
 import { DB3Store } from './database'
+import { DB3Account } from './account'
+import { DB3Network } from './network'
+
+export interface DB3SdkRuntime {
+    db: DB3Store
+    db3Account: DB3Account
+    DB3Network: DB3Network
+}
 
 export function initializeDB3(
     node: string,
     dbAddress: string,
     wallet: Wallet
-): DB3Store {
+): DB3SdkRuntime {
     const dbClient = new DB3Client(node, wallet)
-    return new DB3Store(dbAddress, dbClient)
+    const db = new DB3Store(dbAddress, dbClient)
+    const db3Account = new DB3Account(wallet.getAddress(), dbClient)
+    const db3Network = new DB3Network(dbClient)
+    const runtime: DB3SdkRuntime = {
+        db,
+        db3Account,
+        db3Network,
+    }
+    return runtime
 }
