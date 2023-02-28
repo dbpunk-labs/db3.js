@@ -44,8 +44,8 @@ export function collection<T = DocumentData>(
     index?: Index[]
 ): Promise<CollectionReference<T>> {
     return new Promise((resolve, reject) => {
-        db.getCollections().then((collections) => {
-            if (!collections || !collections[name]) {
+        db.getCollections(name).then((collection) => {
+            if (!collection) {
                 db.client
                     .createCollection(db.address, name, index)
                     .then((txid) => {

@@ -30,13 +30,17 @@ export class DB3Store {
         this._collections = undefined
     }
 
-    async getCollections() {
-        if (!this._database) {
-            const database = await this.client.getDatabase(this.address)
-            this._collections = database?.collections
-            this._database = database
+    async getCollections(name: string) {
+        if (this._database && this._collections && this._collections[name]) {
+            return this._collections[name]
         }
-        return this._collections
+        const database = await this.client.getDatabase(this.address)
+        this._database = database
+        this._collections = database?.collections
+        if (this._collections && this._collections[name]) {
+            return this._collections[name]
+        }
+        return undefined
     }
 
     async getDatabase() {
