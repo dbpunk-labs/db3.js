@@ -17,11 +17,11 @@
 
 export type WalletType = 'DB3_SECP259K1' | 'DB3_ED25519' | 'MetaMask'
 
-export interface Wallet {
+export interface Wallet<T> {
     /**
      * Sign the message
      */
-    sign(message: Uint8Array): Uint8Array
+    sign(message: T): Uint8Array
 
     /**
      * return the db3 address

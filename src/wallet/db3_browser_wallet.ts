@@ -22,7 +22,7 @@ import { fromB64 } from '../crypto/crypto_utils'
 
 const WALLET_KEY = '_db3_wallet_key_'
 const WALLET_ADDRESS = '_db3_wallet_ADDR_'
-export class DB3BrowserWallet implements Wallet {
+export class DB3BrowserWallet implements Wallet<Uint8Array> {
     keypair: Ed25519Keypair | Secp256k1Keypair
     constructor(keypair: Ed25519Keypair | Secp256k1Keypair) {
         this.keypair = keypair
