@@ -31,15 +31,11 @@ import {
     GetDocumentRequest,
     ShowNetworkStatusRequest,
 } from '../proto/db3_node'
-import {
-    CloseSessionPayload,
-    QuerySessionInfo,
-    OpenSessionPayload,
-} from '../proto/db3_session'
+import { QuerySessionInfo, OpenSessionPayload } from '../proto/db3_session'
 import { StructuredQuery } from '../proto/db3_database'
 import { TxId } from '../crypto/id'
 import { Wallet } from '../wallet/wallet'
-import { fromHEX } from '../crypto/crypto_utils'
+import { fromHEX, toHEX } from '../crypto/crypto_utils'
 
 //
 // the db3 storage node provider implementation which provides low level methods to exchange with db3 network
@@ -47,6 +43,7 @@ import { fromHEX } from '../crypto/crypto_utils'
 export class StorageProvider {
     readonly client: StorageNodeClient
     readonly wallet: Wallet
+    readonly useTypedFormat: boolean
     /**
      * new a storage provider with db3 storage grpc url
      */
@@ -62,23 +59,83 @@ export class StorageProvider {
         const transport = new GrpcWebFetchTransport(goptions)
         this.client = new StorageNodeClient(transport)
         this.wallet = wallet
+        if (wallet.getType() === 'MetaMask') {
+            this.useTypedFormat = true
+        } else {
+            this.useTypedFormat = false
+        }
     }
 
     /**
      * send mutation to db3 network
      */
     async sendMutation(mutation: Uint8Array, payloadType: PayloadType) {
+        if (this.useTypedFormat) {
+            const writeRequest = await this.wrapTypedWriteRequest(
+                mutation,
+                payloadType
+            )
+            const broadcastRequest: BroadcastRequest = {
+                body: WriteRequest.toBinary(writeRequest),
+            }
+            const { response } = await this.client.broadcast(broadcastRequest)
+            return new TxId(response.hash)
+        } else {
+            const writeRequest = await this.wrapProtoWriteRequest(
+                mutation,
+                payloadType
+            )
+            const broadcastRequest: BroadcastRequest = {
+                body: WriteRequest.toBinary(writeRequest),
+            }
+            const { response } = await this.client.broadcast(broadcastRequest)
+            return new TxId(response.hash)
+        }
+    }
+
+    private async wrapProtoWriteRequest(
+        mutation: Uint8Array,
+        payloadType: PayloadType
+    ) {
         const signature = await this.wallet.sign(mutation)
         const writeRequest: WriteRequest = {
             payload: mutation,
             signature: signature,
             payloadType: payloadType,
         }
-        const broadcastRequest: BroadcastRequest = {
-            body: WriteRequest.toBinary(writeRequest),
+        return writeRequest
+    }
+
+    private async wrapTypedWriteRequest(
+        mutation: Uint8Array,
+        payloadType: PayloadType
+    ) {
+        const hexMutation = toHEX(mutation)
+        const message = {
+            types: {
+                EIP712Domain: [],
+                Message: [
+                    { name: 'payload', type: 'bytes' },
+                    { name: 'payloadType', type: 'string' },
+                ],
+            },
+            domain: {},
+            primaryType: 'Message',
+            message: {
+                payload: '0x' + hexMutation,
+                payloadType: payloadType.toString(),
+            },
         }
-        const { response } = await this.client.broadcast(broadcastRequest)
-        return new TxId(response.hash)
+        const signature = await this.wallet.sign(message)
+        //TODO avoid multi times stringfy
+        const msgParams = JSON.stringify(message)
+        const binaryMsg = new TextEncoder().encode(msgParams)
+        const writeRequest: WriteRequest = {
+            payload: binaryMsg,
+            signature: signature,
+            payloadType: PayloadType.TypedDataPayload,
+        }
+        return writeRequest
     }
 
     // @ts-nocheck
@@ -100,14 +157,103 @@ export class StorageProvider {
             header: header.toString(),
             startTime: Math.floor(Date.now() / 1000),
         }
+        if (this.useTypedFormat) {
+            const request = await this.wrapTypedSession(payload)
+            const { response } = await this.client.openQuerySession(request)
+            return response
+        } else {
+            const request = await this.wrapProtoSession(payload)
+            const { response } = await this.client.openQuerySession(request)
+            return response
+        }
+    }
+
+    private async wrapProtoSession(payload: OpenSessionPayload) {
         const payloadBinary = OpenSessionPayload.toBinary(payload)
         const signature = await this.wallet.sign(payloadBinary)
         const sessionRequest: OpenSessionRequest = {
             payload: payloadBinary,
             signature: signature,
+            payloadType: PayloadType.QuerySessionPayload,
         }
-        const { response } = await this.client.openQuerySession(sessionRequest)
-        return response
+        return sessionRequest
+    }
+
+    private async wrapTypedSession(payload: OpenSessionPayload) {
+        const payloadBinary = OpenSessionPayload.toBinary(payload)
+        const payloadHex = toHEX(payloadBinary)
+        const message = {
+            types: {
+                EIP712Domain: [],
+                Message: [
+                    { name: 'payload', type: 'bytes' },
+                    { name: 'payloadType', type: 'string' },
+                ],
+            },
+            domain: {},
+            primaryType: 'Message',
+            message: {
+                payload: '0x' + payloadHex,
+                payloadType: PayloadType.QuerySessionPayload.toString(),
+            },
+        }
+        const msgParams = JSON.stringify(message)
+        const binaryMsg = new TextEncoder().encode(msgParams)
+        const signature = await this.wallet.sign(message)
+        const sessionRequest: OpenSessionRequest = {
+            payload: binaryMsg,
+            signature: signature,
+            payloadType: PayloadType.TypedDataPayload,
+        }
+        return sessionRequest
+    }
+
+    private async wrapProtoCloseSession(
+        token: string,
+        sessionInfo: QuerySessionInfo
+    ) {
+        const payloadBinary = QuerySessionInfo.toBinary(payload)
+        const signature = await this.wallet.sign(payloadBinary)
+        const sessionRequest: CloseSessionRequest = {
+            payload: payloadBinary,
+            signature: signature,
+            payloadType: PayloadType.QuerySessionPayload,
+            sessionToke: token,
+        }
+        return sessionRequest
+    }
+
+    private async wrapTypedCloseSession(
+        token: string,
+        payload: QuerySessionInfo
+    ) {
+        const payloadBinary = QuerySessionInfo.toBinary(payload)
+        const payloadHex = toHEX(payloadBinary)
+        const message = {
+            types: {
+                EIP712Domain: [],
+                Message: [
+                    { name: 'payload', type: 'bytes' },
+                    { name: 'payloadType', type: 'string' },
+                ],
+            },
+            domain: {},
+            primaryType: 'Message',
+            message: {
+                payload: '0x' + payloadHex,
+                payloadType: PayloadType.QuerySessionPayload.toString(),
+            },
+        }
+        const msgParams = JSON.stringify(message)
+        const binaryMsg = new TextEncoder().encode(msgParams)
+        const signature = await this.wallet.sign(message)
+        const sessionRequest: CloseSessionRequest = {
+            payload: binaryMsg,
+            signature: signature,
+            payloadType: PayloadType.TypedDataPayload,
+            sessionToke: token,
+        }
+        return sessionRequest
     }
 
     /**
@@ -115,19 +261,13 @@ export class StorageProvider {
      *
      */
     async closeSession(token: string, sessionInfo: QuerySessionInfo) {
-        const payload: CloseSessionPayload = {
-            sessionInfo: sessionInfo,
-            sessionToken: token,
+        let closeRequest
+        if (this.useTypedFormat) {
+            closeRequest = await this.wrapTypedCloseSession(token, sessionInfo)
+        } else {
+            closeRequest = await this.wrapTypedCloseSession(token, sessionInfo)
         }
-        const payloadU8 = CloseSessionPayload.toBinary(payload)
-        const signature = await this.wallet.sign(payloadU8)
-        const closeQuerySessionRequest: CloseSessionRequest = {
-            payload: payloadU8,
-            signature: signature,
-        }
-        const { response } = await this.client.closeQuerySession(
-            closeQuerySessionRequest
-        )
+        const { response } = await this.client.closeQuerySession(closeRequest)
         return response
     }
 
@@ -160,7 +300,7 @@ export class StorageProvider {
 
     getNonce(): number {
         //TODO get nonce from remote with account address
-        return Date.now()
+        return new Date().getTime()
     }
 
     async runQuery(token: string, addr: string, query: StructuredQuery) {

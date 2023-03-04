@@ -29,7 +29,7 @@ describe('test db3.js client module', () => {
     test('create database smoke test', async () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
         await new Promise((r) => setTimeout(r, 2000))

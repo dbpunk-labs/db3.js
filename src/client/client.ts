@@ -52,9 +52,9 @@ export interface DocumentEntry<T> {
 //
 export class DB3Client {
     readonly provider: StorageProvider
-    readonly accountAddress: string
     querySessionInfo: QuerySessionInfo | undefined
     sessionToken: string | undefined
+    wallet: Wallet
 
     /**
      * new a db3 client with db3 node url and wallet
@@ -62,7 +62,7 @@ export class DB3Client {
      */
     constructor(url: string, wallet: Wallet) {
         this.provider = new StorageProvider(url, wallet)
-        this.accountAddress = wallet.getAddress()
+        this.wallet = wallet
     }
 
     /**
@@ -87,7 +87,7 @@ export class DB3Client {
             payload,
             PayloadType.DatabasePayload
         )
-        const dbId = new DbId(this.accountAddress, +meta.nonce)
+        const dbId = new DbId(this.wallet.getAddress(), +meta.nonce)
         return [dbId.getHexAddr(), txId.getB64()]
     }
 

@@ -15,6 +15,7 @@
  */
 
 export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
+export { MetamaskWallet } from './wallet/metamask'
 export { DB3Client } from './client/client'
 export { initializeDB3 } from './store/app'
 export { DB3Store } from './store/database'
@@ -32,3 +33,5 @@ export {
     bytesToReadableNum,
     unitsToReadableNum,
 } from './store/account'
+import { Index, Index_IndexField_Order } from './proto/db3_database'
+import { Account } from './proto/db3_account'

@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// @ts-nocheck
 import sha3 from 'js-sha3'
 import { toB64, fromHEX } from './crypto_utils'
 import { Uint64BE } from 'int64-buffer'
@@ -52,10 +51,11 @@ export class DbId {
         const binary_addr = fromHEX(sender)
         const nonceBuf = new Uint64BE(nonce)
         let tmp = new Uint8Array(DB_ID_LENGTH + 8)
-        tmp.set(nonceBuf.buffer || nonceBuf.toBuffer())
+        tmp.set(nonceBuf.toArray(), 0)
         tmp.set(binary_addr, 8)
         this.addr = '0x' + sha3.sha3_256(tmp).slice(0, 40)
     }
+
     getHexAddr(): string {
         return this.addr
     }
