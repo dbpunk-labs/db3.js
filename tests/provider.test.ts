@@ -68,7 +68,7 @@ describe('test db3.js provider module', () => {
     test('provider send mutation test secp256k1', async () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
         const provider = new StorageProvider('http://127.0.0.1:26659', wallet)
         const meta: BroadcastMeta = {
             nonce: '9527',

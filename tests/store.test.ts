@@ -39,7 +39,7 @@ interface Todo {
 describe('test db3.js store module', () => {
     const mnemonic =
         'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-    const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP259K1')
+    const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
 
     test('test document curd', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
