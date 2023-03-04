@@ -15,16 +15,21 @@
 // limitations under the License.
 //
 
-export type WalletType = 'DB3_SECP259K1' | 'DB3_ED25519' | 'MetaMask'
+export type WalletType = 'DB3_SECP256K1' | 'DB3_ED25519' | 'MetaMask'
 
-export interface Wallet<T> {
+export interface Wallet<P, R> {
     /**
      * Sign the message
      */
-    sign(message: T): Uint8Array
+    sign(message: P): R
 
     /**
      * return the db3 address
      */
     getAddress(): string
+
+    /**
+     * return the type of wallet
+     */
+    getType(): WalletType
 }

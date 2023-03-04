@@ -221,3 +221,10 @@ export const isValidPath = (path: string): boolean => {
         .map(replaceDerive)
         .some(isNaN as any /* ts T_T*/)
 }
+export const isHexString = (value: string): boolean => {
+    if (typeof value !== 'string' || !value.match(/^0x[0-9A-Fa-f]*$/)) {
+        return false
+    }
+
+    return true
+}

@@ -33,3 +33,5 @@ export {
     bytesToReadableNum,
     unitsToReadableNum,
 } from './store/account'
+import { Index, Index_IndexField_Order } from './proto/db3_database'
+import { Account } from './proto/db3_account'
