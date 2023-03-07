@@ -210,6 +210,12 @@ export class DB3Client {
         )
     }
 
+    async subscribe_mutation() {
+        const token = await this.keepSessionAlive()
+        const response = await this.provider.subscribe_mutation(token)
+        return response
+    }
+
     async deleteDocument(
         databaseAddress: string,
         collectionName: string,

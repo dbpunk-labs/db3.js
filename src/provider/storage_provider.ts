@@ -22,6 +22,12 @@ import {
 import { StorageNodeClient } from '../proto/db3_node.client'
 import { WriteRequest, PayloadType } from '../proto/db3_mutation'
 import {
+    MutationEventFilter,
+    Subscription,
+    EventType,
+    EventFilter,
+} from '../proto/db3_event'
+import {
     OpenSessionRequest,
     BroadcastRequest,
     GetAccountRequest,
@@ -30,6 +36,7 @@ import {
     ShowDatabaseRequest,
     GetDocumentRequest,
     ShowNetworkStatusRequest,
+    SubscribeRequest,
 } from '../proto/db3_node'
 import { QuerySessionInfo, OpenSessionPayload } from '../proto/db3_session'
 import { StructuredQuery } from '../proto/db3_database'
@@ -254,6 +261,29 @@ export class StorageProvider {
             sessionToke: token,
         }
         return sessionRequest
+    }
+
+    async subscribe_mutation(token: string) {
+        const sender = this.wallet.getAddress()
+        const filter: MutationEventFilter = {
+            sender
+        }
+        const event_filter: EventFilter = {
+            filter: {
+                oneofKind: 'mfilter',
+                mfilter: filter,
+            },
+        }
+        const sub: Subscription = {
+            topics: [EventType.Mutation],
+            filters: [event_filter],
+        }
+        const req: SubscribeRequest = {
+            sessionToken: token,
+            sub
+        }
+        const stream = await this.client.subscribe(req)
+        return stream
     }
 
     /**

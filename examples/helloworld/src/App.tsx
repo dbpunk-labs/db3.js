@@ -8,6 +8,7 @@ import {
     Button,
     Result,
     Space,
+    notification
 } from 'antd'
 import { useAsyncFn } from 'react-use'
 import {
@@ -19,7 +20,8 @@ import {
     addDoc,
     getDocs,
     Index,
-    DocumentReference
+    DocumentReference,
+    EventMessage
 } from 'db3.js'
 import './App.css'
 import { Buffer } from 'buffer'
@@ -30,9 +32,20 @@ const { Title, Text } = Typography
 const wallet = new MetamaskWallet(window)
 const client = new DB3Client('http://127.0.0.1:26659', wallet)
 
+
 interface Todo {
     text: string
 }
+
+const openNotification = (msg:EventMessage) => {
+  notification.open({
+    message: 'Mutation ' + msg.event.mutationEvent.hash ,
+    description: msg.event.mutationEvent.sender,
+    onClick: () => {
+      console.log('Notification Clicked!');
+    },
+  });
+};
 
 function App() {
     const [token, setToken] = useState('')
@@ -53,6 +66,18 @@ function App() {
             console.log(e)
         }
     }, [wallet])
+
+    const [resx, subscribe] = useAsyncFn(async () => {
+        try {
+            const call = await client.subscribe_mutation()
+            for await (let response of call.response) {
+                openNotification(response)
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }, [client])
+
 
     const [res2, createDatabase] = useAsyncFn(async () => {
         try {
@@ -133,6 +158,16 @@ function App() {
                         Connect
                     </Button>
                 </Card>
+                <Card title="Open subscription" size="large">
+                    <Button
+                        type="primary"
+                        ghost
+                        onClick={() => subscribe()}
+                    >
+                        subscribe
+                    </Button>
+                </Card>
+
                 <Card title="Create a Database" size="large">
                     <p>Database Address:{database}</p>
                     <Button
