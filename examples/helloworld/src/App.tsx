@@ -12,6 +12,7 @@ import {
     Col,
     Row,
     Statistic,
+    QRCode
 } from 'antd'
 import VirtualList from 'rc-virtual-list'
 import { useAsyncFn } from 'react-use'
@@ -306,6 +307,11 @@ function App() {
                         Query
                     </Button>
                 </Card>
+                <Card title="Experience on the mobile" size="large">
+                    <QRCode value={window.location.href} />
+                    <p>Scan the QRCode with your metamask on your phone</p>
+                </Card>
+
             </Space>
         </div>
     )
