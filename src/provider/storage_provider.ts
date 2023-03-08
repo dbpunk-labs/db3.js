@@ -265,36 +265,55 @@ export class StorageProvider {
         return sessionRequest
     }
 
-    subscribe(token: string, messageHandle: (e: EventMessage) => void) {
+    subscribe(
+        token: string,
+        messageHandle: (e: EventMessage) => void,
+        include_block_event: boolean = true
+    ) {
         const sender = this.wallet.getAddress()
         const mfilter: MutationEventFilter = {
             sender,
         }
-        const bfilter: BlockEventFilter = {}
         const mutation_filter: EventFilter = {
             filter: {
                 oneofKind: 'mfilter',
                 mfilter,
             },
         }
-        const block_filter: EventFilter = {
-            filter: {
-                oneofKind: 'bfilter',
-                bfilter,
-            },
+        if (include_block_event) {
+            const bfilter: BlockEventFilter = {}
+            const block_filter: EventFilter = {
+                filter: {
+                    oneofKind: 'bfilter',
+                    bfilter,
+                },
+            }
+            const sub: Subscription = {
+                topics: [EventType.Mutation, EventType.Block],
+                filters: [mutation_filter, block_filter],
+            }
+            const req: SubscribeRequest = {
+                sessionToken: token,
+                sub,
+            }
+            const call = this.client.subscribe(req)
+            const ctrl = call.responses
+            ctrl.onMessage(messageHandle)
+            return ctrl
+        } else {
+            const sub: Subscription = {
+                topics: [EventType.Mutation],
+                filters: [mutation_filter],
+            }
+            const req: SubscribeRequest = {
+                sessionToken: token,
+                sub,
+            }
+            const call = this.client.subscribe(req)
+            const ctrl = call.responses
+            ctrl.onMessage(messageHandle)
+            return ctrl
         }
-        const sub: Subscription = {
-            topics: [EventType.Mutation, EventType.Block],
-            filters: [mutation_filter, block_filter],
-        }
-        const req: SubscribeRequest = {
-            sessionToken: token,
-            sub,
-        }
-        const call = this.client.subscribe(req)
-        const ctrl = call.responses
-        ctrl.onMessage(messageHandle)
-        return ctrl
     }
 
     /**
