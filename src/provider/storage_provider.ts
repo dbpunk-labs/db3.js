@@ -26,6 +26,8 @@ import {
     Subscription,
     EventType,
     EventFilter,
+    EventMessage,
+    BlockEventFilter,
 } from '../proto/db3_event'
 import {
     OpenSessionRequest,
@@ -263,27 +265,36 @@ export class StorageProvider {
         return sessionRequest
     }
 
-    async subscribe_mutation(token: string) {
+    subscribe(token: string, messageHandle: (e: EventMessage) => void) {
         const sender = this.wallet.getAddress()
-        const filter: MutationEventFilter = {
-            sender
+        const mfilter: MutationEventFilter = {
+            sender,
         }
-        const event_filter: EventFilter = {
+        const bfilter: BlockEventFilter = {}
+        const mutation_filter: EventFilter = {
             filter: {
                 oneofKind: 'mfilter',
-                mfilter: filter,
+                mfilter,
+            },
+        }
+        const block_filter: EventFilter = {
+            filter: {
+                oneofKind: 'bfilter',
+                bfilter,
             },
         }
         const sub: Subscription = {
-            topics: [EventType.Mutation],
-            filters: [event_filter],
+            topics: [EventType.Mutation, EventType.Block],
+            filters: [mutation_filter, block_filter],
         }
         const req: SubscribeRequest = {
             sessionToken: token,
-            sub
+            sub,
         }
-        const stream = await this.client.subscribe(req)
-        return stream
+        const call = this.client.subscribe(req)
+        const ctrl = call.responses
+        ctrl.onMessage(messageHandle)
+        return ctrl
     }
 
     /**

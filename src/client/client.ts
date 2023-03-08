@@ -24,6 +24,7 @@ import {
     DocumentMutation,
     DocumentMask,
 } from '../proto/db3_mutation'
+import { EventMessage } from '../proto/db3_event'
 import { BroadcastMeta, ChainId, ChainRole } from '../proto/db3_base'
 import { StorageProvider } from '../provider/storage_provider'
 import { Wallet } from '../wallet/wallet'
@@ -143,6 +144,7 @@ export class DB3Client {
     async getState() {
         return await this.provider.getState()
     }
+
     async getAccount(address: string) {
         const binaryAddr = fromHEX(address)
         return await this.provider.getAccount(binaryAddr)
@@ -210,10 +212,10 @@ export class DB3Client {
         )
     }
 
-    async subscribe_mutation() {
+    async subscribe(messageHandle: (e: EventMessage) => void) {
         const token = await this.keepSessionAlive()
-        const response = await this.provider.subscribe_mutation(token)
-        return response
+        const ctrl = this.provider.subscribe(token, messageHandle)
+        return ctrl
     }
 
     async deleteDocument(
