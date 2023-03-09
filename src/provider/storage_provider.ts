@@ -22,6 +22,14 @@ import {
 import { StorageNodeClient } from '../proto/db3_node.client'
 import { WriteRequest, PayloadType } from '../proto/db3_mutation'
 import {
+    MutationEventFilter,
+    Subscription,
+    EventType,
+    EventFilter,
+    EventMessage,
+    BlockEventFilter,
+} from '../proto/db3_event'
+import {
     OpenSessionRequest,
     BroadcastRequest,
     GetAccountRequest,
@@ -30,6 +38,7 @@ import {
     ShowDatabaseRequest,
     GetDocumentRequest,
     ShowNetworkStatusRequest,
+    SubscribeRequest,
 } from '../proto/db3_node'
 import { QuerySessionInfo, OpenSessionPayload } from '../proto/db3_session'
 import { StructuredQuery } from '../proto/db3_database'
@@ -254,6 +263,57 @@ export class StorageProvider {
             sessionToke: token,
         }
         return sessionRequest
+    }
+
+    subscribe(
+        token: string,
+        messageHandle: (e: EventMessage) => void,
+        include_block_event: boolean = true
+    ) {
+        const sender = this.wallet.getAddress()
+        const mfilter: MutationEventFilter = {
+            sender,
+        }
+        const mutation_filter: EventFilter = {
+            filter: {
+                oneofKind: 'mfilter',
+                mfilter,
+            },
+        }
+        if (include_block_event) {
+            const bfilter: BlockEventFilter = {}
+            const block_filter: EventFilter = {
+                filter: {
+                    oneofKind: 'bfilter',
+                    bfilter,
+                },
+            }
+            const sub: Subscription = {
+                topics: [EventType.Mutation, EventType.Block],
+                filters: [mutation_filter, block_filter],
+            }
+            const req: SubscribeRequest = {
+                sessionToken: token,
+                sub,
+            }
+            const call = this.client.subscribe(req)
+            const ctrl = call.responses
+            ctrl.onMessage(messageHandle)
+            return ctrl
+        } else {
+            const sub: Subscription = {
+                topics: [EventType.Mutation],
+                filters: [mutation_filter],
+            }
+            const req: SubscribeRequest = {
+                sessionToken: token,
+                sub,
+            }
+            const call = this.client.subscribe(req)
+            const ctrl = call.responses
+            ctrl.onMessage(messageHandle)
+            return ctrl
+        }
     }
 
     /**

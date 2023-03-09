@@ -16,13 +16,29 @@
 //
 
 import { DB3Client } from '../client/client'
+import { NetworkStatus } from '../proto/db3_node'
+
+export interface NodeStatus {
+    network: NetworkStatus
+    latency: number
+}
+
 export class DB3Network {
     readonly client: DB3Client
     constructor(client: DB3Client) {
         this.client = client
     }
-
-    async getState() {
-        return await this.client.getState()
+    getState(): Promise<NodeStatus> {
+        const now = new Date().getTime()
+        return new Promise<NodeStatus>((resolve, reject) => {
+            this.client.getState().then((network) => {
+                const latency = new Date().getTime() - now
+                const status: NodeStatus = {
+                    network,
+                    latency,
+                }
+                resolve(status)
+            })
+        })
     }
 }

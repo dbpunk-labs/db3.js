@@ -16,6 +16,7 @@
 
 export { Account } from './proto/db3_account'
 export { Index } from './proto/db3_database'
+export { EventMessage, EventType } from './proto/db3_event'
 export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
 export { MetamaskWallet } from './wallet/metamask'
 export { DB3Client } from './client/client'
@@ -35,3 +36,4 @@ export {
     bytesToReadableNum,
     unitsToReadableNum,
 } from './store/account'
+export { DB3Network } from './store/network'
