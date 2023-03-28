@@ -265,6 +265,17 @@ export class StorageProvider {
         return sessionRequest
     }
 
+    async getMyDatabases(token: string) {
+        const sender = this.wallet.getAddress()
+        const request: ShowDatabaseRequest = {
+            sessionToken: token,
+            address: '',
+            ownerAddress: sender,
+        }
+        const { response } = await this.client.showDatabase(request)
+        return response.db
+    }
+
     subscribe(
         token: string,
         messageHandle: (e: EventMessage) => void,

@@ -36,7 +36,7 @@ globalThis.Buffer = Buffer
 const { TextArea } = Input
 const { Title, Text } = Typography
 const wallet = new MetamaskWallet(window)
-const client = new DB3Client('http://127.0.0.1:26659', wallet)
+const client = new DB3Client('https://grpc.devnet.db3.network', wallet)
 
 interface Todo {
     text: string
@@ -227,7 +227,7 @@ function App() {
                         )}
                     </VirtualList>
                 </List>
-                <Card title="Connect to Metamask" size="large">
+                <Card title="Connect to Metamask" >
                     <p>DB3 Network Address:{addr}</p>
                     <p>Evm Chain Address:{evmAddr}</p>
                     <Button type="primary" ghost onClick={() => connect()}>
@@ -235,7 +235,7 @@ function App() {
                     </Button>
                 </Card>
 
-                <Card title="Generate Query Session Token" size="large">
+                <Card title="Generate Query Session Token" >
                     <p>Token:{token}</p>
                     <Button
                         type="primary"
@@ -246,7 +246,7 @@ function App() {
                     </Button>
                 </Card>
 
-                <Card title="Open subscription" size="large">
+                <Card title="Open subscription" >
                     <Button type="primary" ghost onClick={() => subscribe()}>
                         subscribe
                     </Button>

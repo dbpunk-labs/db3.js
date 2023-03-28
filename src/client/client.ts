@@ -92,6 +92,13 @@ export class DB3Client {
         return [dbId.getHexAddr(), txId.getB64()]
     }
 
+    async getMyDatabase() {
+        const token = await this.keepSessionAlive()
+        const dbs = await this.provider.getMyDatabase(token)
+        this.querySessionInfo!.queryCount += 1
+        return dbs
+    }
+
     /**
      * get a database information
      *
