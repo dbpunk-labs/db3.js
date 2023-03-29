@@ -46,13 +46,13 @@ export function initializeDB3(
     return runtime
 }
 
-export function listMyDatabase(
+export function listMyDatabases(
     node: string,
     wallet: Wallet
 ): Promise<Database[]> {
     const client = new DB3Client(node, wallet)
     return new Promise((resolve, reject) => {
-        client.getMyDatabase().then((dbs) => {
+        client.getMyDatabases().then((dbs) => {
             resolve(dbs)
         })
     })

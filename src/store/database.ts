@@ -47,7 +47,9 @@ export class DB3Store {
         if (!this._database) {
             const database = await this.client.getDatabase(this.address)
             this._database = database
-            this._collections = database?.collections
+            this._collections = Object.fromEntries(
+                database?.collections.map((e) => [e.name, e])
+            )
         }
         return this._database
     }

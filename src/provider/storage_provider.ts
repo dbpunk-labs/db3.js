@@ -273,7 +273,7 @@ export class StorageProvider {
             ownerAddress: sender,
         }
         const { response } = await this.client.showDatabase(request)
-        return response.db
+        return response.dbs
     }
 
     subscribe(
@@ -364,6 +364,7 @@ export class StorageProvider {
         const request: ShowDatabaseRequest = {
             sessionToken: token,
             address,
+            ownerAddress: '',
         }
         const { response } = await this.client.showDatabase(request)
         return response
