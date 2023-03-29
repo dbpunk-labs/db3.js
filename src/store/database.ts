@@ -35,6 +35,9 @@ export class DB3Store {
             return this._collections[name]
         }
         const database = await this.client.getDatabase(this.address)
+        if (database === undefined) {
+            return undefined
+        }
         this._database = database
         this._collections = Object.fromEntries(
             database!.collections.map((e) => [e.name, e])
