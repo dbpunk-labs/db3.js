@@ -36,7 +36,9 @@ export class DB3Store {
         }
         const database = await this.client.getDatabase(this.address)
         this._database = database
-        this._collections = database?.collections
+        this._collections = Object.fromEntries(
+            database!.collections.map((e) => [e.name, e])
+        )
         if (this._collections && this._collections[name]) {
             return this._collections[name]
         }
@@ -48,7 +50,7 @@ export class DB3Store {
             const database = await this.client.getDatabase(this.address)
             this._database = database
             this._collections = Object.fromEntries(
-                database?.collections.map((e) => [e.name, e])
+                database!.collections.map((e) => [e.name, e])
             )
         }
         return this._database
