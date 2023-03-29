@@ -71,8 +71,9 @@ describe('test db3.js store module', () => {
                 ],
             },
         ]
+        await new Promise((r) => setTimeout(r, 1000))
         const collectionRef = await collection<Todo>(db, 'todos', indexList)
-        await new Promise((r) => setTimeout(r, 2000))
+        await new Promise((r) => setTimeout(r, 1000))
         const database = await db.getDatabase()
         expect('0x' + toHEX(database.address)).toBe(dbId)
         // create doc
@@ -81,7 +82,7 @@ describe('test db3.js store module', () => {
             owner: wallet.getAddress(),
         } as Todo)
 
-        await new Promise((r) => setTimeout(r, 2000))
+        await new Promise((r) => setTimeout(r, 1000))
         const docs = await getDocs<Todo>(collectionRef)
         expect(docs.size).toBe(1)
         expect(docs.docs[0].entry.doc['text']).toBe('beijing')
@@ -93,7 +94,7 @@ describe('test db3.js store module', () => {
             text: 'shanghai',
             owner: wallet.getAddress(),
         })
-        await new Promise((r) => setTimeout(r, 2000))
+        await new Promise((r) => setTimeout(r, 1000))
         const docs3 = await getDocs<Todo>(collectionRef)
         expect(docs3.size).toBe(1)
         expect(docs.docs[0].entry.id).toBe(docs3.docs[0].entry.id)
@@ -102,7 +103,7 @@ describe('test db3.js store module', () => {
         expect(docs3.docs[0].entry.owner).toBe(wallet.getAddress())
         // delete
         await deleteDoc(docs.docs[0])
-        await new Promise((r) => setTimeout(r, 2000))
+        await new Promise((r) => setTimeout(r, 1000))
         const docs2 = await getDocs<Todo>(collectionRef)
         expect(docs2.size).toBe(0)
     })
