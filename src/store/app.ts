@@ -21,6 +21,7 @@ import { Wallet } from '../wallet/wallet'
 import { DB3Store } from './database'
 import { DB3Account } from './account'
 import { DB3Network } from './network'
+import { Database } from './proto/db3_database'
 
 export interface DB3SdkRuntime {
     db: DB3Store
@@ -43,4 +44,16 @@ export function initializeDB3(
         db3Network,
     }
     return runtime
+}
+
+export function listMyDatabases(
+    node: string,
+    wallet: Wallet
+): Promise<Database[]> {
+    const client = new DB3Client(node, wallet)
+    return new Promise((resolve, reject) => {
+        client.getMyDatabases().then((dbs) => {
+            resolve(dbs)
+        })
+    })
 }

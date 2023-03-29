@@ -28,6 +28,7 @@ import {
     where,
     query,
     limit,
+    listMyDatabases,
 } from '../src/index'
 import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
 import { toHEX } from '../src/crypto/crypto_utils'
@@ -40,7 +41,17 @@ describe('test db3.js store module', () => {
     const mnemonic =
         'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
     const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
-
+    test('test list my database', async () => {
+        const mnemonic =
+            'result crisp session latin must fruit genuine question prevent are coconut brave speak student dismiss'
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
+        const client = new DB3Client('http://127.0.0.1:26659', wallet)
+        const [dbId, txId] = await client.createDatabase('test')
+        await new Promise((r) => setTimeout(r, 2000))
+        const dbs = await listMyDatabases('http://127.0.0.1:26659', wallet)
+        expect(dbs.length).toEqual(1)
+        expect(dbs[0].desc).toEqual('test')
+    })
     test('test document curd', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()

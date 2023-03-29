@@ -265,6 +265,17 @@ export class StorageProvider {
         return sessionRequest
     }
 
+    async getMyDatabases(token: string) {
+        const sender = this.wallet.getAddress()
+        const request: ShowDatabaseRequest = {
+            sessionToken: token,
+            address: '',
+            ownerAddress: sender,
+        }
+        const { response } = await this.client.showDatabase(request)
+        return response.dbs
+    }
+
     subscribe(
         token: string,
         messageHandle: (e: EventMessage) => void,
@@ -353,6 +364,7 @@ export class StorageProvider {
         const request: ShowDatabaseRequest = {
             sessionToken: token,
             address,
+            ownerAddress: '',
         }
         const { response } = await this.client.showDatabase(request)
         return response

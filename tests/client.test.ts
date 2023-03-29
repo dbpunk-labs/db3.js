@@ -26,6 +26,19 @@ import {
 } from '../src/proto/db3_database'
 
 describe('test db3.js client module', () => {
+    test('get my database smoke test', async () => {
+        const mnemonic =
+            'result crisp session latin must fruit genuine question prevent star coconut brave speak student dismiss'
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
+        const client = new DB3Client('http://127.0.0.1:26659', wallet)
+        const [dbId, txId] = await client.createDatabase()
+        await new Promise((r) => setTimeout(r, 2000))
+        const db = await client.getDatabase(dbId)
+        expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
+        const dbs = await client.getMyDatabases()
+        expect(dbs.length == 1).toEqual(true)
+    })
+
     test('create database smoke test', async () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
@@ -35,6 +48,8 @@ describe('test db3.js client module', () => {
         await new Promise((r) => setTimeout(r, 2000))
         const db = await client.getDatabase(dbId)
         expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
+        const dbs = await client.getMyDatabases()
+        expect(dbs.length > 0).toEqual(true)
         const indexList: Index[] = [
             {
                 name: 'idx1',
@@ -53,7 +68,7 @@ describe('test db3.js client module', () => {
         await client.createCollection(dbId, 'books', indexList)
         await new Promise((r) => setTimeout(r, 2000))
         const collections = await client.listCollection(dbId)
-        expect(collections && collections['books']).toBeDefined()
+        expect(collections.length).toEqual(1)
         await client.createDocument(dbId, 'books', {
             name: 'book1',
             author: 'db3 developers',

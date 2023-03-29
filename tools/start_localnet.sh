@@ -2,7 +2,7 @@
 #
 # start_localnet.sh
 killall db3 tendermint
-DB3_VERSION="v0.2.15"
+DB3_VERSION=`curl -s https://api.github.com/repos/dbpunk-labs/db3/releases/latest | python3  -c 'import sys, json; print(json.load(sys.stdin)["name"])'`
 test_dir=`pwd`
 BUILD_MODE='debug'
 if [[ $1 == 'release' ]] ; then

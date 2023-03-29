@@ -70,7 +70,7 @@ export class DB3Client {
      * create a database and return the address of it
      *
      */
-    async createDatabase(): Promise<[string, string]> {
+    async createDatabase(desc: string = ''): Promise<[string, string]> {
         const meta: BroadcastMeta = {
             nonce: this.provider.getNonce().toString(),
             chainId: ChainId.MainNet,
@@ -82,6 +82,7 @@ export class DB3Client {
             documentMutations: [],
             dbAddress: new Uint8Array(),
             action: DatabaseAction.CreateDB,
+            dbDesc: desc,
         }
         const payload = DatabaseMutation.toBinary(dm)
         const txId = await this.provider.sendMutation(
@@ -92,6 +93,13 @@ export class DB3Client {
         return [dbId.getHexAddr(), txId.getB64()]
     }
 
+    async getMyDatabases() {
+        const token = await this.keepSessionAlive()
+        const dbs = await this.provider.getMyDatabases(token)
+        this.querySessionInfo!.queryCount += 1
+        return dbs
+    }
+
     /**
      * get a database information
      *
@@ -100,7 +108,11 @@ export class DB3Client {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDatabase(addr, token)
         this.querySessionInfo!.queryCount += 1
-        return response.db
+        if (response.dbs.length > 0) {
+            return response.dbs[0]
+        } else {
+            return undefined
+        }
     }
 
     async listCollection(databaseAddress: string) {
@@ -132,6 +144,7 @@ export class DB3Client {
             documentMutations: [],
             dbAddress: fromHEX(databaseAddress),
             action: DatabaseAction.AddCollection,
+            dbDesc: '',
         }
         const payload = DatabaseMutation.toBinary(dm)
         const txId = await this.provider.sendMutation(
@@ -178,6 +191,7 @@ export class DB3Client {
             dbAddress: fromHEX(databaseAddress),
             collectionMutations: [],
             documentMutations: [documentMutation],
+            dbDesc: '',
         }
         const payload = DatabaseMutation.toBinary(dm)
         const txId = await this.provider.sendMutation(
@@ -241,6 +255,7 @@ export class DB3Client {
             documentMutations: [documentMutation],
             dbAddress: fromHEX(databaseAddress),
             action: DatabaseAction.DeleteDocument,
+            dbDesc: '',
         }
         const payload = DatabaseMutation.toBinary(dm)
         return this.provider.sendMutation(payload, PayloadType.DatabasePayload)
@@ -279,6 +294,7 @@ export class DB3Client {
             documentMutations: [documentMutation],
             dbAddress: fromHEX(databaseAddress),
             action: DatabaseAction.UpdateDocument,
+            dbDesc: '',
         }
         const payload = DatabaseMutation.toBinary(dm)
         return this.provider.sendMutation(payload, PayloadType.DatabasePayload)

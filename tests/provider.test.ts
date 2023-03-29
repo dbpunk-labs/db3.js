@@ -52,6 +52,7 @@ describe('test db3.js provider module', () => {
             documentMutations: [],
             dbAddress: new Uint8Array(),
             action: DatabaseAction.CreateDB,
+            dbDesc: '',
         }
         const payload = DatabaseMutation.toBinary(dm)
         const signature = wallet.sign(payload)
@@ -81,6 +82,7 @@ describe('test db3.js provider module', () => {
             documentMutations: [],
             dbAddress: new Uint8Array(),
             action: DatabaseAction.CreateDB,
+            dbDesc: '',
         }
         const payload = DatabaseMutation.toBinary(dm)
         const signature = wallet.sign(payload)
