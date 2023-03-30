@@ -56,7 +56,8 @@ export class DB3Client {
     querySessionInfo: QuerySessionInfo | undefined
     sessionToken: string | undefined
     wallet: Wallet
-
+    querySessionEnabled: boolean
+    hasCheckedQuerySession: boolean
     /**
      * new a db3 client with db3 node url and wallet
      *
@@ -64,6 +65,8 @@ export class DB3Client {
     constructor(url: string, wallet: Wallet) {
         this.provider = new StorageProvider(url, wallet)
         this.wallet = wallet
+        this.querySessionEnabled = true
+        this.hasCheckedQuerySession = false
     }
 
     /**
@@ -93,13 +96,18 @@ export class DB3Client {
         return [dbId.getHexAddr(), txId.getB64()]
     }
 
-    async getMyDatabases() {
+    async listDatabases(sender: string) {
         const token = await this.keepSessionAlive()
-        const dbs = await this.provider.getMyDatabases(token)
-        this.querySessionInfo!.queryCount += 1
+        const dbs = await this.provider.listDatabases(token, sender)
+        this.incrQueryCount()
         return dbs
     }
 
+    incrQueryCount() {
+        if (this.querySessionEnable && this.querySessionInfo) {
+            this.querySessionInfo!.queryCount += 1
+        }
+    }
     /**
      * get a database information
      *
@@ -107,7 +115,7 @@ export class DB3Client {
     async getDatabase(addr: string) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDatabase(addr, token)
-        this.querySessionInfo!.queryCount += 1
+        this.incrQueryCount()
         if (response.dbs.length > 0) {
             return response.dbs[0]
         } else {
@@ -204,6 +212,7 @@ export class DB3Client {
     async getDocument(id: string) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.getDocument(token, id)
+        this.incrQueryCount()
         return {
             id: toB64(response.document.id),
             doc: BSON.deserialize(response.document.doc),
@@ -215,6 +224,7 @@ export class DB3Client {
     async runQuery<T>(dbAddress: string, query: StructuredQuery) {
         const token = await this.keepSessionAlive()
         const response = await this.provider.runQuery(token, dbAddress, query)
+        this.incrQueryCount()
         return response.documents.map(
             (item) =>
                 ({
@@ -227,9 +237,16 @@ export class DB3Client {
     }
 
     async subscribe(messageHandle: (e: EventMessage) => void) {
-        const token = await this.keepSessionAlive()
-        const ctrl = this.provider.subscribe(token, messageHandle)
-        return ctrl
+        if (!this.querySessionEnabled) {
+            const response = await this.provider.openSession()
+            const token = response.sessionToken
+            const ctrl = this.provider.subscribe(token, messageHandle)
+            return ctrl
+        } else {
+            const token = await this.keepSessionAlive()
+            const ctrl = this.provider.subscribe(token, messageHandle)
+            return ctrl
+        }
     }
 
     async deleteDocument(
@@ -242,7 +259,6 @@ export class DB3Client {
             chainId: ChainId.MainNet,
             chainRole: ChainRole.StorageShardChain,
         }
-
         const documentMutation: DocumentMutation = {
             collectionName,
             documents: [],
@@ -301,6 +317,16 @@ export class DB3Client {
     }
 
     async keepSessionAlive() {
+        if (!this.hasCheckedQuerySession) {
+            const state = await this.getState()
+            this.querySessionEnabled = state.querySessionEnabled
+            this.hasCheckedQuerySession = true
+        }
+
+        if (!this.querySessionEnabled) {
+            return ''
+        }
+
         if (!this.querySessionInfo || !this.sessionToken) {
             const response = await this.provider.openSession()
             this.sessionToken = response.sessionToken

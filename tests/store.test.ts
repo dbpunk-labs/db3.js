@@ -29,6 +29,7 @@ import {
     query,
     limit,
     listMyDatabases,
+    listDatabases,
 } from '../src/index'
 import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
 import { toHEX } from '../src/crypto/crypto_utils'
@@ -51,6 +52,13 @@ describe('test db3.js store module', () => {
         const dbs = await listMyDatabases('http://127.0.0.1:26659', wallet)
         expect(dbs.length).toEqual(1)
         expect(dbs[0].desc).toEqual('test')
+        const dbs2 = await listDatabases(
+            'http://127.0.0.1:26659',
+            wallet.getAddress(),
+            wallet
+        )
+        expect(dbs2.length).toEqual(1)
+        expect(dbs2[0].desc).toEqual('test')
     })
     test('test document curd', async () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
@@ -82,7 +90,7 @@ describe('test db3.js store module', () => {
             owner: wallet.getAddress(),
         } as Todo)
 
-        await new Promise((r) => setTimeout(r, 1000))
+        await new Promise((r) => setTimeout(r, 1550))
         const docs = await getDocs<Todo>(collectionRef)
         expect(docs.size).toBe(1)
         expect(docs.docs[0].entry.doc['text']).toBe('beijing')

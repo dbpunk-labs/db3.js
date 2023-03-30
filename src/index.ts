@@ -20,7 +20,7 @@ export { EventMessage, EventType } from './proto/db3_event'
 export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
 export { MetamaskWallet } from './wallet/metamask'
 export { DB3Client } from './client/client'
-export { initializeDB3, listMyDatabases } from './store/app'
+export { initializeDB3, listMyDatabases, listDatabases } from './store/app'
 export { DB3Store } from './store/database'
 export { collection } from './store/collection'
 export {
