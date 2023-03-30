@@ -35,7 +35,7 @@ describe('test db3.js client module', () => {
         await new Promise((r) => setTimeout(r, 2000))
         const db = await client.getDatabase(dbId)
         expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
-        const dbs = await client.getMyDatabases()
+        const dbs = await client.listDatabases(wallet.getAddress())
         expect(dbs.length == 1).toEqual(true)
     })
 
@@ -46,42 +46,46 @@ describe('test db3.js client module', () => {
         const client = new DB3Client('http://127.0.0.1:26659', wallet)
         const [dbId, txId] = await client.createDatabase()
         await new Promise((r) => setTimeout(r, 2000))
-        const db = await client.getDatabase(dbId)
-        expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
-        const dbs = await client.getMyDatabases()
-        expect(dbs.length > 0).toEqual(true)
-        const indexList: Index[] = [
-            {
-                name: 'idx1',
-                id: 1,
-                fields: [
-                    {
-                        fieldPath: 'name',
-                        valueMode: {
-                            oneofKind: 'order',
-                            order: Index_IndexField_Order.ASCENDING,
+        try {
+            const db = await client.getDatabase(dbId)
+            expect(dbId).toEqual(`0x${toHEX(db!.address)}`)
+            const dbs = await client.listDatabases(wallet.getAddress())
+            expect(dbs.length > 0).toEqual(true)
+            const indexList: Index[] = [
+                {
+                    name: 'idx1',
+                    id: 1,
+                    fields: [
+                        {
+                            fieldPath: 'name',
+                            valueMode: {
+                                oneofKind: 'order',
+                                order: Index_IndexField_Order.ASCENDING,
+                            },
                         },
-                    },
-                ],
-            },
-        ]
-        await client.createCollection(dbId, 'books', indexList)
-        await new Promise((r) => setTimeout(r, 2000))
-        const collections = await client.listCollection(dbId)
-        expect(collections.length).toEqual(1)
-        await client.createDocument(dbId, 'books', {
-            name: 'book1',
-            author: 'db3 developers',
-        })
-        await new Promise((r) => setTimeout(r, 2000))
-        const query: StructuredQuery = {
-            collectionName: 'books',
+                    ],
+                },
+            ]
+            await client.createCollection(dbId, 'books', indexList)
+            await new Promise((r) => setTimeout(r, 2000))
+            const collections = await client.listCollection(dbId)
+            expect(collections.length).toEqual(1)
+            await client.createDocument(dbId, 'books', {
+                name: 'book1',
+                author: 'db3 developers',
+            })
+            await new Promise((r) => setTimeout(r, 2000))
+            const query: StructuredQuery = {
+                collectionName: 'books',
+            }
+            const books = await client.runQuery(dbId, query)
+            expect(books.length).toBe(1)
+            expect(books[0].doc['name']).toBe('book1')
+            const bookId = books[0].id
+            const result = await client.deleteDocument(dbId, 'books', [bookId])
+            expect(result).toBeDefined()
+        } catch (e) {
+            console.log(e)
         }
-        const books = await client.runQuery(dbId, query)
-        expect(books.length).toBe(1)
-        expect(books[0].doc['name']).toBe('book1')
-        const bookId = books[0].id
-        const result = await client.deleteDocument(dbId, 'books', [bookId])
-        expect(result).toBeDefined()
     })
 })

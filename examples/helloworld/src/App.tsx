@@ -36,7 +36,7 @@ globalThis.Buffer = Buffer
 const { TextArea } = Input
 const { Title, Text } = Typography
 const wallet = new MetamaskWallet(window)
-const client = new DB3Client('https://grpc.devnet.db3.network', wallet)
+const client = new DB3Client('http://127.0.0.1:46659', wallet)
 
 interface Todo {
     text: string
