@@ -50,7 +50,7 @@ export function listDatabases(
     node: string,
     sender: string,
     wallet: Wallet
-): Promise<Database[]> {
+): Promise<Record<string, any>[]> {
     const client = new DB3Client(node, wallet)
     return new Promise((resolve, reject) => {
         client.listDatabases(sender).then((dbs) => {
@@ -62,6 +62,6 @@ export function listDatabases(
 export function listMyDatabases(
     node: string,
     wallet: Wallet
-): Promise<Database[]> {
+): Promise<Record<string, any>[]> {
     return listDatabases(node, wallet.getAddress(), wallet)
 }
