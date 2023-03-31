@@ -100,7 +100,12 @@ export class DB3Client {
         const token = await this.keepSessionAlive()
         const dbs = await this.provider.listDatabases(token, sender)
         this.incrQueryCount()
-        return dbs
+        const new_dbs = dbs.map((x) => ({
+            ...x,
+            sender: '0x' + toHEX(x.sender),
+            address: '0x' + toHEX(x.address),
+        }))
+        return new_dbs
     }
 
     incrQueryCount() {
