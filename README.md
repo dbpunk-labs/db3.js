@@ -1,6 +1,5 @@
 # What is db3.js
-
-[![npm](https://img.shields.io/npm/v/db3.js?style=flat-square)](https://www.npmjs.com/package/db3.js)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/dbpunk-labs/db3.js?color=green&display_name=tag&label=db3.js&logo=db3&logoColor=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F102341693%3Fs%3D96%26v%3D4&style=flat-square)
 ![npm](https://img.shields.io/npm/dw/db3.js?style=flat-square)
 [![Coveralls branch](https://img.shields.io/coverallsCoverage/github/dbpunk-labs/db3.js?style=flat-square)](https://coveralls.io/github/dbpunk-labs/db3.js)
 
