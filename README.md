@@ -32,7 +32,7 @@ const client = new DB3Client('http://127.0.0.1:26659', wallet)
 
 ```typescript
 const [dbId, txId] = await client.createDatabase()
-const db = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
+const {db} = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
 ```
 
 ### Create a collection
