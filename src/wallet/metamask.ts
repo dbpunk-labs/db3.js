@@ -45,12 +45,12 @@ export interface TypedData {
 export class MetamaskWallet implements Wallet<TypedData, Promise<Uint8Array>> {
     readonly window: Window
     private addr: string
-    private publicKey: Secp256k1PublicKey | undefined
+    private db3Addr: string
 
     constructor(window: Window) {
         this.window = window
         this.addr = ''
-        this.publicKey = undefined
+        this.db3Addr = ''
     }
 
     async connect() {
@@ -64,7 +64,7 @@ export class MetamaskWallet implements Wallet<TypedData, Promise<Uint8Array>> {
     }
 
     getAddress(): string {
-        return this.publicKey!.toAddress()
+        return this.db3Addr
     }
 
     getEvmAddress(): string {
@@ -76,6 +76,11 @@ export class MetamaskWallet implements Wallet<TypedData, Promise<Uint8Array>> {
     }
 
     private async generateAddr() {
+        const addr = localStorage.getItem('db3_addr')
+        if (addr) {
+            this.db3Addr = addr
+            return addr
+        }
         const message = {
             types: {
                 EIP712Domain: [],
@@ -108,8 +113,11 @@ export class MetamaskWallet implements Wallet<TypedData, Promise<Uint8Array>> {
             Number(rid),
             true
         )
-        this.publicKey = new Secp256k1PublicKey(publicKey)
-        return this.publicKey.toAddress()
+        const secpPublicKey = new Secp256k1PublicKey(publicKey)
+        const db3Addr = secpPublicKey.toAddress()
+        localStorage.setItem('db3_addr', db3Addr)
+        this.db3Addr = db3Addr
+        return db3Addr
     }
 
     async sign(message: TypedData): Promise<Uint8Array> {
