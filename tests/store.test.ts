@@ -111,7 +111,7 @@ describe('test db3.js store module', () => {
         expect(docs3.docs[0].entry.owner).toBe(wallet.getAddress())
         // delete
         await deleteDoc(docs.docs[0])
-        await new Promise((r) => setTimeout(r, 1000))
+        await new Promise((r) => setTimeout(r, 1400))
         const docs2 = await getDocs<Todo>(collectionRef)
         expect(docs2.size).toBe(0)
     })
