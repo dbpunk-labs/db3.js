@@ -103,7 +103,7 @@ describe('test db3.js store module', () => {
             text: 'shanghai',
             owner: wallet.getAddress(),
         })
-        await new Promise((r) => setTimeout(r, 1000))
+        await new Promise((r) => setTimeout(r, 2000))
         const docs3 = await getDocs<Todo>(collectionRef)
         expect(docs3.size).toBe(1)
         expect(docs.docs[0].entry.id).toBe(docs3.docs[0].entry.id)
