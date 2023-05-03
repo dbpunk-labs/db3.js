@@ -1,6 +1,6 @@
 {
     "name": "db3.js",
-    "version": "0.2.25",
+    "version": "0.2.25-dev",
     "description": "DB3 Network Javascript API",
     "author": "dbpunk labs",
     "keywords": [
@@ -23,7 +23,7 @@
     "types": "./dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "microbundle --entry src/index.ts --external crypto,stream",
+        "build": "microbundle --entry src/index.ts",
         "test": "jest"
     },
     "exports": {
@@ -80,9 +80,6 @@
         "tslint": "~6.1.0",
         "tsup": "^6.5.0",
         "typescript": "^4.6.4"
-    },
-    "browser": {
-        "crypto": false,
-        "stream": false
     }
+    
 }
