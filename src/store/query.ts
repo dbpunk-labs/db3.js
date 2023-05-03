@@ -3,7 +3,9 @@ import type { DocumentReference } from './document'
 import type { CollectionReference } from './collection'
 import type { DocumentData } from '../client/client'
 import {
+    StructuredQuery_CompositeFilter,
     StructuredQuery_FieldFilter,
+    StructuredQuery_FieldFilter_Operator,
     StructuredQuery_Filter,
 } from '../proto/db3_database'
 import {
@@ -12,7 +14,12 @@ import {
     queryWithAddedFilter,
     queryWithLimit,
 } from '../core/query'
-import { Operator, parseOperator } from '../core/filter'
+import {
+    CompositeOp,
+    Operator,
+    parseCompositeOp,
+    parseOperator,
+} from '../core/filter'
 
 export class Query<T = DocumentData> {
     /** The type of this Firestore reference. */
@@ -44,6 +51,7 @@ export type QueryConstraintType =
     | 'startAfter'
     | 'endAt'
     | 'endBefore'
+    | 'and'
 
 export abstract class AppliableConstraint {
     /**
@@ -118,7 +126,6 @@ export class QueryFieldFilterConstraint extends QueryConstraint {
             )
         }
     }
-
     _parse(): StructuredQuery_Filter {
         const filter = newQueryFilter(this._field, this._op, this._value)
         return filter
@@ -162,6 +169,12 @@ export function where(
     return QueryFieldFilterConstraint._create(field, op, value)
 }
 
+export function and(
+    ...queryConstraints: QueryConstraint[]
+): QueryAndConstraint {
+    return QueryAndConstraint._create(queryConstraints)
+}
+
 export function query<T>(
     query: Query<T>,
     ...queryConstraints: QueryConstraint[]
@@ -175,6 +188,52 @@ export function query<T>(
     return query
 }
 
+/**
+ * A `QueryAndConstraint` is used to narrow the set of documents returned by
+ * a Firestore query by filtering on one or more document fields.
+ * `QueryFieldFilterConstraint`s are created by invoking {@link where} and can then
+ * be passed to {@link query} to create a new query instance that also contains
+ * this `QueryFieldFilterConstraint`.
+ */
+export class QueryAndConstraint extends QueryConstraint {
+    /** The type of this query constraint */
+    readonly type = 'and'
+
+    /**
+     * @internal
+     */
+    protected constructor(private _filters: QueryConstraint[]) {
+        super()
+    }
+
+    static _create(_filters: QueryConstraint[]): QueryAndConstraint {
+        return new QueryAndConstraint(_filters)
+    }
+
+    _apply<T>(query: Query<T>): Query<T> {
+        const filter = this._parse()
+        if (query.type == 'collection') {
+            // convert filters to StructuredQuery_Filter[]
+
+            const internalQuery: InternalQuery<T> = {
+                filters: [filter],
+                limit: null,
+                collection: query as CollectionReference<T>,
+            }
+            return new Query(query.db, internalQuery)
+        } else {
+            return new Query(
+                query.db,
+                queryWithAddedFilter(query._query, filter)
+            )
+        }
+    }
+
+    _parse(): StructuredQuery_Filter {
+        const filter = newCompositeFilter(this._filters, CompositeOp.AND)
+        return filter
+    }
+}
 export class QueryResult<T = DocumentData> {
     readonly docs: Array<DocumentReference<T>>
     readonly db: DB3Store
@@ -206,6 +265,43 @@ function newQueryFilter(
         filterType: {
             oneofKind: 'fieldFilter',
             fieldFilter: filter,
+        },
+    }
+}
+function newCompositeFilter(
+    queryConstraints: QueryConstraint[],
+    op: CompositeOp
+): StructuredQuery_Filter {
+    const filters = []
+    // transform queryConstraints to StructuredQuery_Filter[]
+    for (const constraint of queryConstraints) {
+        // check all queryConstraints are fieldFilter
+        if (constraint.type != 'where') {
+            throw new Error('unsupport filter type')
+        }
+        const filter = (constraint as QueryFieldFilterConstraint)._parse()
+        if (filter.filterType.oneofKind != 'fieldFilter') {
+            throw new Error('unsupport filter type')
+        }
+        if (
+            filter.filterType.fieldFilter.op !=
+            StructuredQuery_FieldFilter_Operator.EQUAL
+        ) {
+            throw new Error('unsupport where op, required ==')
+        }
+        filters.push(filter)
+    }
+    // const filters = queryConstraints.map(
+    //   (constraint) => (constraint as QueryFieldFilterConstraint)._parse())
+    const queryOp = parseCompositeOp(op)
+    const filter: StructuredQuery_CompositeFilter = {
+        filters: filters,
+        op: queryOp,
+    }
+    return {
+        filterType: {
+            oneofKind: 'compositeFilter',
+            compositeFilter: filter,
         },
     }
 }
