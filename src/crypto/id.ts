@@ -16,7 +16,7 @@
 //
 import sha3 from 'js-sha3'
 import { toB64, fromHEX } from './crypto_utils'
-import { Uint64BE } from 'int64-buffer'
+import * as numBufferPkg from 'int64-buffer'
 
 const TX_ID_LENGTH = 32
 const DB_ID_LENGTH = 20
@@ -49,7 +49,7 @@ export class DbId {
     addr: string
     constructor(sender: string, nonce: number) {
         const binary_addr = fromHEX(sender)
-        const nonceBuf = new Uint64BE(nonce)
+        const nonceBuf = new numBufferPkg.Uint64BE(nonce)
         let tmp = new Uint8Array(DB_ID_LENGTH + 8)
         tmp.set(nonceBuf.toArray(), 0)
         tmp.set(binary_addr, 8)
