@@ -20,6 +20,7 @@ yarn add db3.js
 
 ### Build db3 client
 
+Connect to db3 network with db3 browser wallet
 ```typescript
 // the key seed
 const mnemonic ='...'
@@ -28,6 +29,13 @@ const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
 // build db3 client
 const client = new DB3Client('http://127.0.0.1:26659', wallet)
 ```
+Connect to db3 network with metamask
+
+```typescript
+const wallet = new MetamaskWallet(window)
+const client = new DB3Client('http://127.0.0.1:46659', wallet)
+```
+
 ### Create a database
 
 ```typescript

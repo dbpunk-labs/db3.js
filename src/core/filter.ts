@@ -15,7 +15,7 @@
 // limitations under the License.
 //
 
-import { StructuredQuery_FieldFilter_Operator } from '../proto/db3_database'
+import { StructuredQuery_CompositeFilter_Operator, StructuredQuery_FieldFilter_Operator } from "../proto/db3_database";
 // The operator of a FieldFilter
 export const enum Operator {
     LESS_THAN = '<',
@@ -29,6 +29,11 @@ export const enum Operator {
     NOT_IN = 'not-in',
     ARRAY_CONTAINS_ANY = 'array-contains-any',
 }
+// The operator of a CompositeFilter
+export const enum CompositeOp {
+    AND = 'and',
+    OR = 'or',
+}
 
 export function parseOperator(
     op: Operator
@@ -36,6 +41,31 @@ export function parseOperator(
     switch (op) {
         case Operator.EQUAL: {
             return StructuredQuery_FieldFilter_Operator.EQUAL
+        }
+        case Operator.LESS_THAN: {
+            return StructuredQuery_FieldFilter_Operator.LESS_THAN
+        }
+        case Operator.LESS_THAN_OR_EQUAL: {
+            return StructuredQuery_FieldFilter_Operator.LESS_THAN_OR_EQUAL
+        }
+        case Operator.GREATER_THAN: {
+            return StructuredQuery_FieldFilter_Operator.GREATER_THAN
+        }
+        case Operator.GREATER_THAN_OR_EQUAL: {
+            return StructuredQuery_FieldFilter_Operator.GREATER_THAN_OR_EQUAL
+        }
+        default: {
+            throw new Error('the op is not supported')
+        }
+    }
+}
+
+export function parseCompositeOp(
+  op: CompositeOp
+): StructuredQuery_CompositeFilter_Operator {
+    switch (op) {
+        case CompositeOp.AND: {
+            return StructuredQuery_CompositeFilter_Operator.AND
         }
         default: {
             throw new Error('the op is not supported')
