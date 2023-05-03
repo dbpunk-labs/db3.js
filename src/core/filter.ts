@@ -15,7 +15,10 @@
 // limitations under the License.
 //
 
-import { StructuredQuery_CompositeFilter_Operator, StructuredQuery_FieldFilter_Operator } from "../proto/db3_database";
+import {
+    StructuredQuery_CompositeFilter_Operator,
+    StructuredQuery_FieldFilter_Operator,
+} from '../proto/db3_database'
 // The operator of a FieldFilter
 export const enum Operator {
     LESS_THAN = '<',
@@ -61,7 +64,7 @@ export function parseOperator(
 }
 
 export function parseCompositeOp(
-  op: CompositeOp
+    op: CompositeOp
 ): StructuredQuery_CompositeFilter_Operator {
     switch (op) {
         case CompositeOp.AND: {

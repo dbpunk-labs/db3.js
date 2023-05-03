@@ -33,7 +33,7 @@ import {
 } from '../src/index'
 import { Index, Index_IndexField_Order } from '../src/proto/db3_database'
 import { toHEX } from '../src/crypto/crypto_utils'
-import { and } from "../src/store/query";
+import { and } from '../src/store/query'
 
 interface Todo {
     text: string
@@ -170,9 +170,8 @@ describe('test db3.js store module', () => {
                             oneofKind: 'order',
                             order: Index_IndexField_Order.ASCENDING,
                         },
-                    }
+                    },
                 ],
-
             },
             {
                 name: 'idx_name',
@@ -184,9 +183,8 @@ describe('test db3.js store module', () => {
                             oneofKind: 'order',
                             order: Index_IndexField_Order.ASCENDING,
                         },
-                    }
+                    },
                 ],
-
             },
         ]
         const collectionRef = await collection<Todo>(db, 'todos', indexList)
@@ -217,23 +215,23 @@ describe('test db3.js store module', () => {
         await new Promise((r) => setTimeout(r, 2000))
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(
-                collectionRef,
-                where('owner', '==', wallet.getAddress())
-              )
+                query<Todo>(
+                    collectionRef,
+                    where('owner', '==', wallet.getAddress())
+                )
             )
             expect(docs.size).toBe(4)
         }
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(collectionRef, where('owner', '==', 'xxx'))
+                query<Todo>(collectionRef, where('owner', '==', 'xxx'))
             )
             expect(docs.size).toBe(0)
         }
 
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(collectionRef, where('name', '<', 'John'))
+                query<Todo>(collectionRef, where('name', '<', 'John'))
             )
             expect(docs.size).toBe(1)
             expect(docs.docs[0].entry.doc.name).toBe('Bill')
@@ -241,7 +239,7 @@ describe('test db3.js store module', () => {
 
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(collectionRef, where('name', '<=', 'John'))
+                query<Todo>(collectionRef, where('name', '<=', 'John'))
             )
             expect(docs.size).toBe(3)
             expect(docs.docs[0].entry.doc.name).toBe('Bill')
@@ -251,7 +249,7 @@ describe('test db3.js store module', () => {
 
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(collectionRef, where('name', '==', 'John'))
+                query<Todo>(collectionRef, where('name', '==', 'John'))
             )
             expect(docs.size).toBe(2)
             expect(docs.docs[0].entry.doc.name).toBe('John')
@@ -259,7 +257,7 @@ describe('test db3.js store module', () => {
         }
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(collectionRef, where('name', '>=', 'John'))
+                query<Todo>(collectionRef, where('name', '>=', 'John'))
             )
             expect(docs.size).toBe(3)
             expect(docs.docs[0].entry.doc.name).toBe('John')
@@ -268,7 +266,7 @@ describe('test db3.js store module', () => {
         }
         {
             const docs = await getDocs<Todo>(
-              query<Todo>(collectionRef, where('name', '>', 'John'))
+                query<Todo>(collectionRef, where('name', '>', 'John'))
             )
             expect(docs.size).toBe(1)
             expect(docs.docs[0].entry.doc.name).toBe('Mike')
@@ -297,7 +295,7 @@ describe('test db3.js store module', () => {
                             oneofKind: 'order',
                             order: Index_IndexField_Order.ASCENDING,
                         },
-                    }
+                    },
                 ],
             },
         ]
@@ -323,24 +321,26 @@ describe('test db3.js store module', () => {
 
         await new Promise((r) => setTimeout(r, 2000))
         const docs = await getDocs<Todo>(
-          query<Todo>(
-            collectionRef,
-            and(
-              where('owner', '==', wallet.getAddress()),
-              where('name', '==', 'Bill'))
-          )
+            query<Todo>(
+                collectionRef,
+                and(
+                    where('owner', '==', wallet.getAddress()),
+                    where('name', '==', 'Bill')
+                )
+            )
         )
         expect(docs.size).toBe(1)
         expect(docs.docs[0].entry.doc.name).toBe('Bill')
         expect(docs.docs[0].entry.doc.text).toBe('text1')
 
         const docs2 = await getDocs<Todo>(
-          query<Todo>(
-            collectionRef,
-            and(
-              where('owner', '==', wallet.getAddress()),
-              where('name', '==', 'John'))
-          )
+            query<Todo>(
+                collectionRef,
+                and(
+                    where('owner', '==', wallet.getAddress()),
+                    where('name', '==', 'John')
+                )
+            )
         )
         expect(docs2.size).toBe(2)
         expect(docs2.docs[0].entry.doc.name).toBe('John')
@@ -349,12 +349,13 @@ describe('test db3.js store module', () => {
         expect(docs2.docs[1].entry.doc.text).toBe('text3')
 
         const docs3 = await getDocs<Todo>(
-          query<Todo>(
-            collectionRef,
-            and(
-              where('owner', '==', wallet.getAddress()),
-              where('name', '==', 'Mike'))
-          )
+            query<Todo>(
+                collectionRef,
+                and(
+                    where('owner', '==', wallet.getAddress()),
+                    where('name', '==', 'Mike')
+                )
+            )
         )
         expect(docs3.size).toBe(0)
     })
