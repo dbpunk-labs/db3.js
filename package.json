@@ -1,6 +1,6 @@
 {
     "name": "db3.js",
-    "version": "0.2.24",
+    "version": "0.2.25",
     "description": "DB3 Network Javascript API",
     "author": "dbpunk labs",
     "keywords": [
@@ -23,7 +23,7 @@
     "types": "./dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "microbundle --entry src/index.ts",
+        "build": "microbundle --entry src/index.ts --external crypto,stream",
         "test": "jest"
     },
     "exports": {
