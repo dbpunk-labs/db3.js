@@ -1,6 +1,6 @@
 {
     "name": "db3.js",
-    "version": "0.2.23",
+    "version": "0.2.24",
     "description": "DB3 Network Javascript API",
     "author": "dbpunk labs",
     "keywords": [
@@ -23,7 +23,7 @@
     "types": "./dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "microbundle --entry src/index.ts --external none",
+        "build": "microbundle --entry src/index.ts --alias crypto=crypto-browserify,stream=stream-browserify",
         "test": "jest"
     },
     "exports": {
@@ -41,10 +41,12 @@
         "@scure/bip39": "^1.1.1",
         "bson": "5.0.1",
         "buffer": "^6.0.3",
+        "crypto-browserify": "^3.12.0",
         "events": "^3.3.0",
         "int64-buffer": "^1.0.1",
         "js-sha3": "^0.8.0",
         "loglevel": "^1.8.1",
+        "stream-browserify": "^3.0.0",
         "tweetnacl": "^1.0.3"
     },
     "devDependencies": {
