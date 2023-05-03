@@ -23,7 +23,7 @@
     "types": "./dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "microbundle --entry src/index.ts --external none",
+        "build": "microbundle --entry src/index.ts",
         "test": "jest"
     },
     "exports": {
