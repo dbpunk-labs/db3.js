@@ -25,7 +25,6 @@ jobs:
       - name: test db3.js
         run: |
           yarn install
-          patch -p0 node_modules/bson/lib/bson.mjs patches/bson.patch
           make
           yarn test --coverage
       - name: Coveralls
