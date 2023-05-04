@@ -33,7 +33,7 @@ import { toB64, fromHEX, toHEX } from '../crypto/crypto_utils'
 import { Database, Index, StructuredQuery } from '../proto/db3_database'
 import { QuerySessionInfo } from '../proto/db3_session'
 import * as log from 'loglevel'
-import { BSON } from 'bson'
+import { BSON } from 'db3-bson'
 
 export interface DocumentData {
     [field: string]: any
