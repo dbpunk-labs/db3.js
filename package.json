@@ -1,6 +1,6 @@
 {
     "name": "db3.js",
-    "version": "0.2.25-dev",
+    "version": "0.2.27-dev",
     "description": "DB3 Network Javascript API",
     "author": "dbpunk labs",
     "keywords": [
@@ -41,7 +41,7 @@
         "@protobuf-ts/runtime-rpc": "^2.8.2",
         "@scure/bip32": "^1.1.1",
         "@scure/bip39": "^1.1.1",
-        "db3-bson":"5.1.0",
+        "db3-bson":"5.1.2",
         "buffer": "^6.0.3",
         "events": "^3.3.0",
         "int64-buffer": "^1.0.1",
