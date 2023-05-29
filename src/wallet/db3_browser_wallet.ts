@@ -19,6 +19,8 @@ import type { Wallet, WalletType } from './wallet'
 import { Ed25519Keypair } from '../crypto/ed25519_keypair'
 import { Secp256k1Keypair } from '../crypto/secp256k1_keypair'
 import { fromB64 } from '../crypto/crypto_utils'
+import { fromHEX } from '../crypto/crypto_utils'
+import { toHEX } from '../crypto/crypto_utils'
 
 const WALLET_KEY = '_db3_wallet_key_'
 const WALLET_ADDRESS = '_db3_wallet_ADDR_'
@@ -88,6 +90,25 @@ export class DB3BrowserWallet implements Wallet<Uint8Array, Uint8Array> {
             localStorage.setItem(WALLET_KEY, JSON.stringify(keypair.export()))
             localStorage.setItem(WALLET_ADDRESS, wallet.getAddress())
             return wallet
+        }
+        throw new Error('wallet type is not supported')
+    }
+
+    static createFromPrivateKey(
+        walletType: WalletType,
+        privateKey: string
+    ): DB3BrowserWallet {
+        if (walletType === 'DB3_SECP256K1') {
+            const data = fromHEX(privateKey)
+            const keypair = Secp256k1Keypair.fromSecretKey(data)
+            localStorage.setItem(WALLET_KEY, JSON.stringify(keypair.export()))
+            return new DB3BrowserWallet(keypair, 'DB3_SECP256K1')
+        }
+        if (walletType === 'DB3_ED25519') {
+            const data = fromHEX(privateKey)
+            const keypair = Ed25519Keypair.fromSecretKey(data)
+            localStorage.setItem(WALLET_KEY, JSON.stringify(keypair.export()))
+            return new DB3BrowserWallet(keypair, 'DB3_ED25519')
         }
         throw new Error('wallet type is not supported')
     }
