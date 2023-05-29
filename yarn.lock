@@ -3739,10 +3739,10 @@ data-urls@^3.0.2:
     whatwg-mimetype "^3.0.0"
     whatwg-url "^11.0.0"
 
-db3-bson@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.npmjs.org/db3-bson/-/db3-bson-5.1.0.tgz#b958233c3dfa8e472a029e555134521edeb31310"
-  integrity sha512-wNQsG4O2oReFC2CLi4IWAHObmijV01E6Mxtdehn2E2kQtoxQAmWaxOTnchazeciOUMRKRt6c6cgRzpN/IWpiDg==
+db3-bson@5.1.2:
+  version "5.1.2"
+  resolved "https://registry.npmjs.org/db3-bson/-/db3-bson-5.1.2.tgz#3f5ddd81c5527d646d64ecf41e11b0887a87072a"
+  integrity sha512-NhH7GylEF1pX9zNv83nj7bZkuXSSwOrAa6i2Yn4eUz9XLJ6JiHkMFWbjIMk8Z2FAjOv47X5wtiJBu4BgG3aoOQ==
 
 debug@4, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"

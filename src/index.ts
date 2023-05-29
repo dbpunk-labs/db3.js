@@ -38,3 +38,5 @@ export {
     unitsToReadableNum,
 } from './store/account'
 export { DB3Network } from './store/network'
+
+export { FaucetProvider } from './provider/faucet_provider'
