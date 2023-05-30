@@ -28,15 +28,16 @@ import {
     DocumentReference,
     EventMessage,
     DB3Network,
+    FaucetProvider
 } from 'db3.js'
 import './App.css'
 import { Buffer } from 'buffer'
-
 globalThis.Buffer = Buffer
 const { TextArea } = Input
 const { Title, Text } = Typography
 const wallet = new MetamaskWallet(window)
-const client = new DB3Client('http://127.0.0.1:46659', wallet)
+const client = new DB3Client('http://127.0.0.1:26659', wallet)
+const faucet = new FaucetProvider('http://127.0.0.1:26649', window)
 
 interface Todo {
     text: string
@@ -109,6 +110,16 @@ function App() {
         }
     }
 
+    const [_res, requestFaucet] = useAsyncFn(async () => {
+        try {
+            await faucet.connect()
+            const response = await faucet.faucet()
+            console.log(response)
+        } catch(e) {
+            console.log(e)
+        }
+
+    })
     const [res, connect] = useAsyncFn(async () => {
         try {
             await wallet.connect()
@@ -307,6 +318,16 @@ function App() {
                         Query
                     </Button>
                 </Card>
+                <Card title="request faucet" size="large">
+                    <Button
+                        type="primary"
+                        ghost
+                        onClick={() => requestFaucet()}
+                    >
+                    Faucet
+                    </Button>
+                </Card>
+
                 <Card title="Experience on the mobile" size="large">
                     <QRCode value={window.location.href} />
                     <p>Scan the QRCode with your metamask on your phone</p>
