@@ -35,6 +35,10 @@ if [ -e ./db ]
 then
     rm -rf db
 fi
+if [ -e ./indexer ]
+then
+    rm -rf indexer
+fi
 ./bin/tendermint init
 ./bin/db3 start >db3.log 2>&1  &
 sleep 1
