@@ -32,9 +32,7 @@ jobs:
         with:
           name: db3js-log-artifact
           path: |
-            tools/db3.log
-            tools/indexer.log
-            tools/tm.log
+            tools/*.log
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
