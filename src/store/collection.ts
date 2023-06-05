@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// @ts-nocheck
 
 import { Index } from '../proto/db3_database'
 import { DB3Store } from './database'
