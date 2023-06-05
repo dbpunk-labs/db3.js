@@ -21,6 +21,13 @@ import {
     DatabaseMutation,
     DatabaseAction,
 } from '../src/proto/db3_mutation'
+
+import {
+    PayloadType as PayloadTypeV2,
+    DatabaseMutation as DatabaseMutationV2,
+    DatabaseAction as DatabaseActionV2,
+} from '../src/proto/db3_mutation_v2'
+
 import { ChainId, ChainRole, BroadcastMeta } from '../src/proto/db3_base'
 import { Secp256k1Keypair } from '../src/crypto/secp256k1_keypair'
 import { Secp256k1PublicKey } from '../src/crypto/secp256k1_publickey'
@@ -28,6 +35,9 @@ import {
     StorageProvider,
     StorageProviderOptions,
 } from '../src/provider/storage_provider'
+
+import { StorageProviderV2 } from '../src/provider/storage_provider_v2'
+
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
 import { toB64, fromB64 } from '../src/crypto/crypto_utils'
 
@@ -94,5 +104,28 @@ describe('test db3.js provider module', () => {
             'uWECy6GSliva8MJv1F6yg0Qu9nZPjxFPMgIsmejjWiE='
         )
         localStorage.clear()
+    })
+    test('provider send mutation test secp256k1 light', async () => {
+        const mnemonic =
+            'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
+        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
+        const provider = new StorageProviderV2('http://127.0.0.1:26619', wallet)
+        const dm: DatabaseMutationV2 = {
+            collectionMutations: [],
+            documentMutations: [],
+            dbAddress: new Uint8Array(),
+            action: DatabaseAction.CreateDB,
+            dbDesc: '',
+        }
+        const nonce = await provider.getNonce()
+        const payload = DatabaseMutationV2.toBinary(dm)
+        const response = await provider.sendMutation(
+            payload,
+            PayloadType.DatabasePayload,
+            nonce
+        )
+        expect(response.id).toBe(
+            '0x568511b1649e9524a63b8ddd2731a7a50d009a88882c31c4f5650bea254b2d89'
+        )
     })
 })

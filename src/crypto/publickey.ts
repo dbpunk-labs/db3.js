@@ -47,6 +47,11 @@ export interface PublicKey {
      * Return the db3 address associated with this public key
      */
     toAddress(): string
+
+    /**
+     * Return the evm address associated with this public key
+     */
+    toEvmAddress(): string
 }
 
 export function bytesEqual(a: Uint8Array, b: Uint8Array) {

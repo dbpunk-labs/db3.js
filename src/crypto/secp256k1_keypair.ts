@@ -17,6 +17,7 @@
 
 import * as secp from '@noble/secp256k1'
 import type { ExportedKeypair, Keypair } from './keypair'
+import type { TypedData } from '../wallet/wallet'
 import {
     SIGNATURE_SCHEME_TO_FLAG,
     PublicKey,
@@ -29,6 +30,12 @@ import { Signature } from '@noble/secp256k1'
 import { isValidBIP32Path, mnemonicToSeed } from './mnemonics'
 import { toB64 } from './crypto_utils'
 import { HDKey } from '@scure/bip32'
+import {
+    TypedDataUtils,
+    SignTypedDataVersion,
+    TypedMessage,
+    MessageTypes,
+} from '@metamask/eth-sig-util'
 
 export const DEFAULT_SECP256K1_DERIVATION_PATH = "m/54'/784'/0'/0/0"
 const SECP256K1_SIGNATURE_LEN = 65
@@ -127,18 +134,43 @@ export class Secp256k1Keypair implements Keypair {
     /**
      * Return the signature for the provided data.
      */
-    signData(data: Uint8Array): Uint8Array {
-        const msgHash = sha256(data)
-        const [sig, rec_id] = secp.signSync(msgHash, this.keypair.secretKey, {
-            canonical: true,
-            recovered: true,
-        })
-        var buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
-        buf[0] = SIGNATURE_SCHEME_TO_FLAG['Secp256k1']
-        buf.set(Signature.fromDER(sig).toCompactRawBytes(), 1)
-        buf.set([rec_id], 65)
-        buf.set(this.keypair.publicKey, 66)
-        return buf
+    signData(data: Uint8Array | TypedData): Uint8Array {
+        if (data instanceof Uint8Array) {
+            const msgHash = sha256(data)
+            const [sig, rec_id] = secp.signSync(
+                msgHash,
+                this.keypair.secretKey,
+                {
+                    canonical: true,
+                    recovered: true,
+                }
+            )
+            var buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
+            buf[0] = SIGNATURE_SCHEME_TO_FLAG['Secp256k1']
+            buf.set(Signature.fromDER(sig).toCompactRawBytes(), 1)
+            buf.set([rec_id], 65)
+            buf.set(this.keypair.publicKey, 66)
+            return buf
+        } else {
+            const hashedmsg = TypedDataUtils.eip712Hash(
+                data as TypedMessage<MessageTypes>,
+                SignTypedDataVersion.V3
+            )
+            const [sig, rec_id] = secp.signSync(
+                hashedmsg,
+                this.keypair.secretKey,
+                {
+                    canonical: true,
+                    recovered: true,
+                }
+            )
+            var buf = new Uint8Array(DB3_SECP256K1_SIGNATURE_LEN)
+            buf[0] = SIGNATURE_SCHEME_TO_FLAG['Secp256k1']
+            buf.set(Signature.fromDER(sig).toCompactRawBytes(), 1)
+            buf.set([rec_id], 65)
+            buf.set(this.keypair.publicKey, 66)
+            return buf
+        }
     }
 
     /**

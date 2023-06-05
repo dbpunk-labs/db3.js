@@ -17,6 +17,10 @@
 
 export type WalletType = 'DB3_SECP256K1' | 'DB3_ED25519' | 'MetaMask'
 
+export interface TypedData {
+    [field: string]: any
+}
+
 export interface Wallet<P, R> {
     /**
      * Sign the message
@@ -32,4 +36,9 @@ export interface Wallet<P, R> {
      * return the type of wallet
      */
     getType(): WalletType
+
+    /**
+     * return the evm address
+     */
+    getEvmAddress(): string
 }

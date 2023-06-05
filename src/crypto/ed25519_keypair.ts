@@ -17,11 +17,11 @@
 
 import nacl from 'tweetnacl'
 import type { ExportedKeypair, Keypair } from './keypair'
+import type { TypedData } from '../wallet/wallet'
 import { SignatureScheme, SIGNATURE_SCHEME_TO_FLAG } from './publickey'
 import { Ed25519PublicKey } from './ed25519_publickey'
 import { mnemonicToSeedHex, isValidHardenedPath } from './mnemonics'
 import { derivePath, getPublicKey, toB64 } from './crypto_utils'
-
 export const DEFAULT_ED25519_DERIVATION_PATH = "m/44'/784'/0'/0'/0'"
 
 const ED25519_SIGNATURE_LEN = 64
@@ -99,13 +99,20 @@ export class Ed25519Keypair implements Keypair {
     /**
      * Return the signature for the provided data using Ed25519.
      */
-    signData(data: Uint8Array): Uint8Array {
-        const signature = nacl.sign.detached(data, this.keypair.secretKey)
-        var buf = new Uint8Array(DB3_ED25519_SIGNATURE_LEN)
-        buf[0] = SIGNATURE_SCHEME_TO_FLAG['ED25519']
-        buf.set(signature, 1)
-        buf.set(this.keypair.publicKey, 1 + ED25519_SIGNATURE_LEN)
-        return buf
+    signData(data: Uint8Array | TypedData): Uint8Array {
+        if (data instanceof Uint8Array) {
+            const signature = nacl.sign.detached(
+                data as Uint8Array,
+                this.keypair.secretKey
+            )
+            var buf = new Uint8Array(DB3_ED25519_SIGNATURE_LEN)
+            buf[0] = SIGNATURE_SCHEME_TO_FLAG['ED25519']
+            buf.set(signature, 1)
+            buf.set(this.keypair.publicKey, 1 + ED25519_SIGNATURE_LEN)
+            return buf
+        } else {
+            throw new Error('typed data is not supported')
+        }
     }
 
     static deriveKeypair(mnemonics: string, path?: string): Ed25519Keypair {
