@@ -119,13 +119,11 @@ describe('test db3.js provider module', () => {
         }
         const nonce = await provider.getNonce()
         const payload = DatabaseMutationV2.toBinary(dm)
-        const response = await provider.sendMutation(
-            payload,
-            PayloadType.DatabasePayload,
-            nonce
-        )
+        const response = await provider.sendMutation(payload, nonce)
         expect(response.id).toBe(
-            '0x568511b1649e9524a63b8ddd2731a7a50d009a88882c31c4f5650bea254b2d89'
+            '0xaf2a873a6b5b1e75c34dcc941c0a638a785069862d07799c1b2ed358b690d238'
         )
+        const response2 = await provider.sendMutation(payload, '1')
+        expect(response2.code).toBe(1)
     })
 })

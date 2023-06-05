@@ -45,18 +45,13 @@ export class StorageProviderV2 {
         this.wallet = wallet
     }
 
-    private async wrapTypedRequest(
-        mutation: Uint8Array,
-        payloadType: PayloadType,
-        nonce: string
-    ) {
+    private async wrapTypedRequest(mutation: Uint8Array, nonce: string) {
         const hexMutation = toHEX(mutation)
         const message = {
             types: {
                 EIP712Domain: [],
                 Message: [
                     { name: 'payload', type: 'bytes' },
-                    { name: 'payloadType', type: 'string' },
                     { name: 'nonce', type: 'string' },
                 ],
             },
@@ -64,7 +59,6 @@ export class StorageProviderV2 {
             primaryType: 'Message',
             message: {
                 payload: '0x' + hexMutation,
-                payloadType: payloadType.toString(),
                 nonce: nonce,
             },
         }
@@ -89,16 +83,8 @@ export class StorageProviderV2 {
     /**
      * send mutation to db3 network
      */
-    async sendMutation(
-        mutation: Uint8Array,
-        payloadType: PayloadType,
-        nonce: string
-    ) {
-        const request = await this.wrapTypedRequest(
-            mutation,
-            payloadType,
-            nonce
-        )
+    async sendMutation(mutation: Uint8Array, nonce: string) {
+        const request = await this.wrapTypedRequest(mutation, nonce)
         const { response } = await this.client.sendMutation(request)
         return response
     }
