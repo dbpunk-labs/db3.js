@@ -62,8 +62,8 @@ export class DB3Client {
      * new a db3 client with db3 node url and wallet
      *
      */
-    constructor(url: string, wallet: Wallet) {
-        this.provider = new StorageProvider(url, wallet)
+    constructor(url: string, indexer_url: string, wallet: Wallet) {
+        this.provider = new StorageProvider(url, indexer_url, wallet)
         this.wallet = wallet
         this.querySessionEnabled = true
         this.hasCheckedQuerySession = false
@@ -97,9 +97,7 @@ export class DB3Client {
     }
 
     async listDatabases(sender: string) {
-        const token = await this.keepSessionAlive()
-        const dbs = await this.provider.listDatabases(token, sender)
-        this.incrQueryCount()
+        const dbs = await this.provider.listDatabases(sender)
         const new_dbs = dbs.map((x) => ({
             ...x,
             sender: '0x' + toHEX(x.sender),
@@ -107,20 +105,12 @@ export class DB3Client {
         }))
         return new_dbs
     }
-
-    incrQueryCount() {
-        if (this.querySessionEnable && this.querySessionInfo) {
-            this.querySessionInfo!.queryCount += 1
-        }
-    }
     /**
      * get a database information
      *
      */
     async getDatabase(addr: string) {
-        const token = await this.keepSessionAlive()
-        const response = await this.provider.getDatabase(addr, token)
-        this.incrQueryCount()
+        const response = await this.provider.getDatabase(addr)
         if (response.dbs.length > 0) {
             return response.dbs[0]
         } else {
@@ -215,9 +205,7 @@ export class DB3Client {
     }
 
     async getDocument(id: string) {
-        const token = await this.keepSessionAlive()
-        const response = await this.provider.getDocument(token, id)
-        this.incrQueryCount()
+        const response = await this.provider.getDocument(id)
         return {
             id: toB64(response.document.id),
             doc: BSON.deserialize(response.document.doc),
@@ -227,9 +215,7 @@ export class DB3Client {
     }
 
     async runQuery<T>(dbAddress: string, query: StructuredQuery) {
-        const token = await this.keepSessionAlive()
-        const response = await this.provider.runQuery(token, dbAddress, query)
-        this.incrQueryCount()
+        const response = await this.provider.runQuery(dbAddress, query)
         return response.documents.map(
             (item) =>
                 ({

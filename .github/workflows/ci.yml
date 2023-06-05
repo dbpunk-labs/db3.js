@@ -27,6 +27,12 @@ jobs:
           yarn install
           make
           yarn test --coverage
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: db3js-log-artifact
+          path: |
+            tools/*.log
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:

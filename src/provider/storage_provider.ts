@@ -20,6 +20,7 @@ import {
     GrpcWebOptions,
 } from '@protobuf-ts/grpcweb-transport'
 import { StorageNodeClient } from '../proto/db3_node.client'
+import { IndexerNodeClient } from '../proto/db3_indexer.client'
 import { WriteRequest, PayloadType } from '../proto/db3_mutation'
 import {
     MutationEventFilter,
@@ -33,13 +34,16 @@ import {
     OpenSessionRequest,
     BroadcastRequest,
     GetAccountRequest,
-    RunQueryRequest,
     CloseSessionRequest,
-    ShowDatabaseRequest,
-    GetDocumentRequest,
     ShowNetworkStatusRequest,
     SubscribeRequest,
 } from '../proto/db3_node'
+import {
+    ShowDatabaseRequest,
+    GetDocumentRequest,
+    RunQueryRequest,
+    ShowIndexerStatusRequest,
+} from '../proto/db3_indexer'
 import { QuerySessionInfo, OpenSessionPayload } from '../proto/db3_session'
 import { StructuredQuery } from '../proto/db3_database'
 import { TxId } from '../crypto/id'
@@ -51,12 +55,13 @@ import { fromHEX, toHEX } from '../crypto/crypto_utils'
 //
 export class StorageProvider {
     readonly client: StorageNodeClient
+    readonly indexer_client: IndexerNodeClient
     readonly wallet: Wallet
     readonly useTypedFormat: boolean
     /**
      * new a storage provider with db3 storage grpc url
      */
-    constructor(url: string, wallet: Wallet) {
+    constructor(url: string, indexer_url: string, wallet: Wallet) {
         const goptions: GrpcWebOptions = {
             baseUrl: url,
             // simple example for how to add auth headers to each request
@@ -67,12 +72,24 @@ export class StorageProvider {
         }
         const transport = new GrpcWebFetchTransport(goptions)
         this.client = new StorageNodeClient(transport)
-        this.wallet = wallet
-        if (wallet.getType() === 'MetaMask') {
-            this.useTypedFormat = true
-        } else {
-            this.useTypedFormat = false
+
+        const indexer_goptions: GrpcWebOptions = {
+            baseUrl: indexer_url,
+            // simple example for how to add auth headers to each request
+            // see `RpcInterceptor` for documentation
+            interceptors: [],
+            // you can set global request headers here
+            meta: {},
         }
+        const indexer_transport = new GrpcWebFetchTransport(indexer_goptions)
+        this.indexer_client = new IndexerNodeClient(indexer_transport)
+
+        this.wallet = wallet
+        // if (wallet.getType() === 'MetaMask') {
+        this.useTypedFormat = false
+        // } else {
+        //     this.useTypedFormat = false
+        // }
     }
 
     /**
@@ -265,18 +282,16 @@ export class StorageProvider {
         return sessionRequest
     }
 
-    async listDatabases(token: string, sender: string) {
+    async listDatabases(sender: string) {
         const request: ShowDatabaseRequest = {
-            sessionToken: token,
             address: '',
             ownerAddress: sender,
         }
-        const { response } = await this.client.showDatabase(request)
+        const { response } = await this.indexer_client.showDatabase(request)
         return response.dbs
     }
 
     subscribe(
-        token: string,
         messageHandle: (e: EventMessage) => void,
         include_block_event: boolean = true
     ) {
@@ -359,13 +374,12 @@ export class StorageProvider {
         return response
     }
 
-    async getDatabase(address: string, token: string) {
+    async getDatabase(address: string) {
         const request: ShowDatabaseRequest = {
-            sessionToken: token,
             address,
             ownerAddress: '',
         }
-        const { response } = await this.client.showDatabase(request)
+        const { response } = await this.indexer_client.showDatabase(request)
         return response
     }
 
@@ -374,22 +388,20 @@ export class StorageProvider {
         return new Date().getTime()
     }
 
-    async runQuery(token: string, addr: string, query: StructuredQuery) {
+    async runQuery(addr: string, query: StructuredQuery) {
         const request: RunQueryRequest = {
-            sessionToken: token,
             address: addr,
             query,
         }
-        const { response } = await this.client.runQuery(request)
+        const { response } = await this.indexer_client.runQuery(request)
         return response
     }
 
-    async getDocument(token: string, id: string) {
+    async getDocument(id: string) {
         const request: GetDocumentRequest = {
-            sessionToken: token,
             id,
         }
-        const { response } = await this.client.getDoument(request)
+        const { response } = await this.indexer_client.getDoument(request)
         return response
     }
 }
