@@ -1,5 +1,5 @@
 //
-// wallet.ts
+// base.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,30 +15,13 @@
 // limitations under the License.
 //
 
-export type WalletType = 'DB3_SECP256K1' | 'DB3_ED25519' | 'MetaMask'
-
-export interface TypedData {
+export interface DocumentData {
     [field: string]: any
 }
 
-export interface Wallet<P, R> {
-    /**
-     * Sign the message
-     */
-    sign(message: P): R
-
-    /**
-     * return the db3 address
-     */
-    getAddress(): string
-
-    /**
-     * return the type of wallet
-     */
-    getType(): WalletType
-
-    /**
-     * return the evm address
-     */
-    getEvmAddress(): string
+export interface DocumentEntry<T> {
+    id: string
+    owner: string
+    tx: string
+    doc: T
 }

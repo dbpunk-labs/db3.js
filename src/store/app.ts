@@ -14,14 +14,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// @ts-nocheck
 
 import { DB3Client } from '../client/client'
 import { Wallet } from '../wallet/wallet'
 import { DB3Store } from './database'
 import { DB3Account } from './account'
 import { DB3Network } from './network'
-import { Database } from './proto/db3_database'
+import { Database } from '../proto/db3_database'
 
 export interface DB3SdkRuntime {
     db: DB3Store

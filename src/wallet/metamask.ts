@@ -16,7 +16,7 @@
 //
 
 import { Buffer } from 'buffer'
-import type { Wallet, WalletType } from './wallet'
+import type { Wallet, WalletType, TypedData } from './wallet'
 import { SIGNATURE_SCHEME_TO_FLAG } from '../crypto/publickey'
 import {
     TypedDataUtils,
@@ -37,10 +37,6 @@ const SECP256K1_SIGNATURE_LEN = 65
 const SECP256K1_PUBLIC_LEN = 33
 const DB3_SECP256K1_SIGNATURE_LEN =
     SECP256K1_SIGNATURE_LEN + SECP256K1_PUBLIC_LEN + 1
-
-export interface TypedData {
-    [field: string]: any
-}
 
 export class MetamaskWallet implements Wallet<TypedData, Promise<Uint8Array>> {
     readonly window: Window

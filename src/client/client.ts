@@ -24,6 +24,7 @@ import {
     DocumentMutation,
     DocumentMask,
 } from '../proto/db3_mutation'
+import type { DocumentData, DocumentEntry } from './base'
 import { EventMessage } from '../proto/db3_event'
 import { BroadcastMeta, ChainId, ChainRole } from '../proto/db3_base'
 import { StorageProvider } from '../provider/storage_provider'
@@ -34,17 +35,6 @@ import { Database, Index, StructuredQuery } from '../proto/db3_database'
 import { QuerySessionInfo } from '../proto/db3_session'
 import * as log from 'loglevel'
 import { BSON } from 'db3-bson'
-
-export interface DocumentData {
-    [field: string]: any
-}
-
-export interface DocumentEntry<T> {
-    id: string
-    owner: string
-    tx: string
-    doc: T
-}
 
 //
 //

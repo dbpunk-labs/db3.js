@@ -42,6 +42,11 @@ fi
 ./bin/tendermint init
 ./bin/db3 start >db3.log 2>&1  &
 sleep 1
+
+echo "start db3 store..."
+./bin/db3 store -v >store.log 2>&1  &
+sleep 1
+
 ./bin/db3 indexer >indexer.log 2>&1  &
 sleep 2
 ./bin/tendermint unsafe_reset_all && ./bin/tendermint start

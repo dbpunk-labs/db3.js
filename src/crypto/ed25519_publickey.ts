@@ -81,4 +81,10 @@ export class Ed25519PublicKey {
         tmp.set(this.toBytes(), 1)
         return '0x' + sha3.sha3_256(tmp).slice(0, 40)
     }
+    /**
+     * Return the evm address associated with this Ed25519 public key
+     */
+    toEvmAddress(): string {
+        return '0x' + sha3.sha3_256(this.toBytes()).slice(0, 40)
+    }
 }

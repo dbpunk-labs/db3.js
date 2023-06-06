@@ -15,7 +15,7 @@
 // limitations under the License.
 //
 
-import type { Wallet, WalletType } from './wallet'
+import type { Wallet, WalletType, TypedData } from './wallet'
 import { Ed25519Keypair } from '../crypto/ed25519_keypair'
 import { Secp256k1Keypair } from '../crypto/secp256k1_keypair'
 import { fromB64 } from '../crypto/crypto_utils'
@@ -24,7 +24,9 @@ import { toHEX } from '../crypto/crypto_utils'
 
 const WALLET_KEY = '_db3_wallet_key_'
 const WALLET_ADDRESS = '_db3_wallet_ADDR_'
-export class DB3BrowserWallet implements Wallet<Uint8Array, Uint8Array> {
+export class DB3BrowserWallet
+    implements Wallet<Uint8Array | TypedData, Uint8Array>
+{
     keypair: Ed25519Keypair | Secp256k1Keypair
     readonly walletType: WalletType
     constructor(
@@ -35,12 +37,15 @@ export class DB3BrowserWallet implements Wallet<Uint8Array, Uint8Array> {
         this.walletType = walletType
     }
 
-    sign(message: Uint8Array): Uint8Array {
+    sign(message: Uint8Array | TypedData): Uint8Array {
         return this.keypair.signData(message)
     }
 
     getAddress(): string {
         return this.keypair.getPublicKey().toAddress()
+    }
+    getEvmAddress(): string {
+        return this.keypair.getPublicKey().toEvmAddress()
     }
 
     static hasKey(): boolean {
