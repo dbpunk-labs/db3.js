@@ -23,7 +23,6 @@ export { DB3Client } from './client/client'
 export { initializeDB3, listMyDatabases, listDatabases } from './store/app'
 export { DB3Store } from './store/database'
 export { collection, CollectionReference } from './store/collection'
-
 export {
     addDoc,
     getDocs,

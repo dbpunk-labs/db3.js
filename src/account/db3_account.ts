@@ -40,10 +40,16 @@ export class DB3Account {
         return new DB3Account(client, addr)
     }
 
+    //
+    // get the current account address
+    //
     getAddress() {
         return this.address
     }
 
+    //
+    // sign the data with eip712
+    //
     async sign(data: SignTypedDataParameters) {
         return await this.client.signTypedData(data)
     }

@@ -31,6 +31,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
         this.db = db
     }
 }
+
 export function collection<T = DocumentData>(
     db: DB3Store,
     name: string,
