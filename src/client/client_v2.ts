@@ -20,6 +20,7 @@ import {
     MutationAction,
     CollectionMutation,
     DocumentMutation,
+    DocumentMask,
 } from '../proto/db3_mutation_v2'
 import type { DocumentData, DocumentEntry } from './base'
 import { Index } from '../proto/db3_database'
@@ -127,6 +128,78 @@ export class DB3ClientV2 {
             dbAddress: fromHEX(databaseAddress),
             collectionMutations: [],
             documentMutations: [documentMutation],
+            dbDesc: '',
+        }
+        const payload = Mutation.toBinary(dm)
+        const response = await this.storage_provider.sendMutation(
+            payload,
+            this.nonce.toString()
+        )
+        if (response.code == 0) {
+            this.nonce += 1
+            return response.id
+        } else {
+            throw new Error('fail to create collection')
+        }
+    }
+
+    async deleteDocument(
+        databaseAddress: string,
+        collectionName: string,
+        ids: string[]
+    ) {
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            documents: [],
+            ids,
+            masks: [],
+        }
+        const dm: Mutation = {
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbAddress: fromHEX(databaseAddress),
+            action: MutationAction.DeleteDocument,
+            dbDesc: '',
+        }
+        const payload = Mutation.toBinary(dm)
+        const response = await this.storage_provider.sendMutation(
+            payload,
+            this.nonce.toString()
+        )
+        if (response.code == 0) {
+            this.nonce += 1
+            return response.id
+        } else {
+            throw new Error('fail to create collection')
+        }
+    }
+
+    //
+    //
+    // update document with a mask
+    //
+    //
+    async updateDocument(
+        databaseAddress: string,
+        collectionName: string,
+        document: Record<string, any>,
+        id: string,
+        masks: string[]
+    ) {
+        const documentMask: DocumentMask = {
+            fields: masks,
+        }
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            documents: [BSON.serialize(document)],
+            ids: [id],
+            masks: [documentMask],
+        }
+        const dm: Mutation = {
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbAddress: fromHEX(databaseAddress),
+            action: MutationAction.UpdateDocument,
             dbDesc: '',
         }
         const payload = Mutation.toBinary(dm)

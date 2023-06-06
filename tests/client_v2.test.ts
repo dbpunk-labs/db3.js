@@ -45,5 +45,22 @@ describe('test db3.js client module', () => {
         expect(id2).toBe(
             '0xbb0733757c4bdb8b08f47514da6a34f882ba632b5ad006e2ae1587314aa6d32f'
         )
+        const id3 = await client.deleteDocument(dbId, 'collection1', ['id1'])
+        expect(id3).toBe(
+            '0xe196fcbdb025521581cefdcd69c98fceccbbff8b53acce057be7fec87a58989c'
+        )
+        const id4 = await client.updateDocument(
+            dbId,
+            'collection1',
+            {
+                name: 'book1',
+                author: 'db3 developers',
+            },
+            'id111',
+            ['name', 'author']
+        )
+        expect(id4).toBe(
+            '0xff32cfe1ea25b59cce1dbb819068f31b7dcc08f87d893920545124a89be1a486'
+        )
     })
 })
