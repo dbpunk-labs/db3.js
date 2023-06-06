@@ -26,12 +26,10 @@
         "build": "microbundle --entry src/index.ts",
         "test": "jest"
     },
-
     "exports": {
         "require": "./dist/index.cjs",
         "default": "./dist/index.modern.js"
     },
-
     "dependencies": {
         "@ethereumjs/util": "^8.0.5",
         "@metamask/eth-sig-util": "^5.0.2",
@@ -41,15 +39,15 @@
         "@protobuf-ts/runtime-rpc": "^2.8.2",
         "@scure/bip32": "^1.1.1",
         "@scure/bip39": "^1.1.1",
-        "db3-bson":"5.1.2",
         "buffer": "^6.0.3",
+        "db3-bson": "5.1.2",
         "events": "^3.3.0",
         "int64-buffer": "^1.0.1",
         "js-sha3": "^0.8.0",
         "loglevel": "^1.8.1",
-        "tweetnacl": "^1.0.3"
+        "tweetnacl": "^1.0.3",
+        "viem": "^0.3.50"
     },
-
     "devDependencies": {
         "@babel/core": "^7.20.2",
         "@babel/preset-env": "^7.20.2",

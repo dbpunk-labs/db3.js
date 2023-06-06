@@ -22,11 +22,7 @@ import {
     DatabaseAction,
 } from '../src/proto/db3_mutation'
 
-import {
-    PayloadType as PayloadTypeV2,
-    DatabaseMutation as DatabaseMutationV2,
-    DatabaseAction as DatabaseActionV2,
-} from '../src/proto/db3_mutation_v2'
+import { Mutation, MutationAction } from '../src/proto/db3_mutation_v2'
 
 import { ChainId, ChainRole, BroadcastMeta } from '../src/proto/db3_base'
 import { Secp256k1Keypair } from '../src/crypto/secp256k1_keypair'
@@ -40,6 +36,7 @@ import { StorageProviderV2 } from '../src/provider/storage_provider_v2'
 
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
 import { toB64, fromB64 } from '../src/crypto/crypto_utils'
+import { DB3Account } from '../src/account/db3_account'
 
 describe('test db3.js provider module', () => {
     function nonce() {
@@ -105,20 +102,26 @@ describe('test db3.js provider module', () => {
         )
         localStorage.clear()
     })
-    test('provider send mutation test secp256k1 light', async () => {
-        const mnemonic =
-            'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
-        const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
-        const provider = new StorageProviderV2('http://127.0.0.1:26619', wallet)
-        const dm: DatabaseMutationV2 = {
+    test('provider send mutation test', async () => {
+        const privateKey =
+            '0xad689d9b7751da07b0fb39c5091672cbfe50f59131db015f8a0e76c9790a6fcc'
+        const db3_account = DB3Account.createFromPrivateKey(privateKey)
+        expect(db3_account.getAddress()).toBe(
+            '0xc793b74C568a3953a82C150FDcD0F7D27b60f8Ba'
+        )
+        const provider = new StorageProviderV2(
+            'http://127.0.0.1:26619',
+            db3_account
+        )
+        const dm: Mutation = {
             collectionMutations: [],
             documentMutations: [],
             dbAddress: new Uint8Array(),
-            action: DatabaseAction.CreateDB,
+            action: MutationAction.CreateDocumentDB,
             dbDesc: '',
         }
         const nonce = await provider.getNonce()
-        const payload = DatabaseMutationV2.toBinary(dm)
+        const payload = Mutation.toBinary(dm)
         const response = await provider.sendMutation(payload, nonce)
         expect(response.id).toBe(
             '0xaf2a873a6b5b1e75c34dcc941c0a638a785069862d07799c1b2ed358b690d238'

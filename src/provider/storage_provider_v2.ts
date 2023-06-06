@@ -22,16 +22,16 @@ import {
 import { StorageNodeClient } from '../proto/db3_storage.client'
 import { PayloadType } from '../proto/db3_mutation_v2'
 import { SendMutationRequest, GetNonceRequest } from '../proto/db3_storage'
-import { Wallet } from '../wallet/wallet'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
+import { DB3Account } from '../account/db3_account'
 
 export class StorageProviderV2 {
     readonly client: StorageNodeClient
-    readonly wallet: Wallet
+    readonly account: DB3Account
     /**
      * new a storage provider with db3 storage grpc url
      */
-    constructor(url: string, wallet: Wallet) {
+    constructor(url: string, account: DB3Account) {
         const goptions: GrpcWebOptions = {
             baseUrl: url,
             // simple example for how to add auth headers to each request
@@ -42,7 +42,7 @@ export class StorageProviderV2 {
         }
         const transport = new GrpcWebFetchTransport(goptions)
         this.client = new StorageNodeClient(transport)
-        this.wallet = wallet
+        this.account = account
     }
 
     private async wrapTypedRequest(mutation: Uint8Array, nonce: string) {
@@ -62,7 +62,7 @@ export class StorageProviderV2 {
                 nonce: nonce,
             },
         }
-        const signature = await this.wallet.sign(message)
+        const signature = await this.account.sign(message)
         const msgParams = JSON.stringify(message)
         const binaryMsg = new TextEncoder().encode(msgParams)
         const request: SendMutationRequest = {
@@ -74,7 +74,7 @@ export class StorageProviderV2 {
 
     async getNonce() {
         const request: GetNonceRequest = {
-            address: this.wallet.getEvmAddress(),
+            address: this.account.getAddress(),
         }
         const { response } = await this.client.getNonce(request)
         return response.nonce
