@@ -1,6 +1,5 @@
-//@ts-nocheck
 //
-// client.ts
+// client_v2.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +15,18 @@
 // limitations under the License.
 //
 
-import { Mutation, MutationAction } from '../proto/db3_mutation_v2'
+import {
+    Mutation,
+    MutationAction,
+    CollectionMutation,
+    DocumentMutation,
+} from '../proto/db3_mutation_v2'
+import type { DocumentData, DocumentEntry } from './base'
+import { Index } from '../proto/db3_database'
 import { StorageProviderV2 } from '../provider/storage_provider_v2'
 import { DB3Account } from '../account/db3_account'
-
+import { fromHEX } from '../crypto/crypto_utils'
+import { BSON } from 'db3-bson'
 //
 //
 // the db3 client v2 for developers
@@ -65,6 +72,73 @@ export class DB3ClientV2 {
             return [response.id, response.items[0].value]
         } else {
             throw new Error('fail to create database')
+        }
+    }
+
+    /**
+     * create a collection
+     */
+    async createCollection(
+        databaseAddress: string,
+        name: string,
+        index: Index[]
+    ) {
+        const collection: CollectionMutation = {
+            index,
+            collectionName: name,
+        }
+        const dm: Mutation = {
+            collectionMutations: [collection],
+            documentMutations: [],
+            dbAddress: fromHEX(databaseAddress),
+            action: MutationAction.AddCollection,
+            dbDesc: '',
+        }
+        const payload = Mutation.toBinary(dm)
+        const response = await this.storage_provider.sendMutation(
+            payload,
+            this.nonce.toString()
+        )
+        if (response.code == 0) {
+            this.nonce += 1
+            return response.id
+        } else {
+            throw new Error('fail to create collection')
+        }
+    }
+
+    /**
+     * create a document
+     *
+     */
+    async createDocument(
+        databaseAddress: string,
+        collectionName: string,
+        document: DocumentData
+    ) {
+        const documentMutation: DocumentMutation = {
+            collectionName,
+            documents: [BSON.serialize(document)],
+            ids: [],
+            masks: [],
+        }
+        const dm: Mutation = {
+            action: MutationAction.AddDocument,
+            dbAddress: fromHEX(databaseAddress),
+            collectionMutations: [],
+            documentMutations: [documentMutation],
+            dbDesc: '',
+        }
+        const payload = Mutation.toBinary(dm)
+        const response = await this.storage_provider.sendMutation(
+            payload,
+            this.nonce.toString()
+        )
+        if (response.code == 0) {
+            this.nonce += 1
+            return response.id
+        } else {
+            throw new Error('fail to create collection')
         }
     }
 }

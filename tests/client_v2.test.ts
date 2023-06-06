@@ -34,5 +34,16 @@ describe('test db3.js client module', () => {
             '0xaf2a873a6b5b1e75c34dcc941c0a638a785069862d07799c1b2ed358b690d238'
         )
         expect(dbId).toBe('0x50caab853a8440a929e6f58f51365d836726bc5e')
+        const id = await client.createCollection(dbId, 'collection1', [])
+        expect(id).toBe(
+            '0xd51f7bb2abca08f49cd8d8b21a1b0bb3e110c40aeed5ce38db8bcd78e0d94773'
+        )
+        const id2 = await client.createDocument(dbId, 'collection1', {
+            name: 'book1',
+            author: 'db3 developers',
+        })
+        expect(id2).toBe(
+            '0xbb0733757c4bdb8b08f47514da6a34f882ba632b5ad006e2ae1587314aa6d32f'
+        )
     })
 })

@@ -47,15 +47,23 @@ describe('test db3.js store module', () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent are coconut brave speak student dismiss'
         const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
-        const client = new DB3Client('http://127.0.0.1:26659', 'http://127.0.0.1:26639', wallet)
+        const client = new DB3Client(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            wallet
+        )
         const [dbId, txId] = await client.createDatabase('test')
         await new Promise((r) => setTimeout(r, 2000))
-        const dbs = await listMyDatabases('http://127.0.0.1:26659', 'http://127.0.0.1:26639', wallet)
+        const dbs = await listMyDatabases(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            wallet
+        )
         expect(dbs.length).toEqual(1)
         expect(dbs[0].desc).toEqual('test')
         const dbs2 = await listDatabases(
             'http://127.0.0.1:26659',
-          'http://127.0.0.1:26639',
+            'http://127.0.0.1:26639',
             wallet.getAddress(),
             wallet
         )
@@ -63,9 +71,18 @@ describe('test db3.js store module', () => {
         expect(dbs2[0].desc).toEqual('test')
     })
     test('test document curd', async () => {
-        const client = new DB3Client('http://127.0.0.1:26659', 'http://127.0.0.1:26639', wallet)
+        const client = new DB3Client(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            wallet
+        )
         const [dbId, txId] = await client.createDatabase()
-        const { db } = initializeDB3('http://127.0.0.1:26659', 'http://127.0.0.1:26639', dbId, wallet)
+        const { db } = initializeDB3(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            dbId,
+            wallet
+        )
         const indexList: Index[] = [
             {
                 name: 'idx1',
@@ -119,9 +136,18 @@ describe('test db3.js store module', () => {
     })
 
     test('test document query limit', async () => {
-        const client = new DB3Client('http://127.0.0.1:26659', 'http://127.0.0.1:26639', wallet)
+        const client = new DB3Client(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            wallet
+        )
         const [dbId, txId] = await client.createDatabase()
-        const { db } = initializeDB3('http://127.0.0.1:26659', 'http://127.0.0.1:26639', dbId, wallet)
+        const { db } = initializeDB3(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            dbId,
+            wallet
+        )
         const indexList: Index[] = [
             {
                 name: 'idx1',
@@ -157,9 +183,18 @@ describe('test db3.js store module', () => {
     })
 
     test('test document query with field filter', async () => {
-        const client = new DB3Client('http://127.0.0.1:26659','http://127.0.0.1:26639', wallet)
+        const client = new DB3Client(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            wallet
+        )
         const [dbId, txId] = await client.createDatabase()
-        const { db } = initializeDB3('http://127.0.0.1:26659', 'http://127.0.0.1:26639', dbId, wallet)
+        const { db } = initializeDB3(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            dbId,
+            wallet
+        )
         const indexList: Index[] = [
             {
                 name: 'idx1',
@@ -275,9 +310,18 @@ describe('test db3.js store module', () => {
     })
 
     test('test document query with composite filter', async () => {
-        const client = new DB3Client('http://127.0.0.1:26659', 'http://127.0.0.1:26639', wallet)
+        const client = new DB3Client(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            wallet
+        )
         const [dbId, txId] = await client.createDatabase()
-        const { db } = initializeDB3('http://127.0.0.1:26659', 'http://127.0.0.1:26639', dbId, wallet)
+        const { db } = initializeDB3(
+            'http://127.0.0.1:26659',
+            'http://127.0.0.1:26639',
+            dbId,
+            wallet
+        )
         const indexList: Index[] = [
             {
                 name: 'idx_combine',
