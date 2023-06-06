@@ -30,10 +30,11 @@ export interface DB3SdkRuntime {
 
 export function initializeDB3(
     node: string,
+    indexer: string,
     dbAddress: string,
     wallet: Wallet
 ): DB3SdkRuntime {
-    const dbClient = new DB3Client(node, wallet)
+    const dbClient = new DB3Client(node, indexer, wallet)
     const db = new DB3Store(dbAddress, dbClient)
     const db3Account = new DB3Account(wallet.getAddress(), dbClient)
     const db3Network = new DB3Network(dbClient)
@@ -47,10 +48,11 @@ export function initializeDB3(
 
 export function listDatabases(
     node: string,
+    indexer: string,
     sender: string,
     wallet: Wallet
 ): Promise<Record<string, any>[]> {
-    const client = new DB3Client(node, wallet)
+    const client = new DB3Client(node, indexer, wallet)
     return new Promise((resolve, reject) => {
         client.listDatabases(sender).then((dbs) => {
             resolve(dbs)
@@ -60,7 +62,8 @@ export function listDatabases(
 
 export function listMyDatabases(
     node: string,
+    indexer: string,
     wallet: Wallet
 ): Promise<Record<string, any>[]> {
-    return listDatabases(node, wallet.getAddress(), wallet)
+    return listDatabases(node, indexer, wallet.getAddress(), wallet)
 }

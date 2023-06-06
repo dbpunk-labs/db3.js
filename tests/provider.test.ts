@@ -47,7 +47,7 @@ describe('test db3.js provider module', () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
         const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_ED25519')
-        const provider = new StorageProvider('http://127.0.0.1:26659', wallet)
+        const provider = new StorageProvider('http://127.0.0.1:26659','http://127.0.0.1:26639', wallet)
         const meta: BroadcastMeta = {
             nonce: '9527',
             chainId: ChainId.MainNet,
@@ -77,7 +77,7 @@ describe('test db3.js provider module', () => {
         const mnemonic =
             'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss'
         const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
-        const provider = new StorageProvider('http://127.0.0.1:26659', wallet)
+        const provider = new StorageProvider('http://127.0.0.1:26659', 'http://127.0.0.1:26639', wallet)
         const meta: BroadcastMeta = {
             nonce: '9527',
             chainId: ChainId.MainNet,
