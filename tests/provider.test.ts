@@ -181,12 +181,9 @@ describe('test db3.js provider module', () => {
         }
         const mutation_body = await provider.getMutationBody(response.id)
         if (mutation_body.body) {
-            const typedMsg = new TextDecoder().decode(
-                mutation_body.body.payload
+            const [typedData, m, sig] = provider.parseMutationBody(
+                mutation_body.body
             )
-            const typedData = JSON.parse(typedMsg)
-            const data = fromHEX(typedData['message']['payload'])
-            const m = Mutation.fromBinary(data)
             expect(m.action).toBe(MutationAction.CreateDocumentDB)
         } else {
             expect(1).toBe(0)

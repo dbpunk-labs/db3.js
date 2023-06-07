@@ -21,7 +21,7 @@ import {
 } from '@protobuf-ts/grpcweb-transport'
 import { StorageNodeClient } from '../proto/db3_storage.client'
 import { PayloadType } from '../proto/db3_mutation_v2'
-import { MutationBody } from '../proto/db3_mutation_v2'
+import { MutationBody, Mutation } from '../proto/db3_mutation_v2'
 import {
     SendMutationRequest,
     GetNonceRequest,
