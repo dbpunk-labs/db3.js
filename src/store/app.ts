@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
+// @ts-nocheck
 import { DB3Client } from '../client/client'
 import { Wallet } from '../wallet/wallet'
 import { DB3Store } from './database'

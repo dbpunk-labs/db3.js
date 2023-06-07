@@ -31,9 +31,5 @@ export {
     DocumentReference,
 } from './store/document'
 export { limit, where, query } from './store/query'
-export {
-    DB3Account,
-    bytesToReadableNum,
-    unitsToReadableNum,
-} from './store/account'
 export { DB3Network } from './store/network'
+export { DB3Account } from './account/db3_account'

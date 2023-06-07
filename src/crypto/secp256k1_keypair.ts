@@ -92,7 +92,6 @@ export class Secp256k1Keypair implements Keypair {
     static generate(): Secp256k1Keypair {
         const secretKey = secp.utils.randomPrivateKey()
         const publicKey = secp.getPublicKey(secretKey, true)
-
         return new Secp256k1Keypair({ publicKey, secretKey })
     }
 

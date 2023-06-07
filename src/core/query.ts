@@ -32,7 +32,7 @@ import type { CollectionReference } from '../store/collection'
 export interface Query<T> {
     readonly filters: StructuredQuery_Filter[]
     readonly limit: StructuredQuery_Limit | null
-    readonly collection: CollectionReference<T>
+    readonly collection: CollectionReference<T> | null
 }
 
 export function parseQueryValue(value: unknown): StructuredQuery_Value {

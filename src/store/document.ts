@@ -2,7 +2,7 @@ import { CollectionReference, collection } from './collection'
 import { DB3Store } from './database'
 import { Query, QueryResult } from './query'
 import { StructuredQuery } from '../proto/db3_database'
-import { DocumentEntry, DocumentData } from '../client/client'
+import { DocumentEntry, DocumentData } from '../client/base'
 
 export class DocumentReference<T = DocumentData> {
     /** The type of this Firestore reference. */
@@ -63,7 +63,9 @@ export function getDocs<T = DocumentData>(
             })
         } else {
             const internalQuery = query._query
-            const colref = internalQuery.collection
+            if (!internalQuery.collection) {
+                throw new Error('collection is null')
+            }
             const squery: StructuredQuery = {
                 collectionName: internalQuery.collection.name,
             }
@@ -73,6 +75,7 @@ export function getDocs<T = DocumentData>(
             if (internalQuery.limit != null) {
                 squery.limit = internalQuery.limit
             }
+            const colref = internalQuery.collection
             db.client.runQuery<T>(db.address, squery).then((docs) => {
                 const new_docs = docs.map(
                     (item) => new DocumentReference<T>(colref, item)

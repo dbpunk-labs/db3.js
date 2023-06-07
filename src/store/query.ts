@@ -1,7 +1,7 @@
 import { DB3Store } from './database'
 import type { DocumentReference } from './document'
 import type { CollectionReference } from './collection'
-import type { DocumentData } from '../client/client'
+import type { DocumentData } from '../client/base'
 import {
     StructuredQuery_CompositeFilter,
     StructuredQuery_FieldFilter,
@@ -22,18 +22,9 @@ import {
 } from '../core/filter'
 
 export class Query<T = DocumentData> {
-    /** The type of this Firestore reference. */
     readonly type: 'query' | 'collection'
-    /**
-     * The `Firestore` instance for the Firestore database (useful for performing
-     * transactions, etc.).
-     */
     readonly db: DB3Store
-
     readonly _query: InternalQuery<T>
-
-    // This is the lite version of the Query class in the main SDK.
-
     /** @hideconstructor protected */
     constructor(db3store: DB3Store, _query: InternalQuery<T>) {
         this.db = db3store

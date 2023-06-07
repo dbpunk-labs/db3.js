@@ -21,7 +21,14 @@ import {
 } from '@protobuf-ts/grpcweb-transport'
 import { StorageNodeClient } from '../proto/db3_storage.client'
 import { PayloadType } from '../proto/db3_mutation_v2'
-import { SendMutationRequest, GetNonceRequest } from '../proto/db3_storage'
+import { MutationBody } from '../proto/db3_mutation_v2'
+import {
+    SendMutationRequest,
+    GetNonceRequest,
+    GetMutationHeaderRequest,
+    GetMutationBodyRequest,
+    ScanMutationHeaderRequest,
+} from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/db3_account'
 
@@ -87,5 +94,39 @@ export class StorageProviderV2 {
         const request = await this.wrapTypedRequest(mutation, nonce)
         const { response } = await this.client.sendMutation(request)
         return response
+    }
+
+    async getMutationHeader(block: string, order: number) {
+        const request: GetMutationHeaderRequest = {
+            blockId: block,
+            orderId: order,
+        }
+        const { response } = await this.client.getMutationHeader(request)
+        return response
+    }
+
+    async getMutationBody(id: string) {
+        const request: GetMutationBodyRequest = {
+            id,
+        }
+        const { response } = await this.client.getMutationBody(request)
+        return response
+    }
+
+    async scanMutationHeaders(start: number, limit: number) {
+        const request: ScanMutationHeaderRequest = {
+            start,
+            limit,
+        }
+        const { response } = await this.client.scanMutationHeader(request)
+        return response
+    }
+
+    parseMutationBody(body: MutationBody) {
+        const typedMsg = new TextDecoder().decode(body.payload)
+        const typedData = JSON.parse(typedMsg)
+        const data = fromHEX(typedData['message']['payload'])
+        const m = Mutation.fromBinary(data)
+        return [typedData, m, body.signature]
     }
 }

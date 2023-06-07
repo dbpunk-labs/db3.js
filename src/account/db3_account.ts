@@ -15,21 +15,28 @@
 // limitations under the License.
 //
 
-import type { Client, SignTypedDataParameters, Address } from 'viem'
+import type { WalletClient, SignTypedDataParameters, Address, Hex } from 'viem'
+import * as secp from '@noble/secp256k1'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { mainnet } from 'viem/chains'
+import { toHEX } from '../crypto/crypto_utils'
 
 export class DB3Account {
-    readonly client: Client
+    readonly client: WalletClient
     readonly address: Address
 
-    constructor(client: Client, address: Address) {
+    constructor(client: WalletClient, address: Address) {
         this.client = client
         this.address = address
     }
 
-    static createFromPrivateKey(privateKey: string): DB3Account {
+    static genRandomAccount(): DB3Account {
+        const secretKey = '0x' + toHEX(secp.utils.randomPrivateKey())
+        return DB3Account.createFromPrivateKey(secretKey)
+    }
+
+    static createFromPrivateKey(privateKey: Hex): DB3Account {
         const account = privateKeyToAccount(privateKey)
         const client = createWalletClient({
             account,
