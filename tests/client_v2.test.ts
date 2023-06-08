@@ -36,6 +36,28 @@ describe('test db3.js client module', () => {
         }
     })
 
+    test('test scan mutation headers', async () => {
+        const db3_account = DB3Account.genRandomAccount()
+        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        try {
+            await client.syncNonce()
+            const [txId, dbId, block, order] =
+                await client.createSimpleDatabase()
+            const [txId2, block2, order2] = await client.createDocument(
+                dbId,
+                'collection1',
+                {
+                    name: 'book1',
+                    author: 'db3 developers',
+                }
+            )
+            const headers = await client.scanMutationHeaders(0, 1)
+            expect(headers.length).toBe(1)
+        } catch (e) {
+            console.log(e)
+            expect(1).toBe(0)
+        }
+    })
     test('test add collection', async () => {
         const db3_account = DB3Account.genRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)

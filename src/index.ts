@@ -32,4 +32,15 @@ export {
 } from './store/document'
 export { limit, where, query } from './store/query'
 export { DB3Network } from './store/network'
+
+//===================v2======================
+
 export { DB3Account } from './account/db3_account'
+export { MutationHeader } from './proto/db3_mutation_v2'
+export { DB3ClientV2 } from './client/client_v2'
+export {
+    createAccountFromPrivateKey,
+    createRandomAccount,
+    initializeClient,
+} from './store/app_v2'
+export { createDocumentDatabase } from './store/database_v2'

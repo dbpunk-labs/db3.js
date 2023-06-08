@@ -43,14 +43,23 @@ export class DB3ClientV2 {
      * new a db3 client v2 with db3 node url and wallet
      *
      */
-    constructor(url: string, account: Account) {
+    constructor(url: string, account: DB3Account) {
         this.storage_provider = new StorageProviderV2(url, account)
         this.account = account
+        this.nonce = 0
     }
 
     async syncNonce() {
         const nonce = await this.storage_provider.getNonce()
         this.nonce = parseInt(nonce)
+    }
+
+    getNonce() {
+        return this.nonce
+    }
+
+    getAccount() {
+        return this.account.address
     }
 
     /**
@@ -59,7 +68,7 @@ export class DB3ClientV2 {
      */
     async createSimpleDatabase(
         desc: string = ''
-    ): [string, string, string, number] {
+    ): Promise<[string, string, string, number]> {
         const docDatabaseMutation: DocumentDatabaseMutation = {
             dbDesc: desc,
         }
@@ -100,7 +109,7 @@ export class DB3ClientV2 {
         databaseAddress: string,
         name: string,
         index: Index[]
-    ): [string, string, number] {
+    ): Promise<[string, string, number]> {
         const collection: CollectionMutation = {
             index,
             collectionName: name,
@@ -263,8 +272,16 @@ export class DB3ClientV2 {
     async getMutationBody(id: string) {
         const response = await this.storage_provider.getMutationBody(id)
         if (response.body) {
-            return this.storage_provider_v2.parseMutationBody(response.body)
+            return this.storage_provider.parseMutationBody(response.body)
         }
         throw new Error('mutation not found')
+    }
+
+    async scanMutationHeaders(start: number, limit: number) {
+        const response = await this.storage_provider.scanMutationHeaders(
+            start,
+            limit
+        )
+        return response.headers
     }
 }

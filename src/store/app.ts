@@ -27,7 +27,6 @@ export interface DB3SdkRuntime {
     db3Account: DB3Account
     DB3Network: DB3Network
 }
-
 export function initializeDB3(
     node: string,
     indexer: string,

@@ -48,7 +48,8 @@ echo "start db3 store..."
 sleep 1
 
 ./bin/db3 indexer >indexer.log 2>&1  &
-sleep 2
+
+sleep 1
 ./bin/tendermint unsafe_reset_all && ./bin/tendermint start
-sleep 2
+sleep 1
 

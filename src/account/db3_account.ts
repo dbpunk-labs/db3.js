@@ -32,8 +32,8 @@ export class DB3Account {
     }
 
     static genRandomAccount(): DB3Account {
-        const secretKey = '0x' + toHEX(secp.utils.randomPrivateKey())
-        return DB3Account.createFromPrivateKey(secretKey)
+        const rawKey = '0x' + toHEX(secp.utils.randomPrivateKey())
+        return DB3Account.createFromPrivateKey(rawKey as Hex)
     }
 
     static createFromPrivateKey(privateKey: Hex): DB3Account {

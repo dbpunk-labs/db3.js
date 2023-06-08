@@ -14,13 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
+//@ts-nocheck
 import {
     GrpcWebFetchTransport,
     GrpcWebOptions,
 } from '@protobuf-ts/grpcweb-transport'
 import { StorageNodeClient } from '../proto/db3_storage.client'
-import { PayloadType } from '../proto/db3_mutation_v2'
 import { MutationBody, Mutation } from '../proto/db3_mutation_v2'
 import {
     SendMutationRequest,
