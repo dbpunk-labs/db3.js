@@ -58,6 +58,52 @@ describe('test db3.js client module', () => {
             expect(1).toBe(0)
         }
     })
+    test('test add large mutations', async () => {
+        const db3_account = DB3Account.genRandomAccount()
+        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        try {
+            await client.syncNonce()
+            for (var i = 0; i < 1; i++) {
+                const [txId, dbId, block, order] =
+                    await client.createSimpleDatabase()
+                const [txId2, block2, order2] = await client.createDocument(
+                    dbId,
+                    'collection1',
+                    {
+                        name: 'book1',
+                        author: 'db3 developers',
+                        id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
+                        time: 1686285013,
+                        fee: 0.069781,
+                    }
+                )
+                const [txId3, block3, order3] = await client.createDocument(
+                    dbId,
+                    'collection1',
+                    {
+                        name: 'book1',
+                        author: 'db3 developers',
+                        id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
+                        time: 1686285013,
+                        fee: 0.069781,
+                    }
+                )
+                await client.deleteDocument(dbId, 'collection1', ['id1'])
+                await client.updateDocument(
+                    dbId,
+                    'collection1',
+                    {
+                        name: 'book1',
+                        author: 'db3 developers',
+                    },
+                    'id111',
+                    ['name', 'author']
+                )
+            }
+        } catch (e) {
+            expect(1).toBe(0)
+        }
+    })
     test('test add collection', async () => {
         const db3_account = DB3Account.genRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)

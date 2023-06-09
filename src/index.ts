@@ -37,6 +37,7 @@ export { DB3Network } from './store/network'
 
 export { DB3Account } from './account/db3_account'
 export { MutationHeader } from './proto/db3_mutation_v2'
+export { RollupRecord } from './proto/db3_rollup'
 export { DB3ClientV2 } from './client/client_v2'
 export {
     createAccountFromPrivateKey,

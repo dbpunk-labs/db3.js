@@ -284,4 +284,12 @@ export class DB3ClientV2 {
         )
         return response.headers
     }
+
+    async scanRollupRecords(start: number, limit: number) {
+        const response = await this.storage_provider.scanRollupRecords(
+            start,
+            limit
+        )
+        return response.records
+    }
 }

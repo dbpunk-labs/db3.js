@@ -27,6 +27,7 @@ import {
     GetMutationHeaderRequest,
     GetMutationBodyRequest,
     ScanMutationHeaderRequest,
+    ScanRollupRecordRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/db3_account'
@@ -118,6 +119,15 @@ export class StorageProviderV2 {
             limit,
         }
         const { response } = await this.client.scanMutationHeader(request)
+        return response
+    }
+
+    async scanRollupRecords(start: number, limit: number) {
+        const request: ScanRollupRecordRequest = {
+            start,
+            limit,
+        }
+        const { response } = await this.client.scanRollupRecord(request)
         return response
     }
 
