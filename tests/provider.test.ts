@@ -22,8 +22,12 @@ import {
     DatabaseAction,
 } from '../src/proto/db3_mutation'
 
-import { Mutation, MutationAction } from '../src/proto/db3_mutation_v2'
-
+import {
+    Mutation,
+    MutationAction,
+    Mutation_BodyWrapper,
+    DocumentDatabaseMutation,
+} from '../src/proto/db3_mutation_v2'
 import { ChainId, ChainRole, BroadcastMeta } from '../src/proto/db3_base'
 import { Secp256k1Keypair } from '../src/crypto/secp256k1_keypair'
 import { Secp256k1PublicKey } from '../src/crypto/secp256k1_publickey'
@@ -35,7 +39,7 @@ import {
 import { StorageProviderV2 } from '../src/provider/storage_provider_v2'
 
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
-import { toB64, fromB64 } from '../src/crypto/crypto_utils'
+import { toB64, fromB64, fromHEX } from '../src/crypto/crypto_utils'
 import { DB3Account } from '../src/account/db3_account'
 
 describe('test db3.js provider module', () => {
@@ -110,6 +114,7 @@ describe('test db3.js provider module', () => {
         )
         localStorage.clear()
     })
+
     test('provider send mutation test', async () => {
         const privateKey =
             '0xad689d9b7751da07b0fb39c5091672cbfe50f59131db015f8a0e76c9790a6fcc'
@@ -121,20 +126,67 @@ describe('test db3.js provider module', () => {
             'http://127.0.0.1:26619',
             db3_account
         )
+        const docDatabaseMutation: DocumentDatabaseMutation = {
+            dbDesc: 'desc',
+        }
+        const body: Mutation_BodyWrapper = {
+            body: { oneofKind: 'docDatabaseMutation', docDatabaseMutation },
+            dbAddress: new Uint8Array(0),
+        }
         const dm: Mutation = {
-            collectionMutations: [],
-            documentMutations: [],
-            dbAddress: new Uint8Array(),
             action: MutationAction.CreateDocumentDB,
-            dbDesc: '',
+            bodies: [body],
         }
         const nonce = await provider.getNonce()
         const payload = Mutation.toBinary(dm)
         const response = await provider.sendMutation(payload, nonce)
         expect(response.id).toBe(
-            '0xaf2a873a6b5b1e75c34dcc941c0a638a785069862d07799c1b2ed358b690d238'
+            '0xb2e9e60f3b94697ea06151d3e1a55b5c814ebdcb2be52aa6ef26e8bf9924f590'
         )
         const response2 = await provider.sendMutation(payload, '1')
         expect(response2.code).toBe(1)
+    })
+
+    test('provider get mutation header test', async () => {
+        const db3_account = DB3Account.genRandomAccount()
+        const provider = new StorageProviderV2(
+            'http://127.0.0.1:26619',
+            db3_account
+        )
+        const nonce = await provider.getNonce()
+        expect(nonce).toBe('1')
+        const docDatabaseMutation: DocumentDatabaseMutation = {
+            dbDesc: 'desc',
+        }
+        const body: Mutation_BodyWrapper = {
+            body: { oneofKind: 'docDatabaseMutation', docDatabaseMutation },
+            dbAddress: new Uint8Array(0),
+        }
+        const dm: Mutation = {
+            action: MutationAction.CreateDocumentDB,
+            bodies: [body],
+        }
+        const payload = Mutation.toBinary(dm)
+        const response = await provider.sendMutation(payload, nonce)
+        expect(response.code).toBe(0)
+        const mutation_header = await provider.getMutationHeader(
+            response.block,
+            response.order
+        )
+        if (mutation_header.header) {
+            expect(mutation_header.header.blockId).toBe(response.block)
+            expect(mutation_header.header.orderId).toBe(response.order)
+        } else {
+            expect(1).toBe(0)
+        }
+        const mutation_body = await provider.getMutationBody(response.id)
+        if (mutation_body.body) {
+            const [typedData, m, sig] = provider.parseMutationBody(
+                mutation_body.body
+            )
+            expect(m.action).toBe(MutationAction.CreateDocumentDB)
+        } else {
+            expect(1).toBe(0)
+        }
     })
 })

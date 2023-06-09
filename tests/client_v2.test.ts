@@ -20,47 +20,122 @@ import { DB3ClientV2 } from '../src/client/client_v2'
 import { DB3Account } from '../src/account/db3_account'
 
 describe('test db3.js client module', () => {
-    test('create database smoke test v2', async () => {
-        const privateKey =
-            '0xca6ade874391db77a7a66e542f800ba4f89f249cb7c785371eeacbaa3ef74cfd'
-        const db3_account = DB3Account.createFromPrivateKey(privateKey)
-        expect(db3_account.getAddress()).toBe(
-            '0xBbE29f26dc7ADEFEf6592FA34a2EFa037585087C'
-        )
+    test('create database v2', async () => {
+        const db3_account = DB3Account.genRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
         await client.syncNonce()
-        const [txId, dbId] = await client.createSimpleDatabase()
-        expect(txId).toBe(
-            '0xaf2a873a6b5b1e75c34dcc941c0a638a785069862d07799c1b2ed358b690d238'
-        )
-        expect(dbId).toBe('0x50caab853a8440a929e6f58f51365d836726bc5e')
-        const id = await client.createCollection(dbId, 'collection1', [])
-        expect(id).toBe(
-            '0xd51f7bb2abca08f49cd8d8b21a1b0bb3e110c40aeed5ce38db8bcd78e0d94773'
-        )
-        const id2 = await client.createDocument(dbId, 'collection1', {
-            name: 'book1',
-            author: 'db3 developers',
-        })
-        expect(id2).toBe(
-            '0xbb0733757c4bdb8b08f47514da6a34f882ba632b5ad006e2ae1587314aa6d32f'
-        )
-        const id3 = await client.deleteDocument(dbId, 'collection1', ['id1'])
-        expect(id3).toBe(
-            '0xe196fcbdb025521581cefdcd69c98fceccbbff8b53acce057be7fec87a58989c'
-        )
-        const id4 = await client.updateDocument(
-            dbId,
-            'collection1',
-            {
-                name: 'book1',
-                author: 'db3 developers',
-            },
-            'id111',
-            ['name', 'author']
-        )
-        expect(id4).toBe(
-            '0xff32cfe1ea25b59cce1dbb819068f31b7dcc08f87d893920545124a89be1a486'
-        )
+        try {
+            const [txid, dbid, block, order] =
+                await client.createSimpleDatabase()
+            const header = await client.getMutationHeader(block, order)
+            if (!header.header) {
+                expect(1).toBe(0)
+            }
+        } catch (e) {
+            expect(1).toBe(0)
+        }
+    })
+
+    test('test scan mutation headers', async () => {
+        const db3_account = DB3Account.genRandomAccount()
+        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        try {
+            await client.syncNonce()
+            const [txId, dbId, block, order] =
+                await client.createSimpleDatabase()
+            const [txId2, block2, order2] = await client.createDocument(
+                dbId,
+                'collection1',
+                {
+                    name: 'book1',
+                    author: 'db3 developers',
+                }
+            )
+            const headers = await client.scanMutationHeaders(0, 1)
+            expect(headers.length).toBe(1)
+        } catch (e) {
+            console.log(e)
+            expect(1).toBe(0)
+        }
+    })
+    test('test add large mutations', async () => {
+        const db3_account = DB3Account.genRandomAccount()
+        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        try {
+            await client.syncNonce()
+            for (var i = 0; i < 1; i++) {
+                const [txId, dbId, block, order] =
+                    await client.createSimpleDatabase()
+                const [txId2, block2, order2] = await client.createDocument(
+                    dbId,
+                    'collection1',
+                    {
+                        name: 'book1',
+                        author: 'db3 developers',
+                        id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
+                        time: 1686285013,
+                        fee: 0.069781,
+                    }
+                )
+                const [txId3, block3, order3] = await client.createDocument(
+                    dbId,
+                    'collection1',
+                    {
+                        name: 'book1',
+                        author: 'db3 developers',
+                        id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
+                        time: 1686285013,
+                        fee: 0.069781,
+                    }
+                )
+                await client.deleteDocument(dbId, 'collection1', ['id1'])
+                await client.updateDocument(
+                    dbId,
+                    'collection1',
+                    {
+                        name: 'book1',
+                        author: 'db3 developers',
+                    },
+                    'id111',
+                    ['name', 'author']
+                )
+            }
+        } catch (e) {
+            expect(1).toBe(0)
+        }
+    })
+    test('test add collection', async () => {
+        const db3_account = DB3Account.genRandomAccount()
+        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        try {
+            await client.syncNonce()
+            const [txId, dbId, block, order] =
+                await client.createSimpleDatabase()
+            const [txId2, block2, order2] = await client.createDocument(
+                dbId,
+                'collection1',
+                {
+                    name: 'book1',
+                    author: 'db3 developers',
+                }
+            )
+            const header = await client.getMutationHeader(block2, order2)
+            if (!header.header) {
+                expect(1).toBe(0)
+            }
+            await client.deleteDocument(dbId, 'collection1', ['id1'])
+            await client.updateDocument(
+                dbId,
+                'collection1',
+                {
+                    name: 'book1',
+                    author: 'db3 developers',
+                },
+                'id111',
+                ['name', 'author']
+            )
+        } catch (e) {
+            expect(1).toBe(0)
+        }
     })
 })

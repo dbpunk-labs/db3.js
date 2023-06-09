@@ -21,6 +21,8 @@ import {
     CollectionMutation,
     DocumentMutation,
     DocumentMask,
+    Mutation_BodyWrapper,
+    DocumentDatabaseMutation,
 } from '../proto/db3_mutation_v2'
 import type { DocumentData, DocumentEntry } from './base'
 import { Index } from '../proto/db3_database'
@@ -41,9 +43,10 @@ export class DB3ClientV2 {
      * new a db3 client v2 with db3 node url and wallet
      *
      */
-    constructor(url: string, account: Account) {
+    constructor(url: string, account: DB3Account) {
         this.storage_provider = new StorageProviderV2(url, account)
         this.account = account
+        this.nonce = 0
     }
 
     async syncNonce() {
@@ -51,26 +54,49 @@ export class DB3ClientV2 {
         this.nonce = parseInt(nonce)
     }
 
+    getNonce() {
+        return this.nonce
+    }
+
+    getAccount() {
+        return this.account.address
+    }
+
     /**
      * create a database and return the address of it
      *
      */
-    async createSimpleDatabase(desc: string = ''): [string, string] {
-        const dm: Mutation = {
-            collectionMutations: [],
-            documentMutations: [],
-            dbAddress: new Uint8Array(),
-            action: MutationAction.CreateDocumentDB,
+    async createSimpleDatabase(
+        desc: string = ''
+    ): Promise<[string, string, string, number]> {
+        const docDatabaseMutation: DocumentDatabaseMutation = {
             dbDesc: desc,
         }
+
+        const body: Mutation_BodyWrapper = {
+            body: { oneofKind: 'docDatabaseMutation', docDatabaseMutation },
+            dbAddress: new Uint8Array(0),
+        }
+
+        const dm: Mutation = {
+            action: MutationAction.CreateDocumentDB,
+            bodies: [body],
+        }
+
         const payload = Mutation.toBinary(dm)
         const response = await this.storage_provider.sendMutation(
             payload,
             this.nonce.toString()
         )
+
         if (response.code == 0) {
             this.nonce += 1
-            return [response.id, response.items[0].value]
+            return [
+                response.id,
+                response.items[0].value,
+                response.block,
+                response.order,
+            ]
         } else {
             throw new Error('fail to create database')
         }
@@ -83,26 +109,34 @@ export class DB3ClientV2 {
         databaseAddress: string,
         name: string,
         index: Index[]
-    ) {
+    ): Promise<[string, string, number]> {
         const collection: CollectionMutation = {
             index,
             collectionName: name,
         }
-        const dm: Mutation = {
-            collectionMutations: [collection],
-            documentMutations: [],
+
+        const body: Mutation_BodyWrapper = {
+            body: {
+                oneofKind: 'collectionMutation',
+                collectionMutation: collection,
+            },
             dbAddress: fromHEX(databaseAddress),
-            action: MutationAction.AddCollection,
-            dbDesc: '',
         }
+
+        const dm: Mutation = {
+            action: MutationAction.AddCollection,
+            bodies: [body],
+        }
+
         const payload = Mutation.toBinary(dm)
         const response = await this.storage_provider.sendMutation(
             payload,
             this.nonce.toString()
         )
+
         if (response.code == 0) {
             this.nonce += 1
-            return response.id
+            return [response.id, response.block, response.order]
         } else {
             throw new Error('fail to create collection')
         }
@@ -123,12 +157,16 @@ export class DB3ClientV2 {
             ids: [],
             masks: [],
         }
+        const body: Mutation_BodyWrapper = {
+            body: {
+                oneofKind: 'documentMutation',
+                documentMutation,
+            },
+            dbAddress: fromHEX(databaseAddress),
+        }
         const dm: Mutation = {
             action: MutationAction.AddDocument,
-            dbAddress: fromHEX(databaseAddress),
-            collectionMutations: [],
-            documentMutations: [documentMutation],
-            dbDesc: '',
+            bodies: [body],
         }
         const payload = Mutation.toBinary(dm)
         const response = await this.storage_provider.sendMutation(
@@ -137,7 +175,7 @@ export class DB3ClientV2 {
         )
         if (response.code == 0) {
             this.nonce += 1
-            return response.id
+            return [response.id, response.block, response.order]
         } else {
             throw new Error('fail to create collection')
         }
@@ -154,12 +192,16 @@ export class DB3ClientV2 {
             ids,
             masks: [],
         }
-        const dm: Mutation = {
-            collectionMutations: [],
-            documentMutations: [documentMutation],
+        const body: Mutation_BodyWrapper = {
+            body: {
+                oneofKind: 'documentMutation',
+                documentMutation,
+            },
             dbAddress: fromHEX(databaseAddress),
+        }
+        const dm: Mutation = {
             action: MutationAction.DeleteDocument,
-            dbDesc: '',
+            bodies: [body],
         }
         const payload = Mutation.toBinary(dm)
         const response = await this.storage_provider.sendMutation(
@@ -168,7 +210,7 @@ export class DB3ClientV2 {
         )
         if (response.code == 0) {
             this.nonce += 1
-            return response.id
+            return [response.id, response.block, response.order]
         } else {
             throw new Error('fail to create collection')
         }
@@ -195,12 +237,16 @@ export class DB3ClientV2 {
             ids: [id],
             masks: [documentMask],
         }
-        const dm: Mutation = {
-            collectionMutations: [],
-            documentMutations: [documentMutation],
+        const body: Mutation_BodyWrapper = {
+            body: {
+                oneofKind: 'documentMutation',
+                documentMutation,
+            },
             dbAddress: fromHEX(databaseAddress),
+        }
+        const dm: Mutation = {
             action: MutationAction.UpdateDocument,
-            dbDesc: '',
+            bodies: [body],
         }
         const payload = Mutation.toBinary(dm)
         const response = await this.storage_provider.sendMutation(
@@ -209,9 +255,41 @@ export class DB3ClientV2 {
         )
         if (response.code == 0) {
             this.nonce += 1
-            return response.id
+            return [response.id, response.block, response.order]
         } else {
             throw new Error('fail to create collection')
         }
+    }
+
+    async getMutationHeader(block: string, order: number) {
+        const response = await this.storage_provider.getMutationHeader(
+            block,
+            order
+        )
+        return response
+    }
+
+    async getMutationBody(id: string) {
+        const response = await this.storage_provider.getMutationBody(id)
+        if (response.body) {
+            return this.storage_provider.parseMutationBody(response.body)
+        }
+        throw new Error('mutation not found')
+    }
+
+    async scanMutationHeaders(start: number, limit: number) {
+        const response = await this.storage_provider.scanMutationHeaders(
+            start,
+            limit
+        )
+        return response.headers
+    }
+
+    async scanRollupRecords(start: number, limit: number) {
+        const response = await this.storage_provider.scanRollupRecords(
+            start,
+            limit
+        )
+        return response.records
     }
 }

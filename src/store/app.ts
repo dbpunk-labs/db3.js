@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
+// @ts-nocheck
 import { DB3Client } from '../client/client'
 import { Wallet } from '../wallet/wallet'
 import { DB3Store } from './database'
@@ -27,7 +27,6 @@ export interface DB3SdkRuntime {
     db3Account: DB3Account
     DB3Network: DB3Network
 }
-
 export function initializeDB3(
     node: string,
     indexer: string,

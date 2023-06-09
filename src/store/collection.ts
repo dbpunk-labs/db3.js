@@ -18,15 +18,21 @@
 import { Index } from '../proto/db3_database'
 import { DB3Store } from './database'
 import { DocumentReference } from './document'
-import type { DocumentData } from '../client/client'
+import type { DocumentData } from '../client/base'
 import { Query } from './query'
+import { Query as InternalQuery } from '../core/query'
 
 export class CollectionReference<T = DocumentData> extends Query<T> {
     readonly type = 'collection'
     readonly db: DB3Store
     readonly name: string
     constructor(db: DB3Store, name: string) {
-        super(db)
+        const internalQuery: InternalQuery<T> = {
+            filters: [],
+            limit: null,
+            collection: null,
+        }
+        super(db, internalQuery)
         this.name = name
         this.db = db
     }
@@ -46,11 +52,19 @@ export function collection<T = DocumentData>(
     return new Promise((resolve, reject) => {
         db.getCollections(name).then((collection) => {
             if (!collection) {
-                db.client
-                    .createCollection(db.address, name, index)
-                    .then((txid) => {
-                        resolve(new CollectionReference<T>(db, name))
-                    })
+                if (!index) {
+                    db.client
+                        .createCollection(db.address, name, [])
+                        .then((txid) => {
+                            resolve(new CollectionReference<T>(db, name))
+                        })
+                } else {
+                    db.client
+                        .createCollection(db.address, name, index)
+                        .then((txid) => {
+                            resolve(new CollectionReference<T>(db, name))
+                        })
+                }
             } else {
                 resolve(new CollectionReference<T>(db, name))
             }
