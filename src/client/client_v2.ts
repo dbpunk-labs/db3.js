@@ -292,8 +292,13 @@ export class DB3ClientV2 {
         )
         return response.records
     }
-    async getDatabaseOfOwner(owner:string) {
+    async getDatabaseOfOwner(owner: string) {
         const response = await this.storage_provider.getDatabaseOfOwner(owner)
         return response.databases
+    }
+
+    async getCollectionOfDatabase(db: string) {
+        const response = await this.storage_provider.getCollectionOfDatabase(db)
+        return response.collections
     }
 }
