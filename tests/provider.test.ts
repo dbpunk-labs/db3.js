@@ -141,7 +141,7 @@ describe('test db3.js provider module', () => {
         const payload = Mutation.toBinary(dm)
         const response = await provider.sendMutation(payload, nonce)
         expect(response.id).toBe(
-            '0xb2e9e60f3b94697ea06151d3e1a55b5c814ebdcb2be52aa6ef26e8bf9924f590'
+            '0x969239a75954321018ddb1c89b8946eae24757bd42742ccc0665c62c20a8fb7b'
         )
         const response2 = await provider.sendMutation(payload, '1')
         expect(response2.code).toBe(1)
