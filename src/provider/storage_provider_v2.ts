@@ -28,6 +28,8 @@ import {
     GetMutationBodyRequest,
     ScanMutationHeaderRequest,
     ScanRollupRecordRequest,
+    GetDatabaseOfOwnerRequest,
+    GetCollectionOfDatabase,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/db3_account'
@@ -128,6 +130,23 @@ export class StorageProviderV2 {
             limit,
         }
         const { response } = await this.client.scanRollupRecord(request)
+        return response
+    }
+
+    async getDatabaseOfOwner(owner: string) {
+        const request: GetDatabaseOfOwnerRequest = {
+            owner,
+        }
+        const { response } = await this.client.getDatabaseOfOwner(request)
+        return response
+    }
+
+    async getCollectionOfDatabase(db: string) {
+        const request: GetCollectionOfDatabaseRequest = {
+            dbAddr: db,
+        }
+
+        const { response } = await this.client.getCollectionOfDatabase(request)
         return response
     }
 

@@ -31,6 +31,10 @@ describe('test db3.js client module', () => {
             if (!header.header) {
                 expect(1).toBe(0)
             }
+            const databases = await client.getDatabaseOfOwner(
+                db3_account.address
+            )
+            expect(1).toBe(databases.length)
         } catch (e) {
             expect(1).toBe(0)
         }
@@ -111,30 +115,15 @@ describe('test db3.js client module', () => {
             await client.syncNonce()
             const [txId, dbId, block, order] =
                 await client.createSimpleDatabase()
-            const [txId2, block2, order2] = await client.createDocument(
+            const [txId2, block2, order2] = await client.createCollection(
                 dbId,
                 'collection1',
-                {
-                    name: 'book1',
-                    author: 'db3 developers',
-                }
+                []
             )
-            const header = await client.getMutationHeader(block2, order2)
-            if (!header.header) {
-                expect(1).toBe(0)
-            }
-            await client.deleteDocument(dbId, 'collection1', ['id1'])
-            await client.updateDocument(
-                dbId,
-                'collection1',
-                {
-                    name: 'book1',
-                    author: 'db3 developers',
-                },
-                'id111',
-                ['name', 'author']
-            )
+            const collections = await client.getCollectionOfDatabase(dbId)
+            expect(1).toBe(collections.length)
         } catch (e) {
+            console.log(e)
             expect(1).toBe(0)
         }
     })
