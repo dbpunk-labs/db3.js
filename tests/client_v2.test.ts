@@ -105,6 +105,7 @@ describe('test db3.js client module', () => {
                 )
             }
         } catch (e) {
+            console.log(e)
             expect(1).toBe(0)
         }
     })
@@ -115,13 +116,20 @@ describe('test db3.js client module', () => {
             await client.syncNonce()
             const [txId, dbId, block, order] =
                 await client.createSimpleDatabase()
+
             const [txId2, block2, order2] = await client.createCollection(
                 dbId,
                 'collection1',
-                []
+                [
+                    {
+                        name: 'idx1',
+                        fields: ['f1', 'f2'],
+                    },
+                ]
             )
             const collections = await client.getCollectionOfDatabase(dbId)
             expect(1).toBe(collections.length)
+            console.log(collections)
         } catch (e) {
             console.log(e)
             expect(1).toBe(0)

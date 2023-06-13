@@ -30,6 +30,7 @@ import {
     ScanRollupRecordRequest,
     GetDatabaseOfOwnerRequest,
     GetCollectionOfDatabase,
+    ScanGcRecordRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/db3_account'
@@ -130,6 +131,15 @@ export class StorageProviderV2 {
             limit,
         }
         const { response } = await this.client.scanRollupRecord(request)
+        return response
+    }
+
+    async scanGcRecords(start: number, limit: number) {
+        const request: ScanGcRecordRequest = {
+            start,
+            limit,
+        }
+        const { response } = await this.client.scanGcRecord(request)
         return response
     }
 
