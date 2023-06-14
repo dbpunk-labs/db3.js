@@ -16,7 +16,12 @@
 //
 
 import { describe, expect, test } from '@jest/globals'
-import { DB3ClientV2 } from '../src/client/client_v2'
+import {
+    DB3ClientV2,
+    createClient,
+    syncAccountNonce,
+} from '../src/client/client_v2'
+import { Client } from '../src/client/types'
 import { createRandomAccount } from '../src/account/db3_account'
 import {
     createDocumentDatabase,
@@ -31,14 +36,16 @@ describe('test db3.js sdk database', () => {
     test('database smoke test from sdk', async () => {
         // test create database and show database
         const account = createRandomAccount()
-        const client = new DB3ClientV2('http://127.0.0.1:26619', account)
-        await client.syncNonce()
+        const client = createClient('http://127.0.0.1:26619', '', account)
+        await syncAccountNonce(client)
         const databases1 = await showDatabase(account.address, client)
         expect(databases1.length).toBe(0)
+
         const { db, result } = await createDocumentDatabase(client, 'test_db')
         expect(db).toBeDefined()
         expect(result).toBeDefined()
         expect(result.id).toBeTruthy()
+
         const databases2 = await showDatabase(account.address, client)
         expect(databases2.length).toBe(1)
         expect(databases2[0].addr).toBe(db.addr)
@@ -48,9 +55,8 @@ describe('test db3.js sdk database', () => {
 
     test('collection smoke test from sdk', async () => {
         const account = createRandomAccount()
-        const client = new DB3ClientV2('http://127.0.0.1:26619', account)
-        await client.syncNonce()
-
+        const client = createClient('http://127.0.0.1:26619', '', account)
+        await syncAccountNonce(client)
         const { db, result } = await createDocumentDatabase(client, 'test_db2')
         const collections = await showCollection(db)
         expect(collections.length).toBe(0)
