@@ -15,49 +15,92 @@
 // limitations under the License.
 //
 
-import type { WalletClient, SignTypedDataParameters, Address, Hex } from 'viem'
+import type {
+    WalletClient,
+    SignTypedDataParameters,
+    Hex,
+    SignTypedDataReturnType,
+} from 'viem'
+import type { DB3Account } from './types'
 import * as secp from '@noble/secp256k1'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { mainnet } from 'viem/chains'
 import { toHEX } from '../crypto/crypto_utils'
 
-export class DB3Account {
-    readonly client: WalletClient
-    readonly address: Address
+/**
+ *
+ * Create a {@link DB3Account} from a hex format private key
+ *
+ * ```ts
+ * const account = createFromPrivateKey("0x........")
+ * ```
+ * @param privatekey - a hex format private key string
+ * @returns the instance of {@link DB3ACCOUNT}
+ *
+ **/
+export function createFromPrivateKey(privateKey: Hex): DB3Account {
+    const account = privateKeyToAccount(privateKey)
+    const client = createWalletClient({
+        account,
+        chain: mainnet,
+        transport: http(),
+    })
+    const address = account.address
+    return {
+        client,
+        address,
+    } as DB3Account
+}
 
-    constructor(client: WalletClient, address: Address) {
-        this.client = client
-        this.address = address
-    }
+/**
+ *
+ * Generate a {@link DB3Account} from a random private key
+ *
+ * ```ts
+ * const account = createRandomAccount()
+ * ```
+ * @returns the instance of {@link DB3ACCOUNT}
+ *
+ **/
+export function createRandomAccount(): DB3Account {
+    const rawKey = '0x' + toHEX(secp.utils.randomPrivateKey())
+    return createFromPrivateKey(rawKey as Hex)
+}
 
-    static genRandomAccount(): DB3Account {
-        const rawKey = '0x' + toHEX(secp.utils.randomPrivateKey())
-        return DB3Account.createFromPrivateKey(rawKey as Hex)
-    }
-
-    static createFromPrivateKey(privateKey: Hex): DB3Account {
-        const account = privateKeyToAccount(privateKey)
-        const client = createWalletClient({
-            account,
-            chain: mainnet,
-            transport: http(),
-        })
-        const addr = account.address
-        return new DB3Account(client, addr)
-    }
-
-    //
-    // get the current account address
-    //
-    getAddress() {
-        return this.address
-    }
-
-    //
-    // sign the data with eip712
-    //
-    async sign(data: SignTypedDataParameters) {
-        return await this.client.signTypedData(data)
-    }
+/**
+ * Signs typed data and calculates an Ethereum-specific signature in [https://eips.ethereum.org/EIPS/eip-712](https://eips.ethereum.org/EIPS/eip-712): `sign(keccak256("\x19\x01" ‖ domainSeparator ‖ hashStruct(message)))`
+ *
+ * - JSON-RPC Methods:
+ *   - JSON-RPC Accounts: [`eth_signTypedData_v4`](https://docs.metamask.io/guide/signing-data.html#signtypeddata-v4)
+ *   - Local Accounts: Signs locally. No JSON-RPC request.
+ *
+ * ```ts
+ *  const message = {
+ *      types: {
+ *          EIP712Domain: [],
+ *          Message: [
+ *              { name: 'payload', type: 'bytes' },
+ *              { name: 'nonce', type: 'string' },
+ *          ],
+ *      },
+ *      domain: {},
+ *      primaryType: 'Message',
+ *      message: {
+ *          payload: '0x',
+ *          nonce: nonce,
+ *      },
+ *  }
+ *  const signature = await signTypedData(account, message)
+ * ```
+ * @param client - Client to use
+ * @param parameters - {@link SignTypedDataParameters}
+ * @returns The signed data. {@link SignTypedDataReturnType}
+ *
+ **/
+export async function signTypedData(
+    account: DB3Account,
+    data: SignTypedDataParameters
+): Promise<SignTypedDataReturnType> {
+    return account.client.signTypedData(data)
 }

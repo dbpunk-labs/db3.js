@@ -25,20 +25,11 @@ import {
     DocumentDatabaseMutation,
 } from '../proto/db3_mutation_v2'
 import type { DocumentData, DocumentEntry } from './base'
-import {
-    Index,
-    Index_IndexField,
-    Index_IndexField_Order,
-} from '../proto/db3_database_v2'
+import type { DB3Account } from '../account/types'
+import { Index } from '../proto/db3_database_v2'
 import { StorageProviderV2 } from '../provider/storage_provider_v2'
-import { DB3Account } from '../account/db3_account'
 import { fromHEX } from '../crypto/crypto_utils'
 import { BSON } from 'db3-bson'
-
-export interface CollectionIndex {
-    name: string
-    fields: string[]
-}
 
 //
 //
@@ -118,29 +109,10 @@ export class DB3ClientV2 {
     async createCollection(
         databaseAddress: string,
         name: string,
-        index: CollectionIndex[]
+        index: Index[]
     ): Promise<[string, string, number]> {
-        const internalIndex = index.map((item, i) => {
-            const fields = item.fields.map((f) => {
-                const field: Index_IndexField = {
-                    fieldPath: f,
-                    valueMode: {
-                        oneofKind: 'order',
-                        order: Index_IndexField_Order.ASCENDING,
-                    },
-                }
-                return field
-            })
-            const interIndex: Index = {
-                name: item.name,
-                id: i,
-                fields,
-            }
-            return interIndex
-        })
-
         const collection: CollectionMutation = {
-            index: internalIndex,
+            indexFields: index,
             collectionName: name,
         }
         const body: Mutation_BodyWrapper = {
@@ -225,15 +197,18 @@ export class DB3ClientV2 {
             },
             dbAddress: fromHEX(databaseAddress),
         }
+
         const dm: Mutation = {
             action: MutationAction.DeleteDocument,
             bodies: [body],
         }
+
         const payload = Mutation.toBinary(dm)
         const response = await this.storage_provider.sendMutation(
             payload,
             this.nonce.toString()
         )
+
         if (response.code == 0) {
             this.nonce += 1
             return [response.id, response.block, response.order]

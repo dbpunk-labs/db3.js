@@ -15,13 +15,38 @@
 // limitations under the License.
 //
 
-export type CreateDatabaseResult = {
-    // the mutation id
-    mid: string
-    // the database address
-    dbAddress: string
-    // the block id
+import { DB3ClientV2 } from '../client/client_v2'
+import {
+    DatabaseMessage as InternalDatabase,
+    Index,
+    Collection as InternalCollection,
+} from '../proto/db3_database_v2'
+
+export type CreateDBResult = {
+    db: Database
+    result: MutationResult
+}
+
+export type CreateCollectionResult = {
+    collection: Collection
+    result: MutationResult
+}
+
+export type Database = {
+    addr: string
+    client: DB3ClientV2
+    internal: InternalDataBase | undefined
+}
+
+export type MutationResult = {
+    id: string
     block: string
-    // the order in the block
     order: number
+}
+
+export type Collection = {
+    name: string
+    db: Database
+    indexFields: Index[]
+    internal: InternalCollection | undefined
 }
