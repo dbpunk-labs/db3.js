@@ -16,22 +16,22 @@
 
 //export { Account } from './proto/db3_account'
 //export { Index, Database } from './proto/db3_database'
-export { EventMessage, EventType } from './proto/db3_event'
-export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
-export { MetamaskWallet } from './wallet/metamask'
-export { DB3Client } from './client/client'
-export { initializeDB3, listMyDatabases, listDatabases } from './store/app'
-export { DB3Store } from './store/database'
-export { collection, CollectionReference } from './store/collection'
-export {
-    addDoc,
-    getDocs,
-    deleteDoc,
-    updateDoc,
-    DocumentReference,
-} from './store/document'
-export { limit, where, query } from './store/query'
-export { DB3Network } from './store/network'
+//export { EventMessage, EventType } from './proto/db3_event'
+//export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
+//export { MetamaskWallet } from './wallet/metamask'
+//export { DB3Client } from './client/client'
+//export { initializeDB3, listMyDatabases, listDatabases } from './store/app'
+////export { DB3Store } from './store/database'
+//export { collection, CollectionReference } from './store/collection'
+//export {
+//    addDoc,
+//    getDocs,
+//    deleteDoc,
+//    updateDoc,
+//    DocumentReference,
+//} from './store/document'
+//export { limit, where, query } from './store/query'
+//export { DB3Network } from './store/network'
 
 //===================v2======================
 

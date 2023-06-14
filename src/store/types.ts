@@ -35,7 +35,7 @@ export type CreateCollectionResult = {
 export type Database = {
     addr: string
     client: DB3ClientV2
-    internal: InternalDataBase | undefined
+    internal: InternalDatabase | undefined
 }
 
 export type MutationResult = {
