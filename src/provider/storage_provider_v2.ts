@@ -33,7 +33,8 @@ import {
     ScanGcRecordRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
-import { DB3Account } from '../account/db3_account'
+import { DB3Account } from '../account/types'
+import { signTypedData } from '../account/db3_account'
 
 export class StorageProviderV2 {
     readonly client: StorageNodeClient
@@ -72,7 +73,7 @@ export class StorageProviderV2 {
                 nonce: nonce,
             },
         }
-        const signature = await this.account.sign(message)
+        const signature = await signTypedData(this.account, message)
         const msgParams = JSON.stringify(message)
         const binaryMsg = new TextEncoder().encode(msgParams)
         const request: SendMutationRequest = {
@@ -84,7 +85,7 @@ export class StorageProviderV2 {
 
     async getNonce() {
         const request: GetNonceRequest = {
-            address: this.account.getAddress(),
+            address: this.account.address,
         }
         const { response } = await this.client.getNonce(request)
         return response.nonce

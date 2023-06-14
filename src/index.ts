@@ -14,35 +14,45 @@
  * limitations under the License.
  */
 
-export { Account } from './proto/db3_account'
-export { Index, Database } from './proto/db3_database'
-export { EventMessage, EventType } from './proto/db3_event'
-export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
-export { MetamaskWallet } from './wallet/metamask'
-export { DB3Client } from './client/client'
-export { initializeDB3, listMyDatabases, listDatabases } from './store/app'
-export { DB3Store } from './store/database'
-export { collection, CollectionReference } from './store/collection'
-export {
-    addDoc,
-    getDocs,
-    deleteDoc,
-    updateDoc,
-    DocumentReference,
-} from './store/document'
-export { limit, where, query } from './store/query'
-export { DB3Network } from './store/network'
+//export { Account } from './proto/db3_account'
+//export { Index, Database } from './proto/db3_database'
+//export { EventMessage, EventType } from './proto/db3_event'
+//export { DB3BrowserWallet } from './wallet/db3_browser_wallet'
+//export { MetamaskWallet } from './wallet/metamask'
+//export { DB3Client } from './client/client'
+//export { initializeDB3, listMyDatabases, listDatabases } from './store/app'
+////export { DB3Store } from './store/database'
+//export { collection, CollectionReference } from './store/collection'
+//export {
+//    addDoc,
+//    getDocs,
+//    deleteDoc,
+//    updateDoc,
+//    DocumentReference,
+//} from './store/document'
+//export { limit, where, query } from './store/query'
+//export { DB3Network } from './store/network'
 
 //===================v2======================
 
-export { DB3Account } from './account/db3_account'
-export { MutationHeader } from './proto/db3_mutation_v2'
-export { DatabaseMessage, Collection } from './proto/db3_database_v2'
-export { RollupRecord, GcRecord } from './proto/db3_rollup'
-export { DB3ClientV2 } from './client/client_v2'
+//export { DB3Account } from './account/types'
+
 export {
-    createAccountFromPrivateKey,
+    createFromPrivateKey,
     createRandomAccount,
-    initializeClient,
-} from './store/app_v2'
-export { createDocumentDatabase } from './store/database_v2'
+    signTypedData,
+} from './account/db3_account'
+
+export { MutationHeader } from './proto/db3_mutation_v2'
+
+export { RollupRecord, GcRecord } from './proto/db3_rollup'
+
+export { DB3ClientV2 } from './client/client_v2'
+
+export {
+    createDocumentDatabase,
+    showDatabase,
+    createCollection,
+    showCollection,
+} from './store/database_v2'
+export { Index, IndexType } from './proto/db3_database_v2'

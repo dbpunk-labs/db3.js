@@ -1,5 +1,5 @@
 //
-// app_v2.ts
+// types.ts
 // Copyright (C) 2023 db3.network Author imotai <codego.me@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,9 @@
 // limitations under the License.
 //
 
-import { DB3Account } from '../account/db3_account'
-import { DB3ClientV2 } from '../client/client_v2'
-import { Hex } from 'viem'
+import type { WalletClient, Address } from 'viem'
 
-export function createAccountFromPrivateKey(key: Hex): DB3Account {
-    return DB3Account.createFromPrivateKey(key)
-}
-
-export function createRandomAccount(): DB3Account {
-    return DB3Account.genRandomAccount()
-}
-
-export function initializeClient(
-    storage: string,
-    indexer: string,
-    account: DB3Account
-): DB3ClientV2 {
-    return new DB3ClientV2(storage, account)
+export type DB3Account = {
+    client: WalletClient
+    address: Address
 }

@@ -40,7 +40,10 @@ import { StorageProviderV2 } from '../src/provider/storage_provider_v2'
 
 import { DB3BrowserWallet } from '../src/wallet/db3_browser_wallet'
 import { toB64, fromB64, fromHEX } from '../src/crypto/crypto_utils'
-import { DB3Account } from '../src/account/db3_account'
+import {
+    createRandomAccount,
+    createFromPrivateKey,
+} from '../src/account/db3_account'
 
 describe('test db3.js provider module', () => {
     function nonce() {
@@ -118,8 +121,8 @@ describe('test db3.js provider module', () => {
     test('provider send mutation test', async () => {
         const privateKey =
             '0xad689d9b7751da07b0fb39c5091672cbfe50f59131db015f8a0e76c9790a6fcc'
-        const db3_account = DB3Account.createFromPrivateKey(privateKey)
-        expect(db3_account.getAddress()).toBe(
+        const db3_account = createFromPrivateKey(privateKey)
+        expect(db3_account.address).toBe(
             '0xc793b74C568a3953a82C150FDcD0F7D27b60f8Ba'
         )
         const provider = new StorageProviderV2(
@@ -148,7 +151,7 @@ describe('test db3.js provider module', () => {
     })
 
     test('provider get mutation header test', async () => {
-        const db3_account = DB3Account.genRandomAccount()
+        const db3_account = createRandomAccount()
         const provider = new StorageProviderV2(
             'http://127.0.0.1:26619',
             db3_account

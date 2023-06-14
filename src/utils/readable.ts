@@ -31,5 +31,5 @@ export function bytesToReadableNum(bytes_size: number): string {
 }
 
 export function unitsToReadableNum(units: number): string {
-    return ((units as f64) / 1000_000_000.0).toFixed(6)
+    return (units / 1000_000_000.0).toFixed(6)
 }

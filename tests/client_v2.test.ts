@@ -17,11 +17,11 @@
 
 import { describe, expect, test } from '@jest/globals'
 import { DB3ClientV2 } from '../src/client/client_v2'
-import { DB3Account } from '../src/account/db3_account'
+import { createRandomAccount } from '../src/account/db3_account'
 
 describe('test db3.js client module', () => {
     test('create database v2', async () => {
-        const db3_account = DB3Account.genRandomAccount()
+        const db3_account = createRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
         await client.syncNonce()
         try {
@@ -41,7 +41,7 @@ describe('test db3.js client module', () => {
     })
 
     test('test scan mutation headers', async () => {
-        const db3_account = DB3Account.genRandomAccount()
+        const db3_account = createRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
         try {
             await client.syncNonce()
@@ -63,7 +63,7 @@ describe('test db3.js client module', () => {
         }
     })
     test('test add large mutations', async () => {
-        const db3_account = DB3Account.genRandomAccount()
+        const db3_account = createRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
         try {
             await client.syncNonce()
@@ -110,22 +110,16 @@ describe('test db3.js client module', () => {
         }
     })
     test('test add collection', async () => {
-        const db3_account = DB3Account.genRandomAccount()
+        const db3_account = createRandomAccount()
         const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
         try {
             await client.syncNonce()
             const [txId, dbId, block, order] =
                 await client.createSimpleDatabase()
-
             const [txId2, block2, order2] = await client.createCollection(
                 dbId,
                 'collection1',
-                [
-                    {
-                        name: 'idx1',
-                        fields: ['f1', 'f2'],
-                    },
-                ]
+                []
             )
             const collections = await client.getCollectionOfDatabase(dbId)
             expect(1).toBe(collections.length)
