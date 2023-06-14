@@ -15,7 +15,6 @@
 // limitations under the License.
 //
 
-import { DB3ClientV2 } from '../client/client_v2'
 import { Client } from '../client/types'
 import {
     DatabaseMessage as InternalDatabase,

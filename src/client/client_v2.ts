@@ -177,4 +177,3 @@ export async function scanGcRecords(
     const response = await client.provider.scanGcRecords(start, limit)
     return response.records
 }
-
