@@ -6,8 +6,6 @@
 db3.js is the [db3 network](https://github.com/dbpunk-labs/db3) javascript API and you can use it to write and query JSON documents against the db3 network.
 and you can build fully decentralized applications combining [web3.js](https://github.com/web3/web3.js) and db3.js
 
-![why](./images/whydb3js.png)
-
 # Play with db3.js
 
 ## Install db3.js
@@ -18,59 +16,30 @@ yarn add db3.js
 
 ## Use db3.js in action
 
-### Build db3 client
-
-Connect to db3 network with db3 browser wallet
-```typescript
-// the key seed
-const mnemonic ='...'
-// create a wallet
-const wallet = DB3BrowserWallet.createNew(mnemonic, 'DB3_SECP256K1')
-// build db3 client
-const client = new DB3Client('http://127.0.0.1:26659', wallet)
-```
-Connect to db3 network with metamask
-
-```typescript
-const wallet = new MetamaskWallet(window)
-const client = new DB3Client('http://127.0.0.1:46659', wallet)
-```
-
-### Create a database
-
-```typescript
-const [dbId, txId] = await client.createDatabase()
-const {db} = initializeDB3('http://127.0.0.1:26659', dbId, wallet)
-```
-
-### Create a collection
-
-```typescript
-// add a index to collection
-const indexList: Index[] = [
-            {
-                name: 'idx1',
-                id: 1,
-                fields: [
-                    {
-                        fieldPath: 'name',
-                        valueMode: {
-                            oneofKind: 'order',
-                            order: Index_IndexField_Order.ASCENDING,
-                        },
-                    },
-                ],
-            },
-]
-// create a collecion
-const collectionRef = await collection(db, 'cities', indexList)
-// add a doc to collection
-const result = await addDoc(collectionRef, {
-    name: 'beijing',
-    address: 'north',
+```ts
+const account = createRandomAccount()
+const client = createClient('http://127.0.0.1:26619', '', account)
+const nonce = await syncAccountNonce(client)
+// create a database
+const { db, result } = await createDocumentDatabase(client, 'desc')
+const index: Index = {
+      path: '/city',
+      indexType: IndexType.StringKey,
+}
+// create a collection
+const { collection, result } = await createCollection(
+       db,
+      'col',
+      [index]
+)
+// add a document
+const [txId, block, order] = await addDoc(collection, {
+    name: 'book1',
+    author: 'db3 developers',
+    id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
+    time: 1686285013,
+    fee: 0.069781,
 })
-// get all docs from collection
-const docs = await getDocs(collectionRef)
 ```
 
 ## Show Your Support
