@@ -26,286 +26,155 @@ import {
 } from '../proto/db3_mutation_v2'
 import type { DocumentData, DocumentEntry } from './base'
 import type { DB3Account } from '../account/types'
+import type { Client } from './types'
 import { Index } from '../proto/db3_database_v2'
 import { StorageProviderV2 } from '../provider/storage_provider_v2'
 import { fromHEX } from '../crypto/crypto_utils'
 import { BSON } from 'db3-bson'
 
-//
-//
-// the db3 client v2 for developers
-//
-//
-export class DB3ClientV2 {
-    readonly storage_provider: StorageProviderV2
+/**
+ *
+ * Create a client of db3 network
+ *
+ * ```ts
+ * const client = createClient("http://127.0.0.1:26619",
+ *                             "http://127.0.0.1:26620",
+ *                             account)
+ * ```
+ *
+ * @param rollup_node_url  - the url of db3 rollup node
+ * @param index_node_url   - the url of db3 index node
+ * @param account          - the instance of db3 account
+ * @returns the client instance
+ *
+ **/
+export function createClient(
+    rollup_node_url: string,
+    index_node_url: string,
     account: DB3Account
-    nonce: number
-    /**
-     * new a db3 client v2 with db3 node url and wallet
-     *
-     */
-    constructor(url: string, account: DB3Account) {
-        this.storage_provider = new StorageProviderV2(url, account)
-        this.account = account
-        this.nonce = 0
-    }
-
-    async syncNonce() {
-        const nonce = await this.storage_provider.getNonce()
-        this.nonce = parseInt(nonce)
-    }
-
-    getNonce() {
-        return this.nonce
-    }
-
-    getAccount() {
-        return this.account.address
-    }
-
-    /**
-     * create a database and return the address of it
-     *
-     */
-    async createSimpleDatabase(
-        desc: string = ''
-    ): Promise<[string, string, string, number]> {
-        const docDatabaseMutation: DocumentDatabaseMutation = {
-            dbDesc: desc,
-        }
-
-        const body: Mutation_BodyWrapper = {
-            body: { oneofKind: 'docDatabaseMutation', docDatabaseMutation },
-            dbAddress: new Uint8Array(0),
-        }
-
-        const dm: Mutation = {
-            action: MutationAction.CreateDocumentDB,
-            bodies: [body],
-        }
-
-        const payload = Mutation.toBinary(dm)
-        const response = await this.storage_provider.sendMutation(
-            payload,
-            this.nonce.toString()
-        )
-
-        if (response.code == 0) {
-            this.nonce += 1
-            return [
-                response.id,
-                response.items[0].value,
-                response.block,
-                response.order,
-            ]
-        } else {
-            throw new Error('fail to create database')
-        }
-    }
-
-    /**
-     * create a collection
-     */
-    async createCollection(
-        databaseAddress: string,
-        name: string,
-        index: Index[]
-    ): Promise<[string, string, number]> {
-        const collection: CollectionMutation = {
-            indexFields: index,
-            collectionName: name,
-        }
-        const body: Mutation_BodyWrapper = {
-            body: {
-                oneofKind: 'collectionMutation',
-                collectionMutation: collection,
-            },
-            dbAddress: fromHEX(databaseAddress),
-        }
-        const dm: Mutation = {
-            action: MutationAction.AddCollection,
-            bodies: [body],
-        }
-        const payload = Mutation.toBinary(dm)
-        const response = await this.storage_provider.sendMutation(
-            payload,
-            this.nonce.toString()
-        )
-
-        if (response.code == 0) {
-            this.nonce += 1
-            return [response.id, response.block, response.order]
-        } else {
-            throw new Error('fail to create collection')
-        }
-    }
-
-    /**
-     * create a document
-     *
-     */
-    async createDocument(
-        databaseAddress: string,
-        collectionName: string,
-        document: DocumentData
-    ) {
-        const documentMutation: DocumentMutation = {
-            collectionName,
-            documents: [BSON.serialize(document)],
-            ids: [],
-            masks: [],
-        }
-        const body: Mutation_BodyWrapper = {
-            body: {
-                oneofKind: 'documentMutation',
-                documentMutation,
-            },
-            dbAddress: fromHEX(databaseAddress),
-        }
-        const dm: Mutation = {
-            action: MutationAction.AddDocument,
-            bodies: [body],
-        }
-        const payload = Mutation.toBinary(dm)
-        const response = await this.storage_provider.sendMutation(
-            payload,
-            this.nonce.toString()
-        )
-        if (response.code == 0) {
-            this.nonce += 1
-            return [response.id, response.block, response.order]
-        } else {
-            throw new Error('fail to create collection')
-        }
-    }
-
-    async deleteDocument(
-        databaseAddress: string,
-        collectionName: string,
-        ids: string[]
-    ) {
-        const documentMutation: DocumentMutation = {
-            collectionName,
-            documents: [],
-            ids,
-            masks: [],
-        }
-        const body: Mutation_BodyWrapper = {
-            body: {
-                oneofKind: 'documentMutation',
-                documentMutation,
-            },
-            dbAddress: fromHEX(databaseAddress),
-        }
-
-        const dm: Mutation = {
-            action: MutationAction.DeleteDocument,
-            bodies: [body],
-        }
-
-        const payload = Mutation.toBinary(dm)
-        const response = await this.storage_provider.sendMutation(
-            payload,
-            this.nonce.toString()
-        )
-
-        if (response.code == 0) {
-            this.nonce += 1
-            return [response.id, response.block, response.order]
-        } else {
-            throw new Error('fail to create collection')
-        }
-    }
-
-    //
-    //
-    // update document with a mask
-    //
-    //
-    async updateDocument(
-        databaseAddress: string,
-        collectionName: string,
-        document: Record<string, any>,
-        id: string,
-        masks: string[]
-    ) {
-        const documentMask: DocumentMask = {
-            fields: masks,
-        }
-        const documentMutation: DocumentMutation = {
-            collectionName,
-            documents: [BSON.serialize(document)],
-            ids: [id],
-            masks: [documentMask],
-        }
-        const body: Mutation_BodyWrapper = {
-            body: {
-                oneofKind: 'documentMutation',
-                documentMutation,
-            },
-            dbAddress: fromHEX(databaseAddress),
-        }
-        const dm: Mutation = {
-            action: MutationAction.UpdateDocument,
-            bodies: [body],
-        }
-        const payload = Mutation.toBinary(dm)
-        const response = await this.storage_provider.sendMutation(
-            payload,
-            this.nonce.toString()
-        )
-        if (response.code == 0) {
-            this.nonce += 1
-            return [response.id, response.block, response.order]
-        } else {
-            throw new Error('fail to create collection')
-        }
-    }
-
-    async getMutationHeader(block: string, order: number) {
-        const response = await this.storage_provider.getMutationHeader(
-            block,
-            order
-        )
-        return response
-    }
-
-    async getMutationBody(id: string) {
-        const response = await this.storage_provider.getMutationBody(id)
-        if (response.body) {
-            return this.storage_provider.parseMutationBody(response.body)
-        }
-        throw new Error('mutation not found')
-    }
-
-    async scanMutationHeaders(start: number, limit: number) {
-        const response = await this.storage_provider.scanMutationHeaders(
-            start,
-            limit
-        )
-        return response.headers
-    }
-
-    async scanRollupRecords(start: number, limit: number) {
-        const response = await this.storage_provider.scanRollupRecords(
-            start,
-            limit
-        )
-        return response.records
-    }
-
-    async scanGcRecords(start: number, limit: number) {
-        const response = await this.storage_provider.scanGcRecords(start, limit)
-        return response.records
-    }
-
-    async getDatabaseOfOwner(owner: string) {
-        const response = await this.storage_provider.getDatabaseOfOwner(owner)
-        return response.databases
-    }
-
-    async getCollectionOfDatabase(db: string) {
-        const response = await this.storage_provider.getCollectionOfDatabase(db)
-        return response.collections
-    }
+) {
+    const provider = new StorageProviderV2(rollup_node_url, account)
+    return {
+        provider,
+        account,
+        nonce: 0,
+    } as Client
 }
+
+/**
+ *
+ * Get the mutation content by the id
+ *
+ * ```ts
+ * const body = getMutationBody(client, '0x....')
+ * ```
+ *
+ * @param client    - the instance of client
+ * @param id        - the id of mutation
+ * @returns the mutation
+ *
+ **/
+export async function getMutationBody(client: Client, id: string) {
+    const response = await client.provider.getMutationBody(id)
+    if (response.body) {
+        return client.provider.parseMutationBody(response.body)
+    }
+    throw new Error('mutation not found')
+}
+
+/**
+ *
+ * Sync the nonce of account
+ *
+ * ```ts
+ *  const nonce = syncAccountNonce(client)
+ * ```
+ *
+ * @param client - the instance of client
+ * @returns the nonce
+ *
+ **/
+export async function syncAccountNonce(client: Client) {
+    const nonce = await client.provider.getNonce()
+    client.nonce = parseInt(nonce)
+    return client.nonce
+}
+
+/**
+ *
+ * Get the mutation header by block and order
+ *
+ * ```ts
+ * const header = getMutationHeader(client, 1, 100)
+ * ```
+ *
+ * @param client    - the instance of client
+ * @param block     - the block id
+ * @param order     - the order
+ * @returns the mutation header
+ *
+ **/
+export async function getMutationHeader(
+    client: Client,
+    block: string,
+    order: number
+) {
+    const response = await client.provider.getMutationHeader(block, order)
+    return response
+}
+
+export async function scanMutationHeaders(
+    client: Client,
+    start: number,
+    limit: number
+) {
+    const response = await client.provider.scanMutationHeaders(start, limit)
+    return response.headers
+}
+
+/**
+ *
+ * Scan the rollup records
+ *
+ * ```ts
+ * const records = scanRollupRecords(client, 1, 1000)
+ * ```
+ *
+ * @param client    - the instance of client
+ * @param start     - the start offset
+ * @param limit     - the records limit
+ * @returns the records
+ *
+ **/
+export async function scanRollupRecords(
+    client: Client,
+    start: number,
+    limit: number
+) {
+    const response = await client.provider.scanRollupRecords(start, limit)
+    return response.records
+}
+
+/**
+ *
+ * Scan the gc rollup records
+ *
+ * ```ts
+ * const records = scanGcRecords(client, 1, 1000)
+ * ```
+ *
+ * @param client    - the instance of client
+ * @param start     - the start offset
+ * @param limit     - the records limit
+ * @returns the records
+ *
+ **/
+export async function scanGcRecords(
+    client: Client,
+    start: number,
+    limit: number
+) {
+    const response = await client.provider.scanGcRecords(start, limit)
+    return response.records
+}
+

@@ -35,19 +35,23 @@
 
 //===================v2======================
 
-//export { DB3Account } from './account/types'
-
 export {
     createFromPrivateKey,
     createRandomAccount,
     signTypedData,
 } from './account/db3_account'
 
-export { MutationHeader } from './proto/db3_mutation_v2'
+export { addDoc, updateDoc, deleteDoc } from './store/document_v2'
 
-export { RollupRecord, GcRecord } from './proto/db3_rollup'
-
-export { DB3ClientV2 } from './client/client_v2'
+export {
+    createClient,
+    syncAccountNonce,
+    getMutationHeader,
+    getMutationBody,
+    scanMutationHeaders,
+    scanGcRecords,
+    scanRollupRecords,
+} from './client/client_v2'
 
 export {
     createDocumentDatabase,
@@ -55,4 +59,5 @@ export {
     createCollection,
     showCollection,
 } from './store/database_v2'
+
 export { Index, IndexType } from './proto/db3_database_v2'

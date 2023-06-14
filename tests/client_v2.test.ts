@@ -16,114 +16,107 @@
 //
 
 import { describe, expect, test } from '@jest/globals'
-import { DB3ClientV2 } from '../src/client/client_v2'
+import {
+    DB3ClientV2,
+    createClient,
+    syncAccountNonce,
+    getMutationHeader,
+    getMutationBody,
+    scanMutationHeaders,
+} from '../src/client/client_v2'
+import { addDoc, deleteDoc, updateDoc } from '../src/store/document_v2'
 import { createRandomAccount } from '../src/account/db3_account'
+import {
+    createDocumentDatabase,
+    showDatabase,
+    createCollection,
+} from '../src/store/database_v2'
+import { Index, IndexType } from '../src/proto/db3_database_v2'
 
 describe('test db3.js client module', () => {
-    test('create database v2', async () => {
+    async function createTestClient() {
         const db3_account = createRandomAccount()
-        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
-        await client.syncNonce()
+        const client = createClient('http://127.0.0.1:26619', '', db3_account)
+        const nonce = await syncAccountNonce(client)
+        return client
+    }
+
+    test('create client smoke test', async () => {
+        const client = await createTestClient()
+        expect(1).toBe(client.nonce)
+    })
+
+    test('create database v2', async () => {
+        const client = await createTestClient()
         try {
-            const [txid, dbid, block, order] =
-                await client.createSimpleDatabase()
-            const header = await client.getMutationHeader(block, order)
+            const { db, result } = await createDocumentDatabase(client, 'desc')
+            const header = await getMutationHeader(
+                client,
+                result.block,
+                result.order
+            )
             if (!header.header) {
                 expect(1).toBe(0)
             }
-            const databases = await client.getDatabaseOfOwner(
-                db3_account.address
-            )
+            const body = await getMutationBody(client, result.id)
+            expect(body).toBeDefined()
+            const databases = await showDatabase(client.account.address, client)
             expect(1).toBe(databases.length)
         } catch (e) {
+            console.log(e)
             expect(1).toBe(0)
         }
     })
 
     test('test scan mutation headers', async () => {
-        const db3_account = createRandomAccount()
-        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        const client = await createTestClient()
         try {
-            await client.syncNonce()
-            const [txId, dbId, block, order] =
-                await client.createSimpleDatabase()
-            const [txId2, block2, order2] = await client.createDocument(
-                dbId,
-                'collection1',
-                {
-                    name: 'book1',
-                    author: 'db3 developers',
-                }
-            )
-            const headers = await client.scanMutationHeaders(0, 1)
+            const { db, result } = await createDocumentDatabase(client, 'desc')
+            const headers = await scanMutationHeaders(client, 0, 1)
             expect(headers.length).toBe(1)
         } catch (e) {
             console.log(e)
             expect(1).toBe(0)
         }
     })
+
     test('test add large mutations', async () => {
-        const db3_account = createRandomAccount()
-        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
+        const client = await createTestClient()
         try {
-            await client.syncNonce()
             for (var i = 0; i < 1; i++) {
-                const [txId, dbId, block, order] =
-                    await client.createSimpleDatabase()
-                const [txId2, block2, order2] = await client.createDocument(
-                    dbId,
-                    'collection1',
-                    {
+                const { db, result } = await createDocumentDatabase(
+                    client,
+                    'desc'
+                )
+                const index: Index = {
+                    path: '/city',
+                    indexType: IndexType.StringKey,
+                }
+                {
+                    const { collection, result } = await createCollection(
+                        db,
+                        'col',
+                        [index]
+                    )
+                    const [txId2, block2, order2] = await addDoc(collection, {
                         name: 'book1',
                         author: 'db3 developers',
                         id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
                         time: 1686285013,
                         fee: 0.069781,
-                    }
-                )
-                const [txId3, block3, order3] = await client.createDocument(
-                    dbId,
-                    'collection1',
-                    {
-                        name: 'book1',
-                        author: 'db3 developers',
-                        id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
-                        time: 1686285013,
-                        fee: 0.069781,
-                    }
-                )
-                await client.deleteDocument(dbId, 'collection1', ['id1'])
-                await client.updateDocument(
-                    dbId,
-                    'collection1',
-                    {
-                        name: 'book1',
-                        author: 'db3 developers',
-                    },
-                    'id111',
-                    ['name', 'author']
-                )
+                    })
+                    await updateDoc(
+                        collection,
+                        'id111',
+                        {
+                            name: 'book1',
+                            author: 'db3 developers',
+                        },
+                        ['name', 'author']
+                    )
+                    await deleteDoc(collection, ['id1'])
+                }
             }
-        } catch (e) {
-            console.log(e)
-            expect(1).toBe(0)
-        }
-    })
-    test('test add collection', async () => {
-        const db3_account = createRandomAccount()
-        const client = new DB3ClientV2('http://127.0.0.1:26619', db3_account)
-        try {
-            await client.syncNonce()
-            const [txId, dbId, block, order] =
-                await client.createSimpleDatabase()
-            const [txId2, block2, order2] = await client.createCollection(
-                dbId,
-                'collection1',
-                []
-            )
-            const collections = await client.getCollectionOfDatabase(dbId)
-            expect(1).toBe(collections.length)
-            console.log(collections)
         } catch (e) {
             console.log(e)
             expect(1).toBe(0)

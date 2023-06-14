@@ -16,6 +16,7 @@
 //
 
 import { DB3ClientV2 } from '../client/client_v2'
+import { Client } from '../client/types'
 import {
     DatabaseMessage as InternalDatabase,
     Index,
@@ -34,7 +35,7 @@ export type CreateCollectionResult = {
 
 export type Database = {
     addr: string
-    client: DB3ClientV2
+    client: Client
     internal: InternalDatabase | undefined
 }
 
@@ -49,4 +50,8 @@ export type Collection = {
     db: Database
     indexFields: Index[]
     internal: InternalCollection | undefined
+}
+
+export interface DocumentData {
+    [field: string]: any
 }

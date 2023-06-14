@@ -23,8 +23,18 @@ import type {
     Collection,
 } from './types'
 
-import { DB3ClientV2 } from '../client/client_v2'
-import { toHEX } from '../crypto/crypto_utils'
+import {
+    Mutation,
+    MutationAction,
+    CollectionMutation,
+    DocumentMutation,
+    DocumentMask,
+    Mutation_BodyWrapper,
+    DocumentDatabaseMutation,
+} from '../proto/db3_mutation_v2'
+
+import { Client } from '../client/types'
+import { toHEX, fromHEX } from '../crypto/crypto_utils'
 import { Index } from '../proto/db3_database_v2'
 
 /**
@@ -39,25 +49,39 @@ import { Index } from '../proto/db3_database_v2'
  * @returns the {@link CreateDBResult}
  *
  **/
-export async function createDocumentDatabase(
-    client: DB3ClientV2,
-    desc: string
-): Promise<CreateDBResult> {
-    return new Promise((resolve, reject) => {
-        client.createSimpleDatabase(desc).then(([txId, dbId, block, order]) => {
-            resolve({
-                db: {
-                    addr: dbId,
-                    client,
-                } as Database,
-                result: {
-                    id: txId,
-                    block,
-                    order,
-                } as MutationResult,
-            } as CreateDBResult)
-        })
-    })
+export async function createDocumentDatabase(client: Client, desc: string) {
+    const docDatabaseMutation: DocumentDatabaseMutation = {
+        dbDesc: desc,
+    }
+    const body: Mutation_BodyWrapper = {
+        body: { oneofKind: 'docDatabaseMutation', docDatabaseMutation },
+        dbAddress: new Uint8Array(0),
+    }
+    const dm: Mutation = {
+        action: MutationAction.CreateDocumentDB,
+        bodies: [body],
+    }
+    const payload = Mutation.toBinary(dm)
+    const response = await client.provider.sendMutation(
+        payload,
+        client.nonce.toString()
+    )
+    if (response.code == 0) {
+        client.nonce += 1
+        return {
+            db: {
+                addr: response.items[0].value,
+                client,
+            } as Database,
+            result: {
+                id: response.id,
+                block: response.block,
+                order: response.order,
+            } as MutationResult,
+        }
+    } else {
+        throw new Error('fail to create database')
+    }
 }
 
 /**
@@ -72,39 +96,32 @@ export async function createDocumentDatabase(
  * @returns the {@link Database}[]
  *
  **/
-export async function showDatabase(
-    owner: string,
-    client: DB3ClientV2
-): Promise<Database[]> {
-    return new Promise((resolve, reject) => {
-        client.getDatabaseOfOwner(owner).then((databases) => {
-            const db_list = databases
-                .filter((item) => item.database.oneofKind != undefined)
-                .map((db) => {
-                    if (db.database.oneofKind === 'docDb') {
-                        return {
-                            addr: '0x' + toHEX(db.database.docDb.address),
-                            client,
-                            internal: db,
-                        }
-                    } else if (db.database.oneofKind === 'eventDb') {
-                        return {
-                            addr: '0x' + toHEX(db.database.eventDb.address),
-                            client,
-                            internal: db,
-                        }
-                    } else {
-                        //will not go here
-                        return {
-                            addr: '',
-                            client,
-                            internal: undefined,
-                        }
-                    }
-                })
-            resolve(db_list)
+export async function showDatabase(owner: string, client: Client) {
+    const response = await client.provider.getDatabaseOfOwner(owner)
+    return response.databases
+        .filter((item) => item.database.oneofKind != undefined)
+        .map((db) => {
+            if (db.database.oneofKind === 'docDb') {
+                return {
+                    addr: '0x' + toHEX(db.database.docDb.address),
+                    client,
+                    internal: db,
+                }
+            } else if (db.database.oneofKind === 'eventDb') {
+                return {
+                    addr: '0x' + toHEX(db.database.eventDb.address),
+                    client,
+                    internal: db,
+                }
+            } else {
+                //will not go here
+                return {
+                    addr: '',
+                    client,
+                    internal: undefined,
+                }
+            }
         })
-    })
 }
 
 /**
@@ -130,30 +147,50 @@ export async function createCollection(
     db: Database,
     name: string,
     indexFields: Index[]
-): Promise<CreateCollectionResult> {
-    return new Promise((resolve, reject) => {
-        db.client
-            .createCollection(db.addr, name, indexFields)
-            .then(([id, block, order]) => {
-                const col: Collection = {
-                    name,
-                    db,
-                    indexFields,
-                    internal: undefined,
-                }
+) {
+    const collection: CollectionMutation = {
+        indexFields,
+        collectionName: name,
+    }
+    const body: Mutation_BodyWrapper = {
+        body: {
+            oneofKind: 'collectionMutation',
+            collectionMutation: collection,
+        },
+        dbAddress: fromHEX(db.addr),
+    }
+    const dm: Mutation = {
+        action: MutationAction.AddCollection,
+        bodies: [body],
+    }
+    const payload = Mutation.toBinary(dm)
+    const response = await db.client.provider.sendMutation(
+        payload,
+        db.client.nonce.toString()
+    )
 
-                const result: MutationResult = {
-                    id,
-                    block,
-                    order,
-                }
+    if (response.code == 0) {
+        db.client.nonce += 1
+        const col: Collection = {
+            name,
+            db,
+            indexFields,
+            internal: undefined,
+        }
 
-                resolve({
-                    collection: col,
-                    result,
-                } as CreateCollectionResult)
-            })
-    })
+        const result: MutationResult = {
+            id: response.id,
+            block: response.block,
+            order: response.order,
+        }
+
+        return {
+            collection: col,
+            result,
+        } as CreateCollectionResult
+    } else {
+        throw new Error('fail to create collection')
+    }
 }
 
 /**
@@ -168,18 +205,15 @@ export async function createCollection(
  * @returns the {@link Collection[]}
  *
  **/
-export async function showCollection(db: Database): Promise<Collection[]> {
-    return new Promise((resolve, reject) => {
-        db.client.getCollectionOfDatabase(db.addr).then((collections) => {
-            const collectionList = collections.map((c) => {
-                return {
-                    name: c.name,
-                    db,
-                    indexFields: c.indexFields,
-                    internal: c,
-                } as Collection
-            })
-            resolve(collectionList)
-        })
+export async function showCollection(db: Database) {
+    const response = await db.client.provider.getCollectionOfDatabase(db.addr)
+    const collectionList = response.collections.map((c) => {
+        return {
+            name: c.name,
+            db,
+            indexFields: c.indexFields,
+            internal: c,
+        } as Collection
     })
+    return collectionList
 }
