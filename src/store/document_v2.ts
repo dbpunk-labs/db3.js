@@ -26,7 +26,48 @@ import { BSON } from 'db3-bson'
 
 import { fromHEX } from '../crypto/crypto_utils'
 
-import type { Collection, DocumentData } from './types'
+import type { Collection, QueryResult } from './types'
+import type { Query, QueryParameter } from '../proto/db3_database_v2'
+import type { DocumentData, DocumentEntry } from '../client/base'
+
+async function runQueryInternal<T>(col: Collection, query: Query) {
+    const response = await col.db.client.indexer.runQuery(
+        col.db.addr,
+        col.name,
+        query
+    )
+    const entries = response.documents.map((doc) => {
+        return {
+            doc: JSON.parse(doc.doc) as T,
+            id: doc.id,
+            owner: doc.owner,
+        } as DocumentEntry<T>
+    })
+    return {
+        docs: entries,
+        collection: col,
+    } as QueryResult<T>
+}
+
+export async function queryDoc<T = DocumentData>(
+    col: Collection,
+    queryStr: string,
+    parameters?: QueryParameter[]
+) {
+    if (!parameters) {
+        const query: Query = {
+            queryStr,
+            parameters: [],
+        }
+        return runQueryInternal(col, query)
+    } else {
+        const query: Query = {
+            queryStr,
+            parameters,
+        }
+        return runQueryInternal<T>(col, query)
+    }
+}
 
 export async function deleteDoc(col: Collection, ids: string[]) {
     const documentMutation: DocumentMutation = {

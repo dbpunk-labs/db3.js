@@ -18,9 +18,11 @@
 import type { DB3Account } from '../account/types'
 
 import { StorageProviderV2 } from '../provider/storage_provider_v2'
+import { IndexerProvider } from '../provider/indexer_provider'
 
 export type Client = {
     provider: StorageProviderV2
+    indexer: IndexerProvider
     account: DB3Account
     nonce: number
 }

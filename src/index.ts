@@ -41,7 +41,7 @@ export {
     signTypedData,
 } from './account/db3_account'
 
-export { addDoc, updateDoc, deleteDoc } from './store/document_v2'
+export { addDoc, updateDoc, deleteDoc, queryDoc } from './store/document_v2'
 
 export {
     createClient,

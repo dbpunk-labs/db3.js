@@ -29,6 +29,7 @@ import type { DB3Account } from '../account/types'
 import type { Client } from './types'
 import { Index } from '../proto/db3_database_v2'
 import { StorageProviderV2 } from '../provider/storage_provider_v2'
+import { IndexerProvider } from '../provider/indexer_provider'
 import { fromHEX } from '../crypto/crypto_utils'
 import { BSON } from 'db3-bson'
 
@@ -54,8 +55,10 @@ export function createClient(
     account: DB3Account
 ) {
     const provider = new StorageProviderV2(rollup_node_url, account)
+    const indexer = new IndexerProvider(index_node_url)
     return {
         provider,
+        indexer,
         account,
         nonce: 0,
     } as Client

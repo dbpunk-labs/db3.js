@@ -22,6 +22,5 @@ export interface DocumentData {
 export interface DocumentEntry<T> {
     id: string
     owner: string
-    tx: string
     doc: T
 }

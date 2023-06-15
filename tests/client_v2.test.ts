@@ -24,7 +24,12 @@ import {
     getMutationBody,
     scanMutationHeaders,
 } from '../src/client/client_v2'
-import { addDoc, deleteDoc, updateDoc } from '../src/store/document_v2'
+import {
+    addDoc,
+    deleteDoc,
+    updateDoc,
+    queryDoc,
+} from '../src/store/document_v2'
 import { createRandomAccount } from '../src/account/db3_account'
 import {
     createDocumentDatabase,
@@ -33,10 +38,20 @@ import {
 } from '../src/store/database_v2'
 import { Index, IndexType } from '../src/proto/db3_database_v2'
 
+interface Profile {
+    city: string
+    author: string
+    age: number
+}
+
 describe('test db3.js client module', () => {
     async function createTestClient() {
         const db3_account = createRandomAccount()
-        const client = createClient('http://127.0.0.1:26619', '', db3_account)
+        const client = createClient(
+            'http://127.0.0.1:26619',
+            'http://127.0.0.1:26639',
+            db3_account
+        )
         const nonce = await syncAccountNonce(client)
         return client
     }
@@ -46,6 +61,36 @@ describe('test db3.js client module', () => {
         expect(1).toBe(client.nonce)
     })
 
+    test('test query document', async () => {
+        const client = await createTestClient()
+        try {
+            const { db, result } = await createDocumentDatabase(client, 'db1')
+            const index: Index = {
+                path: '/city',
+                indexType: IndexType.StringKey,
+            }
+            {
+                const { collection, result } = await createCollection(
+                    db,
+                    'col',
+                    [index]
+                )
+                await new Promise((r) => setTimeout(r, 3000))
+                const [txId2, block2, order2] = await addDoc(collection, {
+                    city: 'beijing',
+                    author: 'imotai',
+                    age: 10,
+                })
+                await new Promise((r) => setTimeout(r, 3000))
+                const queryStr = '/[age > 8]'
+                const resultSet = await queryDoc<Profile>(collection, queryStr)
+                console.log(resultSet)
+            }
+        } catch (e) {
+            console.log(e)
+            expect(1).toBe(0)
+        }
+    })
     test('create database v2', async () => {
         const client = await createTestClient()
         try {
