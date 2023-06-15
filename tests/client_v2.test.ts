@@ -81,10 +81,56 @@ describe('test db3.js client module', () => {
                     author: 'imotai',
                     age: 10,
                 })
+
+                const [txId3, block3, order3] = await addDoc(collection, {
+                    city: 'beijing2',
+                    author: 'imotai1',
+                    age: 1,
+                })
                 await new Promise((r) => setTimeout(r, 3000))
-                const queryStr = '/[age > 8]'
-                const resultSet = await queryDoc<Profile>(collection, queryStr)
-                console.log(resultSet)
+                {
+                    const queryStr = '/[city = beijing]'
+                    const resultSet = await queryDoc<Profile>(
+                        collection,
+                        queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai')
+                    expect(resultSet.docs[0].doc.age).toBe(10)
+                }
+                {
+                    const queryStr = '/* | limit 1'
+                    const resultSet = await queryDoc<Profile>(
+                        collection,
+                        queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing2')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai1')
+                    expect(resultSet.docs[0].doc.age).toBe(1)
+                }
+
+                {
+                    const queryStr = '/[age = :age]'
+                    const parameter: QueryParameter = {
+                        name: 'age',
+                        parameter: {
+                            oneofKind: 'int64Value',
+                            int64Value: 10,
+                        },
+                    }
+                    const resultSet = await queryDoc<Profile>(
+                        collection,
+                        queryStr,
+                        [parameter]
+                    )
+                    console.log(resultSet)
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai')
+                    expect(resultSet.docs[0].doc.age).toBe(10)
+                }
             }
         } catch (e) {
             console.log(e)

@@ -49,6 +49,20 @@ async function runQueryInternal<T>(col: Collection, query: Query) {
     } as QueryResult<T>
 }
 
+/**
+ *
+ * Query document with a query language
+ *
+ * ```ts
+ * const queryStr = '/* | limit 1'
+ * const resultSet = await queryDoc<Profile>(collection, queryStr)
+ * ```
+ * @param col        - the instance of collection
+ * @param queryStr   - a document query string
+ * @param parameters - an optional query parameters
+ * @returns the {@link Queryresult}
+ *
+ **/
 export async function queryDoc<T = DocumentData>(
     col: Collection,
     queryStr: string,
@@ -102,6 +116,7 @@ export async function deleteDoc(col: Collection, ids: string[]) {
         throw new Error('fail to create collection')
     }
 }
+
 export async function updateDoc(
     col: Collection,
     id: string,

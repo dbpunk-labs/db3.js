@@ -24,7 +24,7 @@ import { Query } from '../proto/db3_database_v2'
 
 export class IndexerProvider {
     readonly client: IndexerNodeClient
-    constructor(url: string, account: DB3Account) {
+    constructor(url: string) {
         const goptions: GrpcWebOptions = {
             baseUrl: url,
             // simple example for how to add auth headers to each request
