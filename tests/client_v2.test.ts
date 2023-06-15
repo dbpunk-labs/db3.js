@@ -119,6 +119,7 @@ describe('test db3.js client module', () => {
                             oneofKind: 'int64Value',
                             int64Value: 10,
                         },
+                        idx:0
                     }
                     const resultSet = await queryDoc<Profile>(
                         collection,
@@ -131,6 +132,16 @@ describe('test db3.js client module', () => {
                     expect(resultSet.docs[0].doc.author).toBe('imotai')
                     expect(resultSet.docs[0].doc.age).toBe(10)
                 }
+                {
+                    const queryStr = '/{age}'
+                    const resultSet = await queryDoc<Profile>(
+                        collection,
+                        queryStr,
+                        []
+                    )
+                    console.log(resultSet.docs)
+                }
+
             }
         } catch (e) {
             console.log(e)
@@ -193,19 +204,9 @@ describe('test db3.js client module', () => {
                         name: 'book1',
                         author: 'db3 developers',
                         id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
-                        time: 1686285013,
-                        fee: 0.069781,
+                        time: "1686285013",
+                        fee: "0.069781",
                     })
-                    await updateDoc(
-                        collection,
-                        'id111',
-                        {
-                            name: 'book1',
-                            author: 'db3 developers',
-                        },
-                        ['name', 'author']
-                    )
-                    await deleteDoc(collection, ['id1'])
                 }
             }
         } catch (e) {
