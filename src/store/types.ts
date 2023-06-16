@@ -16,6 +16,7 @@
 //
 
 import { Client } from '../client/types'
+import { DocumentEntry, DocumentData } from '../client/base'
 import {
     DatabaseMessage as InternalDatabase,
     Index,
@@ -51,6 +52,7 @@ export type Collection = {
     internal: InternalCollection | undefined
 }
 
-export interface DocumentData {
-    [field: string]: any
+export type QueryResult<T = DocumentData> = {
+    docs: Array<DocumentEntry<T>>
+    collection: Collection
 }

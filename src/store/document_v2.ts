@@ -26,7 +26,62 @@ import { BSON } from 'db3-bson'
 
 import { fromHEX } from '../crypto/crypto_utils'
 
-import type { Collection, DocumentData } from './types'
+import type { Collection, QueryResult } from './types'
+import type { Query, QueryParameter } from '../proto/db3_database_v2'
+import type { DocumentData, DocumentEntry } from '../client/base'
+
+async function runQueryInternal<T>(col: Collection, query: Query) {
+    const response = await col.db.client.indexer.runQuery(
+        col.db.addr,
+        col.name,
+        query
+    )
+    const entries = response.documents.map((doc) => {
+        return {
+            doc: JSON.parse(doc.doc) as T,
+            id: doc.id,
+            owner: doc.owner,
+        } as DocumentEntry<T>
+    })
+    return {
+        docs: entries,
+        collection: col,
+    } as QueryResult<T>
+}
+
+/**
+ *
+ * Query document with a query language
+ *
+ * ```ts
+ * const queryStr = '/* | limit 1'
+ * const resultSet = await queryDoc<Profile>(collection, queryStr)
+ * ```
+ * @param col        - the instance of collection
+ * @param queryStr   - a document query string
+ * @param parameters - an optional query parameters
+ * @returns the {@link Queryresult}
+ *
+ **/
+export async function queryDoc<T = DocumentData>(
+    col: Collection,
+    queryStr: string,
+    parameters?: QueryParameter[]
+) {
+    if (!parameters) {
+        const query: Query = {
+            queryStr,
+            parameters: [],
+        }
+        return runQueryInternal(col, query)
+    } else {
+        const query: Query = {
+            queryStr,
+            parameters,
+        }
+        return runQueryInternal<T>(col, query)
+    }
+}
 
 export async function deleteDoc(col: Collection, ids: string[]) {
     const documentMutation: DocumentMutation = {
@@ -61,6 +116,7 @@ export async function deleteDoc(col: Collection, ids: string[]) {
         throw new Error('fail to create collection')
     }
 }
+
 export async function updateDoc(
     col: Collection,
     id: string,
