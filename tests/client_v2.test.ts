@@ -76,13 +76,13 @@ describe('test db3.js client module', () => {
                     [index]
                 )
                 await new Promise((r) => setTimeout(r, 3000))
-                const [txId2, block2, order2] = await addDoc(collection, {
+                const [txId2, block2, order2, docId2] = await addDoc(collection, {
                     city: 'beijing',
                     author: 'imotai',
                     age: 10,
                 })
 
-                const [txId3, block3, order3] = await addDoc(collection, {
+                const [txId3, block3, order3, docId3] = await addDoc(collection, {
                     city: 'beijing2',
                     author: 'imotai1',
                     age: 1,
@@ -143,6 +143,65 @@ describe('test db3.js client module', () => {
                 }
 
             }
+        } catch (e) {
+            console.log(e)
+            expect(1).toBe(0)
+        }
+    })
+    test('test create/update/delete document', async () => {
+        const client = await createTestClient()
+        try {
+            const { db, result } = await createDocumentDatabase(client, 'db_for_update_delete')
+            const index: Index = {
+                path: '/city',
+                indexType: IndexType.StringKey,
+            }
+            {
+                const { collection, result } = await createCollection(
+                  db,
+                  'col',
+                  [index]
+                )
+                await new Promise((r) => setTimeout(r, 3000))
+                const [txId2, block2, order2, docId2] = await addDoc(collection, {
+                    city: 'beijing',
+                    author: 'imotai',
+                    age: 10,
+                })
+
+                const [txId3, block3, order3, docId3] = await addDoc(collection, {
+                    city: 'beijing2',
+                    author: 'imotai1',
+                    age: 1,
+                })
+                await new Promise((r) => setTimeout(r, 3000))
+                {
+                    const queryStr = '/[city = beijing]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai')
+                    expect(resultSet.docs[0].doc.age).toBe(10)
+                    expect(resultSet.docs[0].id).toBe(docId2)
+                }
+                {
+                    const queryStr = '/[city = beijing2]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing2')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai1')
+                    expect(resultSet.docs[0].doc.age).toBe(1)
+                    expect(resultSet.docs[0].id).toBe(docId3)
+                }
+
+            }
+
         } catch (e) {
             console.log(e)
             expect(1).toBe(0)
