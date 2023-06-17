@@ -199,7 +199,44 @@ describe('test db3.js client module', () => {
                     expect(resultSet.docs[0].doc.age).toBe(1)
                     expect(resultSet.docs[0].id).toBe(docId3)
                 }
-
+                const [txId4, block4, order4] = await updateDoc(collection,
+                  docId2,
+                  {
+                    city: 'beijing3',
+                    author: 'imotai3',
+                    age: 3,
+                }, [])
+                await new Promise((r) => setTimeout(r, 3000))
+                {
+                    const queryStr = '/[city = beijing]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(0).toBe(resultSet.docs.length)
+                }
+                {
+                    const queryStr = '/[city = beijing3]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing3')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai3')
+                    expect(resultSet.docs[0].doc.age).toBe(3)
+                    expect(resultSet.docs[0].id).toBe(docId2)
+                }
+                const [txId, block, order] = await deleteDoc(collection, [docId2])
+                await new Promise((r) => setTimeout(r, 3000))
+                {
+                    const queryStr = '/[city = beijing3]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(0).toBe(resultSet.docs.length)
+                }
             }
 
         } catch (e) {
