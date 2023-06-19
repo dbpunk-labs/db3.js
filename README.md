@@ -17,13 +17,14 @@ yarn add db3.js
 ## Use db3.js in action
 
 ```ts
+
 const account = createRandomAccount()
 const client = createClient('http://127.0.0.1:26619', '', account)
 const nonce = await syncAccountNonce(client)
 // create a database
 const { db, result } = await createDocumentDatabase(client, 'desc')
 const index: Index = {
-      path: '/city',
+      path: '/name',
       indexType: IndexType.StringKey,
 }
 // create a collection
@@ -36,10 +37,14 @@ const { collection, result } = await createCollection(
 const [txId, block, order] = await addDoc(collection, {
     name: 'book1',
     author: 'db3 developers',
-    id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
+    tag:'web3',
     time: 1686285013,
-    fee: 0.069781,
 })
+// query document
+const query = '/[name = book1]'
+const resultSet = await queryDoc<Book>(
+                      collection,
+                      query)   
 ```
 
 ## Show Your Support
