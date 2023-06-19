@@ -31,6 +31,8 @@ import {
     GetDatabaseOfOwnerRequest,
     GetCollectionOfDatabase,
     ScanGcRecordRequest,
+    GetSystemStatusRequest,
+    SetupRollupRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/types'
@@ -158,6 +160,21 @@ export class StorageProviderV2 {
         }
 
         const { response } = await this.client.getCollectionOfDatabase(request)
+        return response
+    }
+
+    async configRollup(rollupInterval: string, minRollupSize: string) {
+        const request: SetupRollupRequest = {
+            rollupInterval: rollupInterval.to_string(),
+            minRollupSize: minRollupSize.to_string(),
+        }
+        const { response } = await this.client.setRollup(request)
+        return response
+    }
+
+    async getSystemStatus() {
+        const request: GetSystemStatusRequest = {}
+        const { response } = await this.client.getSystemStatus(request)
         return response
     }
 

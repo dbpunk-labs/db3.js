@@ -20,6 +20,10 @@ export {
     signTypedData,
 } from './account/db3_account'
 
+export type { DB3Account } from './account/types'
+
+export type { Client } from './client/types'
+
 export { addDoc, updateDoc, deleteDoc, queryDoc } from './store/document_v2'
 
 export {
@@ -30,6 +34,8 @@ export {
     scanMutationHeaders,
     scanGcRecords,
     scanRollupRecords,
+    getStorageNodeStatus,
+    configRollup
 } from './client/client_v2'
 
 export {

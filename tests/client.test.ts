@@ -37,6 +37,4 @@ describe('test db3.js client module', () => {
         )
         const [dbId, txId] = await client.createDatabase()
     })
-
-    
 })

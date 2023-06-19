@@ -66,6 +66,54 @@ export function createClient(
 
 /**
  *
+ * Config the rollup
+ *
+ * ```ts
+ *  // 10 min
+ *  const rollupInterval = 10 * 60 * 1000
+ *  // 10 M
+ *  const minRollupSize = 10 * 1024 * 1024
+ *  const result = configRollup(client, rollupInterval, minRollupSize)
+ * ```
+ *
+ * @param client            - the client of db3 network
+ * @param rollupInterval    - the interval of rollup
+ * @param minRollupSize     - the min data size of rollup
+ *
+ * @returns the response
+ *
+ **/
+export async function configRollup(
+    client: Client,
+    rollupInterval: number,
+    minRollupSize: number
+) {
+    const response = await client.provider.configRollup(
+        rollupInterval.to_string(),
+        minRollupSize.to_string()
+    )
+    return response
+}
+
+/**
+ *
+ * Get the system status of storage node
+ *
+ * ```ts
+ *  const status = getStorageNodeStatus(client)
+ * ```
+ *
+ * @param client     - the client of db3 network
+ * @returns the storage system status
+ *
+ **/
+export async function getStorageNodeStatus(client: Client) {
+    const response = await client.provider.getSystemStatus()
+    return response
+}
+
+/**
+ *
  * Get the mutation content by the id
  *
  * ```ts

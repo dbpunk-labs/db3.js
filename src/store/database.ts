@@ -34,6 +34,5 @@ export class DB3Store {
         return undefined
     }
 
-    async getDatabase() {
-    }
+    async getDatabase() {}
 }
