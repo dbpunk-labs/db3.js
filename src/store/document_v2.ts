@@ -40,7 +40,6 @@ async function runQueryInternal<T>(col: Collection, query: Query) {
         return {
             doc: JSON.parse(doc.doc) as T,
             id: doc.id,
-            owner: doc.owner,
         } as DocumentEntry<T>
     })
     return {
@@ -180,9 +179,9 @@ export async function addDoc(col: Collection, doc: DocumentData) {
         payload,
         col.db.client.nonce.toString()
     )
-    if (response.code == 0) {
+    if (response.code == 0 && response.items.length > 0) {
         col.db.client.nonce += 1
-        return [response.id, response.block, response.order]
+        return [response.id, response.block, response.order, response.items[0].value]
     } else {
         throw new Error('fail to create collection')
     }
