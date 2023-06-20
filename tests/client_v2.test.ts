@@ -67,7 +67,7 @@ describe('test db3.js client module', () => {
         const minRollupSize = 10 * 1024 * 1024
         console.log(await getStorageNodeStatus(client))
         console.log(await getIndexNodeStatus(client))
-        console.log(await configRollup(client, rollupInterval, minRollupSize))
+        //    console.log(await configRollup(client, rollupInterval, minRollupSize))
     })
 
     test('test query document', async () => {

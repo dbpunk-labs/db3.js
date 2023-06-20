@@ -23,7 +23,7 @@ import type {
 } from 'viem'
 import type { DB3Account } from './types'
 import * as secp from '@noble/secp256k1'
-import { createWalletClient, http } from 'viem'
+import { createWalletClient, http, Chain, custom } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { mainnet } from 'viem/chains'
 import { toHEX } from '../crypto/crypto_utils'
@@ -39,7 +39,7 @@ import { toHEX } from '../crypto/crypto_utils'
  * @returns the instance of {@link DB3ACCOUNT}
  *
  **/
-export function createFromPrivateKey(privateKey: Hex): DB3Account {
+export function createFromPrivateKey(privateKey: Hex) {
     const account = privateKeyToAccount(privateKey)
     const client = createWalletClient({
         account,
@@ -63,9 +63,25 @@ export function createFromPrivateKey(privateKey: Hex): DB3Account {
  * @returns the instance of {@link DB3ACCOUNT}
  *
  **/
-export function createRandomAccount(): DB3Account {
+export function createRandomAccount() {
     const rawKey = '0x' + toHEX(secp.utils.randomPrivateKey())
     return createFromPrivateKey(rawKey as Hex)
+}
+
+export async function createFromExternal(chain: Chain) {
+    const [account] = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+    })
+    const client = createWalletClient({
+        account,
+        chain,
+        transport: custom(window.ethereum),
+    })
+    const [address] = await client.getAddresses()
+    return {
+        client,
+        address,
+    } as DB3Account
 }
 
 /**

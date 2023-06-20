@@ -50,12 +50,12 @@ import { BSON } from 'db3-bson'
  *
  **/
 export function createClient(
-    rollup_node_url: string,
-    index_node_url: string,
+    rollupNodeUrl: string,
+    indexNodeUrl: string,
     account: DB3Account
 ) {
-    const provider = new StorageProviderV2(rollup_node_url, account)
-    const indexer = new IndexerProvider(index_node_url)
+    const provider = new StorageProviderV2(rollupNodeUrl, account)
+    const indexer = new IndexerProvider(indexNodeUrl)
     return {
         provider,
         indexer,
@@ -64,35 +64,13 @@ export function createClient(
     } as Client
 }
 
-/**
- *
- * Config the rollup
- *
- * ```ts
- *  // 10 min
- *  const rollupInterval = 10 * 60 * 1000
- *  // 10 M
- *  const minRollupSize = 10 * 1024 * 1024
- *  const result = configRollup(client, rollupInterval, minRollupSize)
- * ```
- *
- * @param client            - the client of db3 network
- * @param rollupInterval    - the interval of rollup
- * @param minRollupSize     - the min data size of rollup
- *
- * @returns the response
- *
- **/
-export async function configRollup(
+export async function setupStorageNode(
     client: Client,
-    rollupInterval: number,
-    minRollupSize: number
+    network: string,
+    rollupInterval: string,
+    minRollupSize: string
 ) {
-    const response = await client.provider.configRollup(
-        rollupInterval.toString(),
-        minRollupSize.toString()
-    )
-    return response
+    return await client.provider.setup(network, rollupInterval, minRollupSize)
 }
 
 /**

@@ -32,7 +32,7 @@ import {
     GetCollectionOfDatabase,
     ScanGcRecordRequest,
     GetSystemStatusRequest,
-    SetupRollupRequest,
+    SetupRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/types'
@@ -163,12 +163,36 @@ export class StorageProviderV2 {
         return response
     }
 
-    async configRollup(rollupInterval: string, minRollupSize: string) {
-        const request: SetupRollupRequest = {
-            rollupInterval: rollupInterval,
-            minRollupSize: minRollupSize,
+    async setup(
+        network: string,
+        rollupInterval: string,
+        minRollupSize: string
+    ) {
+        const message = {
+            types: {
+                EIP712Domain: [],
+                Message: [
+                    { name: 'rollupInterval', type: 'string' },
+                    { name: 'minRollupSize', type: 'string' },
+                    { name: 'network', type: 'string' },
+                ],
+            },
+            domain: {},
+            primaryType: 'Message',
+            message: {
+                rollupInterval,
+                minRollupSize,
+                network,
+            },
         }
-        const { response } = await this.client.setupRollup(request)
+        const signature = await signTypedData(this.account, message)
+        const msgParams = JSON.stringify(message)
+        const payload = new TextEncoder().encode(msgParams)
+        const request: SetupRequest = {
+            payload,
+            signature,
+        }
+        const { response } = await this.client.setup(request)
         return response
     }
 

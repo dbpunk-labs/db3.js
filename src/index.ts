@@ -18,6 +18,7 @@ export {
     createFromPrivateKey,
     createRandomAccount,
     signTypedData,
+    createFromExternal,
 } from './account/db3_account'
 
 export type { DB3Account } from './account/types'
@@ -35,7 +36,8 @@ export {
     scanGcRecords,
     scanRollupRecords,
     getStorageNodeStatus,
-    configRollup,
+    getIndexNodeStatus,
+    setupStorageNode,
 } from './client/client_v2'
 
 export {
