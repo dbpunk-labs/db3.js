@@ -114,6 +114,23 @@ export async function getStorageNodeStatus(client: Client) {
 
 /**
  *
+ * Get the system status of index node
+ *
+ * ```ts
+ *  const status = getIndexNodeStatus(client)
+ * ```
+ *
+ * @param client     - the client of db3 network
+ * @returns the Index system status
+ *
+ **/
+export async function getIndexNodeStatus(client: Client) {
+    const response = await client.indexer.getSystemStatus()
+    return response
+}
+
+/**
+ *
  * Get the mutation content by the id
  *
  * ```ts

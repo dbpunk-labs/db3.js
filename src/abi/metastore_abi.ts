@@ -16,40 +16,40 @@
 //
 
 export const db3MetaStoreContractConfig = {
-  address: "0xb9709cE5E749b80978182db1bEdfb8c7340039A9",
-  abi: [
-	{
-      "inputs": [
-        {   
-          "internalType": "uint64",
-          "name": "networkId",
-          "type": "uint64"
-        },  
-        {   
-          "internalType": "string",
-          "name": "rollupNodeUrl",
-          "type": "string"
-        },  
-        {   
-          "internalType": "address",
-          "name": "rollupNodeAddress",
-          "type": "address"
-        },  
-        {   
-          "internalType": "string[]",
-          "name": "indexNodeUrls",
-          "type": "string[]"
-        },  
-        {   
-          "internalType": "address[]",
-          "name": "indexNodeAddresses",
-          "type": "address[]"
-        }   
-      ],  
-      "name": "registerNetwork",
-      "outputs": [], 
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ],
-} as const;
+    address: '0xb9709cE5E749b80978182db1bEdfb8c7340039A9',
+    abi: [
+        {
+            inputs: [
+                {
+                    internalType: 'uint64',
+                    name: 'networkId',
+                    type: 'uint64',
+                },
+                {
+                    internalType: 'string',
+                    name: 'rollupNodeUrl',
+                    type: 'string',
+                },
+                {
+                    internalType: 'address',
+                    name: 'rollupNodeAddress',
+                    type: 'address',
+                },
+                {
+                    internalType: 'string[]',
+                    name: 'indexNodeUrls',
+                    type: 'string[]',
+                },
+                {
+                    internalType: 'address[]',
+                    name: 'indexNodeAddresses',
+                    type: 'address[]',
+                },
+            ],
+            name: 'registerNetwork',
+            outputs: [],
+            stateMutability: 'nonpayable',
+            type: 'function',
+        },
+    ],
+} as const

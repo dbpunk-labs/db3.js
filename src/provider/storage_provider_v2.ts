@@ -165,10 +165,10 @@ export class StorageProviderV2 {
 
     async configRollup(rollupInterval: string, minRollupSize: string) {
         const request: SetupRollupRequest = {
-            rollupInterval: rollupInterval.to_string(),
-            minRollupSize: minRollupSize.to_string(),
+            rollupInterval: rollupInterval,
+            minRollupSize: minRollupSize,
         }
-        const { response } = await this.client.setRollup(request)
+        const { response } = await this.client.setupRollup(request)
         return response
     }
 

@@ -24,6 +24,8 @@ import {
     getMutationBody,
     scanMutationHeaders,
     getStorageNodeStatus,
+    getIndexNodeStatus,
+    configRollup,
 } from '../src/client/client_v2'
 import {
     addDoc,
@@ -60,7 +62,12 @@ describe('test db3.js client module', () => {
     test('create client smoke test', async () => {
         const client = await createTestClient()
         expect(1).toBe(client.nonce)
+
+        const rollupInterval = 10 * 60 * 1000
+        const minRollupSize = 10 * 1024 * 1024
         console.log(await getStorageNodeStatus(client))
+        console.log(await getIndexNodeStatus(client))
+        console.log(await configRollup(client, rollupInterval, minRollupSize))
     })
 
     test('test query document', async () => {
