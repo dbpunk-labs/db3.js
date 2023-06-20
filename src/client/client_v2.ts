@@ -89,8 +89,8 @@ export async function configRollup(
     minRollupSize: number
 ) {
     const response = await client.provider.configRollup(
-        rollupInterval.to_string(),
-        minRollupSize.to_string()
+        rollupInterval.toString(),
+        minRollupSize.toString()
     )
     return response
 }
