@@ -18,7 +18,12 @@ export {
     createFromPrivateKey,
     createRandomAccount,
     signTypedData,
+    createFromExternal,
 } from './account/db3_account'
+
+export type { DB3Account } from './account/types'
+
+export type { Client } from './client/types'
 
 export { addDoc, updateDoc, deleteDoc, queryDoc } from './store/document_v2'
 
@@ -30,6 +35,9 @@ export {
     scanMutationHeaders,
     scanGcRecords,
     scanRollupRecords,
+    getStorageNodeStatus,
+    getIndexNodeStatus,
+    setupStorageNode,
 } from './client/client_v2'
 
 export {
@@ -40,3 +48,4 @@ export {
 } from './store/database_v2'
 
 export { Index, IndexType } from './proto/db3_database_v2'
+export { db3MetaStoreContractConfig } from './abi/metastore_abi'

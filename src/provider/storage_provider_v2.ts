@@ -31,6 +31,8 @@ import {
     GetDatabaseOfOwnerRequest,
     GetCollectionOfDatabase,
     ScanGcRecordRequest,
+    GetSystemStatusRequest,
+    SetupRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/types'
@@ -158,6 +160,45 @@ export class StorageProviderV2 {
         }
 
         const { response } = await this.client.getCollectionOfDatabase(request)
+        return response
+    }
+
+    async setup(
+        network: string,
+        rollupInterval: string,
+        minRollupSize: string
+    ) {
+        const message = {
+            types: {
+                EIP712Domain: [],
+                Message: [
+                    { name: 'rollupInterval', type: 'string' },
+                    { name: 'minRollupSize', type: 'string' },
+                    { name: 'network', type: 'string' },
+                ],
+            },
+            domain: {},
+            primaryType: 'Message',
+            message: {
+                rollupInterval,
+                minRollupSize,
+                network,
+            },
+        }
+        const signature = await signTypedData(this.account, message)
+        const msgParams = JSON.stringify(message)
+        const payload = new TextEncoder().encode(msgParams)
+        const request: SetupRequest = {
+            payload,
+            signature,
+        }
+        const { response } = await this.client.setup(request)
+        return response
+    }
+
+    async getSystemStatus() {
+        const request: GetSystemStatusRequest = {}
+        const { response } = await this.client.getSystemStatus(request)
         return response
     }
 

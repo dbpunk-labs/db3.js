@@ -118,6 +118,21 @@ describe('test db3.js provider module', () => {
         localStorage.clear()
     })
 
+    test('provider setup test', async () => {
+        const privateKey =
+            '0xca6ade874391db77a7a66e542f800ba4f89f249cb7c785371eeacbaa3ef74cfd'
+        const db3_account = createFromPrivateKey(privateKey)
+        expect(db3_account.address).toBe(
+            '0xBbE29f26dc7ADEFEf6592FA34a2EFa037585087C'
+        )
+        const provider = new StorageProviderV2(
+            'http://127.0.0.1:26619',
+            db3_account
+        )
+        const response = await provider.setup('1111', '1000000', '11000000')
+        console.log(response)
+    })
+
     test('provider send mutation test', async () => {
         const privateKey =
             '0xad689d9b7751da07b0fb39c5091672cbfe50f59131db015f8a0e76c9790a6fcc'

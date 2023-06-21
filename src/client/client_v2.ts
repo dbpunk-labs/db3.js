@@ -50,18 +50,61 @@ import { BSON } from 'db3-bson'
  *
  **/
 export function createClient(
-    rollup_node_url: string,
-    index_node_url: string,
+    rollupNodeUrl: string,
+    indexNodeUrl: string,
     account: DB3Account
 ) {
-    const provider = new StorageProviderV2(rollup_node_url, account)
-    const indexer = new IndexerProvider(index_node_url)
+    const provider = new StorageProviderV2(rollupNodeUrl, account)
+    const indexer = new IndexerProvider(indexNodeUrl)
     return {
         provider,
         indexer,
         account,
         nonce: 0,
     } as Client
+}
+
+export async function setupStorageNode(
+    client: Client,
+    network: string,
+    rollupInterval: string,
+    minRollupSize: string
+) {
+    return await client.provider.setup(network, rollupInterval, minRollupSize)
+}
+
+/**
+ *
+ * Get the system status of storage node
+ *
+ * ```ts
+ *  const status = getStorageNodeStatus(client)
+ * ```
+ *
+ * @param client     - the client of db3 network
+ * @returns the storage system status
+ *
+ **/
+export async function getStorageNodeStatus(client: Client) {
+    const response = await client.provider.getSystemStatus()
+    return response
+}
+
+/**
+ *
+ * Get the system status of index node
+ *
+ * ```ts
+ *  const status = getIndexNodeStatus(client)
+ * ```
+ *
+ * @param client     - the client of db3 network
+ * @returns the Index system status
+ *
+ **/
+export async function getIndexNodeStatus(client: Client) {
+    const response = await client.indexer.getSystemStatus()
+    return response
 }
 
 /**

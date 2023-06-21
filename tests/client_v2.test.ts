@@ -23,6 +23,9 @@ import {
     getMutationHeader,
     getMutationBody,
     scanMutationHeaders,
+    getStorageNodeStatus,
+    getIndexNodeStatus,
+    configRollup,
 } from '../src/client/client_v2'
 import {
     addDoc,
@@ -59,6 +62,12 @@ describe('test db3.js client module', () => {
     test('create client smoke test', async () => {
         const client = await createTestClient()
         expect(1).toBe(client.nonce)
+
+        const rollupInterval = 10 * 60 * 1000
+        const minRollupSize = 10 * 1024 * 1024
+        console.log(await getStorageNodeStatus(client))
+        console.log(await getIndexNodeStatus(client))
+        //    console.log(await configRollup(client, rollupInterval, minRollupSize))
     })
 
     test('test query document', async () => {
@@ -76,17 +85,23 @@ describe('test db3.js client module', () => {
                     [index]
                 )
                 await new Promise((r) => setTimeout(r, 3000))
-                const [txId2, block2, order2, docId2] = await addDoc(collection, {
-                    city: 'beijing',
-                    author: 'imotai',
-                    age: 10,
-                })
+                const [txId2, block2, order2, docId2] = await addDoc(
+                    collection,
+                    {
+                        city: 'beijing',
+                        author: 'imotai',
+                        age: 10,
+                    }
+                )
 
-                const [txId3, block3, order3, docId3] = await addDoc(collection, {
-                    city: 'beijing2',
-                    author: 'imotai1',
-                    age: 1,
-                })
+                const [txId3, block3, order3, docId3] = await addDoc(
+                    collection,
+                    {
+                        city: 'beijing2',
+                        author: 'imotai1',
+                        age: 1,
+                    }
+                )
                 await new Promise((r) => setTimeout(r, 3000))
                 {
                     const queryStr = '/[city = beijing]'
@@ -119,7 +134,7 @@ describe('test db3.js client module', () => {
                             oneofKind: 'int64Value',
                             int64Value: 10,
                         },
-                        idx:0
+                        idx: 0,
                     }
                     const resultSet = await queryDoc<Profile>(
                         collection,
@@ -141,7 +156,6 @@ describe('test db3.js client module', () => {
                     )
                     console.log(resultSet.docs)
                 }
-
             }
         } catch (e) {
             console.log(e)
@@ -151,35 +165,44 @@ describe('test db3.js client module', () => {
     test('test create/update/delete document', async () => {
         const client = await createTestClient()
         try {
-            const { db, result } = await createDocumentDatabase(client, 'db_for_update_delete')
+            const { db, result } = await createDocumentDatabase(
+                client,
+                'db_for_update_delete'
+            )
             const index: Index = {
                 path: '/city',
                 indexType: IndexType.StringKey,
             }
             {
                 const { collection, result } = await createCollection(
-                  db,
-                  'col',
-                  [index]
+                    db,
+                    'col',
+                    [index]
                 )
                 await new Promise((r) => setTimeout(r, 3000))
-                const [txId2, block2, order2, docId2] = await addDoc(collection, {
-                    city: 'beijing',
-                    author: 'imotai',
-                    age: 10,
-                })
+                const [txId2, block2, order2, docId2] = await addDoc(
+                    collection,
+                    {
+                        city: 'beijing',
+                        author: 'imotai',
+                        age: 10,
+                    }
+                )
 
-                const [txId3, block3, order3, docId3] = await addDoc(collection, {
-                    city: 'beijing2',
-                    author: 'imotai1',
-                    age: 1,
-                })
+                const [txId3, block3, order3, docId3] = await addDoc(
+                    collection,
+                    {
+                        city: 'beijing2',
+                        author: 'imotai1',
+                        age: 1,
+                    }
+                )
                 await new Promise((r) => setTimeout(r, 3000))
                 {
                     const queryStr = '/[city = beijing]'
                     const resultSet = await queryDoc<Profile>(
-                      collection,
-                      queryStr
+                        collection,
+                        queryStr
                     )
                     expect(1).toBe(resultSet.docs.length)
                     expect(resultSet.docs[0].doc.city).toBe('beijing')
@@ -190,8 +213,8 @@ describe('test db3.js client module', () => {
                 {
                     const queryStr = '/[city = beijing2]'
                     const resultSet = await queryDoc<Profile>(
-                      collection,
-                      queryStr
+                        collection,
+                        queryStr
                     )
                     expect(1).toBe(resultSet.docs.length)
                     expect(resultSet.docs[0].doc.city).toBe('beijing2')
@@ -199,27 +222,30 @@ describe('test db3.js client module', () => {
                     expect(resultSet.docs[0].doc.age).toBe(1)
                     expect(resultSet.docs[0].id).toBe(docId3)
                 }
-                const [txId4, block4, order4] = await updateDoc(collection,
-                  docId2,
-                  {
-                    city: 'beijing3',
-                    author: 'imotai3',
-                    age: 3,
-                }, [])
+                const [txId4, block4, order4] = await updateDoc(
+                    collection,
+                    docId2,
+                    {
+                        city: 'beijing3',
+                        author: 'imotai3',
+                        age: 3,
+                    },
+                    []
+                )
                 await new Promise((r) => setTimeout(r, 3000))
                 {
                     const queryStr = '/[city = beijing]'
                     const resultSet = await queryDoc<Profile>(
-                      collection,
-                      queryStr
+                        collection,
+                        queryStr
                     )
                     expect(0).toBe(resultSet.docs.length)
                 }
                 {
                     const queryStr = '/[city = beijing3]'
                     const resultSet = await queryDoc<Profile>(
-                      collection,
-                      queryStr
+                        collection,
+                        queryStr
                     )
                     expect(1).toBe(resultSet.docs.length)
                     expect(resultSet.docs[0].doc.city).toBe('beijing3')
@@ -227,18 +253,19 @@ describe('test db3.js client module', () => {
                     expect(resultSet.docs[0].doc.age).toBe(3)
                     expect(resultSet.docs[0].id).toBe(docId2)
                 }
-                const [txId, block, order] = await deleteDoc(collection, [docId2])
+                const [txId, block, order] = await deleteDoc(collection, [
+                    docId2,
+                ])
                 await new Promise((r) => setTimeout(r, 3000))
                 {
                     const queryStr = '/[city = beijing3]'
                     const resultSet = await queryDoc<Profile>(
-                      collection,
-                      queryStr
+                        collection,
+                        queryStr
                     )
                     expect(0).toBe(resultSet.docs.length)
                 }
             }
-
         } catch (e) {
             console.log(e)
             expect(1).toBe(0)
@@ -300,8 +327,8 @@ describe('test db3.js client module', () => {
                         name: 'book1',
                         author: 'db3 developers',
                         id: '0x10b1b560b2fd9a66ae5bce29e5050ffcef6bcc9663d5d116e9877b6a4dda13aa',
-                        time: "1686285013",
-                        fee: "0.069781",
+                        time: '1686285013',
+                        fee: '0.069781',
                     })
                 }
             }
