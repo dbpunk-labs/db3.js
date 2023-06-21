@@ -42,6 +42,7 @@ export {
 
 export {
     createDocumentDatabase,
+    createEventDatabase,
     showDatabase,
     createCollection,
     showCollection,

@@ -56,3 +56,7 @@ export type QueryResult<T = DocumentData> = {
     docs: Array<DocumentEntry<T>>
     collection: Collection
 }
+
+export type EventDatabaseOption = {
+    ttl: string
+}

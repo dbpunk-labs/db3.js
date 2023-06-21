@@ -31,12 +31,77 @@ import {
     DocumentMask,
     Mutation_BodyWrapper,
     DocumentDatabaseMutation,
+    EventDatabaseMutation
 } from '../proto/db3_mutation_v2'
 
 import { Client } from '../client/types'
 import { toHEX, fromHEX } from '../crypto/crypto_utils'
 import { Index } from '../proto/db3_database_v2'
 
+/**
+ *
+ * Create an event database to store contract events
+ *
+ * ```ts
+ * const {db, result} = await createEventDatabase(client, "my_db")
+ * ```
+ * @param client - the db3 client instance
+ * @param desc   - the description for the database
+ * @returns the {@link CreateDBResult}
+ *
+ **/
+export async function createEventDatabase(client: Client, 
+                                         desc: string,
+                                         contractAddress: string,
+                                         tables: string[],
+                                         abi: string,
+                                         evmNodeUrl: string) {
+
+    const collections = tables.map((name)=> {
+        indexFields: [],
+        collectionName: name
+    }as CollectionMutation)
+
+    const mutation: EventDatabaseMutation = {
+        desc,
+        contractAddress,
+        ttl:"",
+        tables: collections,
+        eventsJsonAbi: abi,
+        evmNodeUrl
+    }
+    const body: Mutation_BodyWrapper = {
+        body: { oneofKind: 'eventDatabaseMutation', mutation },
+        dbAddress: new Uint8Array(0),
+    }
+
+    const dm: Mutation = {
+        action: MutationAction.CreateEventDB,
+        bodies: [body],
+    }
+
+    const payload = Mutation.toBinary(dm)
+    const response = await client.provider.sendMutation(
+        payload,
+        client.nonce.toString()
+    )
+    if (response.code == 0) {
+        client.nonce += 1
+        return {
+            db: {
+                addr: response.items[0].value,
+                client,
+            } as Database,
+            result: {
+                id: response.id,
+                block: response.block,
+                order: response.order,
+            } as MutationResult,
+        }
+    } else {
+        throw new Error('fail to create database')
+    }
+}
 /**
  *
  * Create a document database to group the collections
