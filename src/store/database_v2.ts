@@ -31,7 +31,7 @@ import {
     DocumentMask,
     Mutation_BodyWrapper,
     DocumentDatabaseMutation,
-    EventDatabaseMutation
+    EventDatabaseMutation,
 } from '../proto/db3_mutation_v2'
 
 import { Client } from '../client/types'
@@ -50,28 +50,35 @@ import { Index } from '../proto/db3_database_v2'
  * @returns the {@link CreateDBResult}
  *
  **/
-export async function createEventDatabase(client: Client, 
-                                         desc: string,
-                                         contractAddress: string,
-                                         tables: string[],
-                                         abi: string,
-                                         evmNodeUrl: string) {
-
-    const collections = tables.map((name)=> {
-        indexFields: [],
-        collectionName: name
-    }as CollectionMutation)
+export async function createEventDatabase(
+    client: Client,
+    desc: string,
+    contractAddress: string,
+    tables: string[],
+    abi: string,
+    evmNodeUrl: string
+) {
+    const collections = tables.map((name) => {
+        const collection: CollectionMutation = {
+            indexFields: [],
+            collectionName: name,
+        }
+        return collection
+    })
 
     const mutation: EventDatabaseMutation = {
-        desc,
         contractAddress,
-        ttl:"",
+        ttl: '0',
+        desc,
         tables: collections,
         eventsJsonAbi: abi,
-        evmNodeUrl
+        evmNodeUrl,
     }
     const body: Mutation_BodyWrapper = {
-        body: { oneofKind: 'eventDatabaseMutation', mutation },
+        body: {
+            oneofKind: 'eventDatabaseMutation',
+            eventDatabaseMutation: mutation,
+        },
         dbAddress: new Uint8Array(0),
     }
 
