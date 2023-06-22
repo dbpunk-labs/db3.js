@@ -31,12 +31,84 @@ import {
     DocumentMask,
     Mutation_BodyWrapper,
     DocumentDatabaseMutation,
+    EventDatabaseMutation,
 } from '../proto/db3_mutation_v2'
 
 import { Client } from '../client/types'
 import { toHEX, fromHEX } from '../crypto/crypto_utils'
 import { Index } from '../proto/db3_database_v2'
 
+/**
+ *
+ * Create an event database to store contract events
+ *
+ * ```ts
+ * const {db, result} = await createEventDatabase(client, "my_db")
+ * ```
+ * @param client - the db3 client instance
+ * @param desc   - the description for the database
+ * @returns the {@link CreateDBResult}
+ *
+ **/
+export async function createEventDatabase(
+    client: Client,
+    desc: string,
+    contractAddress: string,
+    tables: string[],
+    abi: string,
+    evmNodeUrl: string
+) {
+    const collections = tables.map((name) => {
+        const collection: CollectionMutation = {
+            indexFields: [],
+            collectionName: name,
+        }
+        return collection
+    })
+
+    const mutation: EventDatabaseMutation = {
+        contractAddress,
+        ttl: '0',
+        desc,
+        tables: collections,
+        eventsJsonAbi: abi,
+        evmNodeUrl,
+    }
+    const body: Mutation_BodyWrapper = {
+        body: {
+            oneofKind: 'eventDatabaseMutation',
+            eventDatabaseMutation: mutation,
+        },
+        dbAddress: new Uint8Array(0),
+    }
+
+    const dm: Mutation = {
+        action: MutationAction.CreateEventDB,
+        bodies: [body],
+    }
+
+    const payload = Mutation.toBinary(dm)
+    const response = await client.provider.sendMutation(
+        payload,
+        client.nonce.toString()
+    )
+    if (response.code == 0) {
+        client.nonce += 1
+        return {
+            db: {
+                addr: response.items[0].value,
+                client,
+            } as Database,
+            result: {
+                id: response.id,
+                block: response.block,
+                order: response.order,
+            } as MutationResult,
+        }
+    } else {
+        throw new Error('fail to create database')
+    }
+}
 /**
  *
  * Create a document database to group the collections
@@ -81,6 +153,68 @@ export async function createDocumentDatabase(client: Client, desc: string) {
         }
     } else {
         throw new Error('fail to create database')
+    }
+}
+
+/**
+ *
+ * Get the collection by an db address and collection name
+ *
+ * ```ts
+ * const database = await getCollection("0x....", "col1", client)
+ * ```
+ * @param addr  - a hex format string address
+ * @param name  - the name of collection
+ * @param client- the db3 client instance
+ * @returns the {@link Database}[]
+ *
+ **/
+export async function getCollection(
+    addr: string,
+    name: string,
+    client: Client
+) {
+    const db = await getDatabase(addr, client)
+    const collections = await showCollection(db)
+    const targetCollections = collections.filter((item) => item.name === name)
+    if (targetCollections.length > 0) {
+        return targetCollections[0]
+    } else {
+        throw new Error(
+            'db with addr ' + addr + ' has no collection with name ' + name
+        )
+    }
+}
+/**
+ *
+ * Get the database by an address
+ *
+ * ```ts
+ * const database = await getDatabase("0x....", client)
+ * ```
+ * @param addr - a hex format string address
+ * @param client- the db3 client instance
+ * @returns the {@link Database}[]
+ *
+ **/
+export async function getDatabase(addr: string, client: Client) {
+    const response = await client.provider.getDatabase(addr)
+    const db = response.database
+    if (!db) {
+        throw new Error('db with addr ' + addr + ' does not exist')
+    }
+    if (db.database.oneofKind === 'docDb') {
+        return {
+            addr,
+            client,
+            internal: db,
+        }
+    } else {
+        return {
+            addr,
+            client,
+            internal: db,
+        }
     }
 }
 

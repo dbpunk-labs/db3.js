@@ -42,9 +42,12 @@ export {
 
 export {
     createDocumentDatabase,
+    createEventDatabase,
     showDatabase,
     createCollection,
     showCollection,
+    getDatabase,
+    getCollection,
 } from './store/database_v2'
 
 export { Index, IndexType } from './proto/db3_database_v2'

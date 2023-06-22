@@ -28,6 +28,8 @@ import {
     showDatabase,
     createCollection,
     showCollection,
+    getDatabase,
+    getCollection,
 } from '../src/store/database_v2'
 
 import { Index, IndexType } from '../src/proto/db3_database_v2'
@@ -51,6 +53,8 @@ describe('test db3.js sdk database', () => {
         expect(databases2[0].addr).toBe(db.addr)
         expect(databases2[0].internal.database.oneofKind).toBe('docDb')
         expect(databases2[0].internal.database.docDb.desc).toBe('test_db')
+        const database2 = await getDatabase(db.addr, client)
+        expect(database2.addr).toBe(db.addr)
     })
 
     test('collection smoke test from sdk', async () => {
@@ -72,6 +76,8 @@ describe('test db3.js sdk database', () => {
             expect(collection).toBeDefined()
             expect(result).toBeDefined()
             expect(result.id).toBeTruthy()
+            const collection2 = await getCollection(db.addr, 'col1', client)
+            expect(collection.name).toBe(collection2.name)
         }
     })
 })

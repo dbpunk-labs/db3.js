@@ -223,3 +223,17 @@ export async function scanGcRecords(
     const response = await client.provider.scanGcRecords(start, limit)
     return response.records
 }
+
+/**
+ *
+ * Get the contract sync status
+ *
+ *
+ * @param client    - the instance of client
+ * @returns the records
+ *
+ **/
+export async function getContractSyncStatus(client: Client) {
+    const response = await client.indexer.getContractSyncStatus()
+    return response.statusList
+}
