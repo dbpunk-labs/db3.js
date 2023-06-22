@@ -59,7 +59,7 @@ export class IndexerProvider {
 
     async getContractSyncStatus() {
         const request: GetContractSyncStatusRequest = {}
-        const { response } = await this.client.getContractSyncStatus()
+        const { response } = await this.client.getContractSyncStatus(request)
         return response
     }
 }

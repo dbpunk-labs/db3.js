@@ -205,13 +205,13 @@ export async function getDatabase(addr: string, client: Client) {
     }
     if (db.database.oneofKind === 'docDb') {
         return {
-            addr: '0x' + toHEX(db.database.docDb.address),
+            addr,
             client,
             internal: db,
         }
     } else {
         return {
-            addr: '0x' + toHEX(db.eventDb.address),
+            addr,
             client,
             internal: db,
         }
