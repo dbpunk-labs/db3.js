@@ -158,6 +158,68 @@ export async function createDocumentDatabase(client: Client, desc: string) {
 
 /**
  *
+ * Get the collection by an db address and collection name
+ *
+ * ```ts
+ * const database = await getCollection("0x....", "col1", client)
+ * ```
+ * @param addr  - a hex format string address
+ * @param name  - the name of collection
+ * @param client- the db3 client instance
+ * @returns the {@link Database}[]
+ *
+ **/
+export async function getCollection(
+    addr: string,
+    name: string,
+    client: Client
+) {
+    const db = await getDatabase(addr, client)
+    const collections = await showCollection(db)
+    const targetCollections = collections.filter((item) => item.name === name)
+    if (targetCollections.length > 0) {
+        return targetCollections[0]
+    } else {
+        throw new Error(
+            'db with addr ' + addr + ' has no collection with name ' + name
+        )
+    }
+}
+/**
+ *
+ * Get the database by an address
+ *
+ * ```ts
+ * const database = await getDatabase("0x....", client)
+ * ```
+ * @param addr - a hex format string address
+ * @param client- the db3 client instance
+ * @returns the {@link Database}[]
+ *
+ **/
+export async function getDatabase(addr: string, client: Client) {
+    const response = await client.provider.getDatabase(addr)
+    const db = response.database
+    if (!db) {
+        throw new Error('db with addr ' + addr + ' does not exist')
+    }
+    if (db.database.oneofKind === 'docDb') {
+        return {
+            addr: '0x' + toHEX(db.database.docDb.address),
+            client,
+            internal: db,
+        }
+    } else {
+        return {
+            addr: '0x' + toHEX(db.eventDb.address),
+            client,
+            internal: db,
+        }
+    }
+}
+
+/**
+ *
  * Query the all databases created by an address
  *
  * ```ts

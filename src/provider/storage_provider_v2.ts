@@ -33,6 +33,7 @@ import {
     ScanGcRecordRequest,
     GetSystemStatusRequest,
     SetupRequest,
+    GetDatabaseRequest,
 } from '../proto/db3_storage'
 import { fromHEX, toHEX } from '../crypto/crypto_utils'
 import { DB3Account } from '../account/types'
@@ -199,6 +200,14 @@ export class StorageProviderV2 {
     async getSystemStatus() {
         const request: GetSystemStatusRequest = {}
         const { response } = await this.client.getSystemStatus(request)
+        return response
+    }
+
+    async getDatabase(addr: string) {
+        const request: GetDatabaseRequest = {
+            addr,
+        }
+        const { response } = await this.client.getDatabase(request)
         return response
     }
 
