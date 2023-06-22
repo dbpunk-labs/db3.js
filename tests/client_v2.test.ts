@@ -26,6 +26,7 @@ import {
     getStorageNodeStatus,
     getIndexNodeStatus,
     configRollup,
+    getContractSyncStatus,
 } from '../src/client/client_v2'
 import {
     addDoc,
@@ -60,7 +61,7 @@ describe('test db3.js client module', () => {
         return client
     }
 
-    test('create client smoke test', async () => {
+    test('create event db smoke test', async () => {
         const client = await createTestClient()
         expect(1).toBe(client.nonce)
         const abi = `
@@ -72,11 +73,13 @@ describe('test db3.js client module', () => {
             client,
             'desc',
             '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-            ['Transfer', 'Deposit', 'Approval'],
+            ['Transfer', 'Deposit', 'Approval', 'Withdrawal'],
             abi,
             evmNodeUrl
         )
         console.log(response)
+        await new Promise((r) => setTimeout(r, 10000))
+        console.log(await getContractSyncStatus(client))
     })
 
     test('create client smoke test', async () => {

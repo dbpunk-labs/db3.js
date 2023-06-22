@@ -19,7 +19,11 @@ import {
     GrpcWebOptions,
 } from '@protobuf-ts/grpcweb-transport'
 import { IndexerNodeClient } from '../proto/db3_indexer.client'
-import { RunQueryRequest, GetSystemStatusRequest } from '../proto/db3_indexer'
+import {
+    RunQueryRequest,
+    GetSystemStatusRequest,
+    GetContractSyncStatusRequest,
+} from '../proto/db3_indexer'
 import { Query } from '../proto/db3_database_v2'
 
 export class IndexerProvider {
@@ -46,9 +50,16 @@ export class IndexerProvider {
         const { response } = await this.client.runQuery(request)
         return response
     }
+
     async getSystemStatus() {
         const request: GetSystemStatusRequest = {}
         const { response } = await this.client.getSystemStatus(request)
+        return response
+    }
+
+    async getContractSyncStatus() {
+        const request: GetContractSyncStatusRequest = {}
+        const { response } = await this.client.getContractSyncStatus()
         return response
     }
 }
