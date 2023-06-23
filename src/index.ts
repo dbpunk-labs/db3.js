@@ -38,6 +38,7 @@ export {
     getStorageNodeStatus,
     getIndexNodeStatus,
     setupStorageNode,
+    getContractSyncStatus,
 } from './client/client_v2'
 
 export {
@@ -51,4 +52,8 @@ export {
 } from './store/database_v2'
 
 export { Index, IndexType } from './proto/db3_database_v2'
+
+export { MutationHeader, MutationBody } from './proto/db3_mutation_v2'
+
 export { db3MetaStoreContractConfig } from './abi/metastore_abi'
+
