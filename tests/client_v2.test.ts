@@ -288,6 +288,164 @@ describe('test db3.js client module', () => {
                     )
                     expect(0).toBe(resultSet.docs.length)
                 }
+                try {
+                    const [txId4, block4, order4] = await updateDoc(
+                      collection,
+                      docId2,
+                      {
+                          city: 'beijing3',
+                          author: 'imotai3',
+                          age: 3,
+                      },
+                      []
+                    )
+                    fail('should not reach here')
+                } catch (e) {
+                    console.log(e)
+                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id not found')
+                }
+
+            }
+        } catch (e) {
+            console.log(e)
+            expect(1).toBe(0)
+        }
+    })
+    test('test delete doc id not found', async () => {
+        const client = await createTestClient()
+        try {
+            const { db, result } = await createDocumentDatabase(
+              client,
+              'db_for_update_delete'
+            )
+            const index: Index = {
+                path: '/city',
+                indexType: IndexType.StringKey,
+            }
+            {
+                const { collection, result } = await createCollection(
+                  db,
+                  'col',
+                  [index]
+                )
+                await new Promise((r) => setTimeout(r, 2000))
+                const [txId2, block2, order2, docId2] = await addDoc(
+                  collection,
+                  {
+                      city: 'beijing',
+                      author: 'imotai',
+                      age: 10,
+                  }
+                )
+                await new Promise((r) => setTimeout(r, 2000))
+                {
+                    const queryStr = '/[city = beijing]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai')
+                    expect(resultSet.docs[0].doc.age).toBe(10)
+                    expect(resultSet.docs[0].id).toBe(docId2)
+                }
+
+                const [txId, block, order] = await deleteDoc(collection, [
+                    docId2,
+                ])
+                await new Promise((r) => setTimeout(r, 2000))
+                {
+                    const queryStr = '/[city = beijing3]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(0).toBe(resultSet.docs.length)
+                }
+                try {
+                    const [txId, block, order] = await deleteDoc(collection, [
+                        docId2,
+                    ])
+                    fail('should not reach here')
+                } catch (e) {
+                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id not found')
+                }
+
+            }
+        } catch (e) {
+            console.log(e)
+            expect(1).toBe(0)
+        }
+    })
+    test('test update doc id not found', async () => {
+        const client = await createTestClient()
+        try {
+            const { db, result } = await createDocumentDatabase(
+              client,
+              'db_for_update_delete'
+            )
+            const index: Index = {
+                path: '/city',
+                indexType: IndexType.StringKey,
+            }
+            {
+                const { collection, result } = await createCollection(
+                  db,
+                  'col',
+                  [index]
+                )
+                await new Promise((r) => setTimeout(r, 3000))
+                const [txId2, block2, order2, docId2] = await addDoc(
+                  collection,
+                  {
+                      city: 'beijing',
+                      author: 'imotai',
+                      age: 10,
+                  }
+                )
+                await new Promise((r) => setTimeout(r, 2000))
+                {
+                    const queryStr = '/[city = beijing]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(1).toBe(resultSet.docs.length)
+                    expect(resultSet.docs[0].doc.city).toBe('beijing')
+                    expect(resultSet.docs[0].doc.author).toBe('imotai')
+                    expect(resultSet.docs[0].doc.age).toBe(10)
+                    expect(resultSet.docs[0].id).toBe(docId2)
+                }
+
+                const [txId, block, order] = await deleteDoc(collection, [
+                    docId2,
+                ])
+                await new Promise((r) => setTimeout(r, 2000))
+                {
+                    const queryStr = '/[city = beijing3]'
+                    const resultSet = await queryDoc<Profile>(
+                      collection,
+                      queryStr
+                    )
+                    expect(0).toBe(resultSet.docs.length)
+                }
+                try {
+                    const [txId4, block4, order4] = await updateDoc(
+                      collection,
+                      docId2,
+                      {
+                          city: 'beijing3',
+                          author: 'imotai3',
+                          age: 3,
+                      },
+                      []
+                    )
+                    fail('should not reach here')
+                } catch (e) {
+                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id not found')
+                }
+
             }
         } catch (e) {
             console.log(e)
