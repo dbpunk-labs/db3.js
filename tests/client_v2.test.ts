@@ -302,7 +302,7 @@ describe('test db3.js client module', () => {
                     fail('should not reach here')
                 } catch (e) {
                     console.log(e)
-                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id not found')
+                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id is not found')
                 }
 
             }
@@ -369,7 +369,7 @@ describe('test db3.js client module', () => {
                     ])
                     fail('should not reach here')
                 } catch (e) {
-                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id not found')
+                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id is not found')
                 }
 
             }
@@ -443,7 +443,7 @@ describe('test db3.js client module', () => {
                     )
                     fail('should not reach here')
                 } catch (e) {
-                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id not found')
+                    expect(decodeURI(e.message)).toBe('fail to verify the owner with error doc id is not found')
                 }
 
             }
