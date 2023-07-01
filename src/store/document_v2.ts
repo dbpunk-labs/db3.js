@@ -112,7 +112,7 @@ export async function deleteDoc(col: Collection, ids: string[]) {
         col.db.client.nonce += 1
         return [response.id, response.block, response.order]
     } else {
-        throw new Error('fail to create collection')
+        throw new Error('fail to delete doc')
     }
 }
 
@@ -151,7 +151,7 @@ export async function updateDoc(
         col.db.client.nonce += 1
         return [response.id, response.block, response.order]
     } else {
-        throw new Error('fail to create collection')
+        throw new Error('fail to update doc')
     }
 }
 export async function addDoc(col: Collection, doc: DocumentData) {
